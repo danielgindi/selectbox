@@ -131,7 +131,12 @@ const Path = require('path');
             },
             input: inputFile,
             plugins: plugins,
-            external: ['@danielgindi/dom-utils', '@danielgindi/virtual-list-helper', 'keycode-js', 'parse-css-transition'],
+            external: [
+                /^@danielgindi\/dom-utils(\/|$)/,
+                /^@danielgindi\/virtual-list-helper(\/|$)/,
+                'keycode-js',
+                'parse-css-transition',
+            ],
         });
 
         let generated = await bundle.generate({
@@ -140,6 +145,10 @@ const Path = require('path');
             format: task.outputFormat,
             exports: task.outputExports,
             globals: {
+                '@danielgindi/dom-utils/lib/Dom': 'domUtilsDom',
+                '@danielgindi/dom-utils/lib/DomCompat': 'domUtilsDomCompat',
+                '@danielgindi/dom-utils/lib/Css': 'domUtilsCss',
+                '@danielgindi/dom-utils/lib/DomEventsSink': 'domUtilsDomEventsSink',
                 '@danielgindi/virtual-list-helper': 'VirtualListHelper',
                 'keycode-js': 'keyCode',
                 'parse-css-transition': 'parseCssTransition',

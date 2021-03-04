@@ -49,8 +49,8 @@
     "sass": "^1.32.8"
   },
   "dependencies": {
-    "@danielgindi/dom-utils": "^1.0.0",
-    "@danielgindi/virtual-list-helper": "^1.0.0",
+    "@danielgindi/dom-utils": "^1.0.2",
+    "@danielgindi/virtual-list-helper": "^1.0.1",
     "keycode-js": "^3.1.0",
     "parse-css-transition": "^0.1.2"
   }
