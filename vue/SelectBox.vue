@@ -166,6 +166,10 @@
                 type: [Object, Array, String],
                 default: undefined,
             },
+            fixedDroplistWidth: {
+                type: Boolean,
+                default: false,
+            },
         },
 
         data() {
@@ -189,6 +193,7 @@
                 opts.virtualMinItems = this.virtualMinItems;
                 opts.renderItem = this.renderListItem || this._createSlotBasedRenderFunc('list-item');
                 opts.unrenderItem = this.unrenderListItem || this._createSlotBasedUnrenderFunc('list-item');
+                opts.useExactTargetWidth = this.fixedDroplistWidth;
 
                 return opts;
             },
