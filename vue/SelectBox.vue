@@ -100,7 +100,7 @@
             },
             multiItemLabelProp: {
                 type: String,
-                default: 'short_value',
+                default: 'short_label',
             },
             items: {
                 type: Array,
