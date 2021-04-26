@@ -386,12 +386,24 @@
 
         mounted() {
             this._createBox();
+			
+			this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
+			
+			this.$nextTick(() => {
+				if (this._box && this._isAttached)
+					this._box.refreshSize();
+			});
         },
 
         updated() {
             if (this.$refs.el && this.el !== this.$refs.el) {
                 this._createBox();
             }
+			
+			const wasAttached = this._isAttached;
+			this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
+			if (!wasAttached && this._box && this._isAttached)
+				this._box.refreshSize();
         },
 
         destroyed() {
