@@ -4,5 +4,8 @@
       <option name="USE_DOUBLE_QUOTES" value="false" />
       <option name="SPACES_WITHIN_IMPORTS" value="true" />
     </JSCodeStyleSettings>
+    <VueCodeStyleSettings>
+      <option name="UNIFORM_INDENT" value="false" />
+    </VueCodeStyleSettings>
   </code_scheme>
 </component>
