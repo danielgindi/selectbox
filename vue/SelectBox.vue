@@ -110,6 +110,14 @@
                 type: [String, Number, Boolean, Object, Array],
                 default: undefined,
             },
+            maxMultiItems: {
+                type: Number,
+                required: false,
+            },
+            multiItemsRestLabelProvider: {
+                type: Function,
+                required: false,
+            },
             renderSingleItem: {
                 type: Function,
                 default: undefined,
@@ -123,6 +131,14 @@
                 default: undefined,
             },
             unrenderMultiItem: {
+                type: Function,
+                default: undefined,
+            },
+            renderRestMultiItem: {
+                type: Function,
+                default: undefined,
+            },
+            unrenderRestMultiItem: {
                 type: Function,
                 default: undefined,
             },
@@ -212,6 +228,14 @@
 
             computedUnrenderMultiItem() {
                 return this.unrenderMultiItem || this._createSlotBasedUnrenderFunc('multi-item');
+            },
+
+            computedRenderRestMultiItem() {
+                return this.renderRestMultiItem || this._createSlotBasedRenderFunc('rest-multi-item');
+            },
+
+            computedUnrenderRestMultiItem() {
+                return this.unrenderRestMultiItem || this._createSlotBasedUnrenderFunc('rest-multi-item');
             },
 
             computedRenderNoResultsItem() {
@@ -322,6 +346,16 @@
                     this._box.setMultiItemLabelProp(value);
             },
 
+            maxMultiItems(value) {
+                if (this._box)
+                    this._box.setMaxMultiItems(value);
+            },
+
+            multiItemsRestLabelProvider(value) {
+                if (this._box)
+                    this._box.setMultiItemsRestLabelProvider(value);
+            },
+
             items(value) {
                 if (this._box) {
                     this._box.setItems(value, false);
@@ -356,6 +390,16 @@
             unrenderMultiItem() {
                 if (this._box)
                     this._box.setRenderMultiItem(this.computedRenderMultiItem, this.computedUnrenderMultiItem);
+            },
+
+            renderRestMultiItem() {
+                if (this._box)
+                    this._box.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
+            },
+
+            unrenderRestMultiItem() {
+                if (this._box)
+                    this._box.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
             },
 
             renderNoResultsItem() {
@@ -531,12 +575,16 @@
                     labelProp: this.labelProp,
                     valueProp: this.valueProp,
                     multiItemLabelProp: this.multiItemLabelProp,
+                    maxMultiItems: this.maxMultiItems,
+                    multiItemsRestLabelProvider: this.multiItemsRestLabelProvider,
                     items: this.items,
                     listOptions: this.computedListOptions,
                     renderSingleItem: this.computedRenderSingleItem,
                     unrenderSingleItem: this.computedUnrenderSingleItem,
                     renderMultiItem: this.computedRenderMultiItem,
                     unrenderMultiItem: this.computedUnrenderMultiItem,
+                    renderRestMultiItem: this.computedRenderRestMultiItem,
+                    unrenderRestMultiItem: this.computedUnrenderRestMultiItem,
                     renderNoResultsItem: this.computedRenderNoResultsItem,
                     unrenderNoResultsItem: this.computedUnrenderNoResultsItem,
                     filterFn: this.filterFn,
