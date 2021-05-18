@@ -24,6 +24,28 @@
 
     const VueInstanceSymbol = Symbol('vue_instance');
 
+    /**
+     * Events:
+     * 'clear:before': `{cancel: false}` - will clear the whole selection. return false to abort.
+     * 'clear': clearead the whole selection.
+     * 'open': `{ list: DropList `}: the drop list is opening
+     * 'close': the drop list is closing
+     * 'addsel:before': `{value, item, cancel: false}` - an item selection is about to be added (in multi mode). return false to abort.
+     * 'removesel:before: `{value, item, cancel: false}` - an item selection is about to be removed (in multi mode). return false to abort.
+     * 'select:before': `{value, item, cancel: false}` - an item is about to be selected (in single mode). return false to abort.
+     * 'addsel': `{value, item}` - an item selection has been added (in multi mode)
+     * 'removesel': `{value, item}` - an item selection has been removed (in multi mode)
+     * 'select': `{value, item}` - an item has been selected (in single mode)
+     * 'search': `string` - input box value has changed
+     * 'search:focus': input box has gained focus
+     * 'search:blur': input box has lost focus
+     * 'input:resize': input box resized
+     * 'input': (on select, clear, addsel, removesel)
+     *
+     * Slots:
+     * list-item, single-item, multi-item, rest-multi-item, no-results-item
+     */
+
     export default {
         props: {
             disabled: {
