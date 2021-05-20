@@ -208,6 +208,10 @@
                 type: Boolean,
                 default: false,
             },
+            useNullForEmptyValue: {
+                type: Boolean,
+                default: false,
+            },
         },
 
         data() {
@@ -482,7 +486,10 @@
                     event === 'clear' ||
                     event === 'addsel' ||
                     event === 'removesel') {
-                    this.$emit('input', event === 'select' ? data.value : this._box.getValue());
+                    let value = event === 'select' ? data.value : this._box.getValue();
+                    if (value === undefined && event !== 'select' && this.useNullForEmptyValue)
+                        value = null;
+                    this.$emit('input', value);
                 }
 
                 if (event === 'search') {
