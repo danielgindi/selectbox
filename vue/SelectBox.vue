@@ -108,7 +108,7 @@
                 type: String,
                 default: 'No matching results',
             },
-            filterDebounce: {
+            filterThrottleWindow: {
                 type: Number,
                 default: 300,
             },
@@ -352,9 +352,9 @@
                     this._box.setNoResultsText(value);
             },
 
-            filterDebounce(value) {
+            filterThrottleWindow(value) {
                 if (this._box)
-                    this._box.setFilterDebounce(value || 0);
+                    this._box.setFilterThrottleWindow(value || 0);
             },
 
             labelProp(value) {
@@ -600,7 +600,7 @@
                     multi: this.multi,
                     searchable: this.searchable,
                     noResultsText: this.noResultsText,
-                    filterDebounce: this.filterDebounce,
+                    filterThrottleWindow: this.filterThrottleWindow,
                     labelProp: this.labelProp,
                     valueProp: this.valueProp,
                     multiItemLabelProp: this.multiItemLabelProp,
