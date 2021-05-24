@@ -41,6 +41,7 @@
      * 'search:blur': input box has lost focus
      * 'input:resize': input box resized
      * 'input': (on select, clear, addsel, removesel)
+     * 'itemschanged': `{term, mutated, count}` = the current set of items has changed
      *
      * Slots:
      * list-item, single-item, multi-item, rest-multi-item, no-results-item
@@ -512,6 +513,7 @@
                     case 'select:before':
                     case 'select':
                     case 'input:resize':
+                    case 'itemschanged':
                         this.$emit(event, ...(data === undefined ? [] : [data]));
                         break;
                 }
@@ -702,6 +704,24 @@
                 if (this._box)
                     return this._box.getSearchTerm();
                 return '';
+            },
+
+            /**
+             * @returns {number}
+             */
+            getFilteredItemCount() {
+                if (this._box)
+                    return this._box.getFilteredItemCount();
+                return 0;
+            },
+
+            /**
+             * @returns {boolean}
+             */
+            isFilterPending() {
+                if (this._box)
+                    return this._box.isFilterPending();
+                return false;
             },
 
             focus() {
