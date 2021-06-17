@@ -113,6 +113,10 @@
                 type: Number,
                 default: 300,
             },
+            filterOnEmptyTerm: {
+                type: Boolean,
+                default: false,
+            },
             labelProp: {
                 type: String,
                 default: 'label',
@@ -356,6 +360,11 @@
             filterThrottleWindow(value) {
                 if (this._box)
                     this._box.setFilterThrottleWindow(value || 0);
+            },
+
+            filterOnEmptyTerm(value) {
+                if (this._box)
+                    this._box.setFilterOnEmptyTerm(value || false);
             },
 
             labelProp(value) {
@@ -603,6 +612,7 @@
                     searchable: this.searchable,
                     noResultsText: this.noResultsText,
                     filterThrottleWindow: this.filterThrottleWindow,
+                    filterOnEmptyTerm: this.filterOnEmptyTerm,
                     labelProp: this.labelProp,
                     valueProp: this.valueProp,
                     multiItemLabelProp: this.multiItemLabelProp,
