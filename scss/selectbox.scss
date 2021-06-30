@@ -183,6 +183,7 @@ $spinner-transition-duration: .15s;
     overflow: hidden;
     direction: ltr;
     text-align: left;
+    cursor: pointer;
 
     &::before {
         border-style: solid;
