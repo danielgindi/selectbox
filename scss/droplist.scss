@@ -42,6 +42,11 @@ ul.droplist {
 		white-space: nowrap;
 		cursor: pointer;
 
+		/** avoid jumpy scroll issues in RTL mode (Chrome),
+		  by force-clipping the item's width, so parent's scroll properties do not change */
+		width: 100%;
+		overflow-x: hidden;
+
 		&.droplist__item_focus {
 			/* background-color: #4c8fbd; */
 			background-color: #3e3f48;
