@@ -29,6 +29,7 @@
      * 'clear:before': `{cancel: false}` - will clear the whole selection. return false to abort.
      * 'clear': clearead the whole selection.
      * 'open': `{ list: DropList `}: the drop list is opening
+     * 'open:before': `{ list: DropList `}: the drop list will open
      * 'close': the drop list is closing
      * 'addsel:before': `{value, item, cancel: false}` - an item selection is about to be added (in multi mode). return false to abort.
      * 'removesel:before: `{value, item, cancel: false}` - an item selection is about to be removed (in multi mode). return false to abort.
@@ -76,6 +77,14 @@
             sortListCheckedFirst: {
                 type: Boolean,
                 default: true,
+            },
+            stickyValues: {
+                type: Array,
+                required: false,
+            },
+            sortItemComparator: {
+                type: Function,
+                required: false,
             },
             splitListCheckedGroups: {
                 type: Boolean,
@@ -320,6 +329,16 @@
             sortListCheckedFirst(value) {
                 if (this._box)
                     this._box.setSortListCheckedFirst(value);
+            },
+
+            stickyValues(value) {
+                if (this._box)
+                    this._box.setStickyValues(value);
+            },
+
+            sortItemComparator(value) {
+                if (this._box)
+                    this._box.setSortItemComparator(value);
             },
 
             splitListCheckedGroups(value) {
@@ -604,6 +623,8 @@
                     sortSelectedItems: this.sortSelectedItems,
                     sortListItems: this.sortListItems,
                     sortListCheckedFirst: this.sortListCheckedFirst,
+                    stickyValues: this.stickyValues,
+                    sortItemComparator: this.sortItemComparator,
                     splitListCheckedGroups: this.splitListCheckedGroups,
                     showSelection: this.showSelection,
                     multiPlaceholderFormatter: this.multiPlaceholderFormatter,
