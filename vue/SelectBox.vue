@@ -226,6 +226,10 @@
                 type: Boolean,
                 default: false,
             },
+            isLoadingMode: {
+                type: Boolean,
+                default: false,
+            },
         },
 
         data() {
@@ -481,6 +485,11 @@
                 if (this._box)
                     this._box.setAdditionalClasses(this.additionalClassesList);
             },
+
+            isLoadingMode() {
+                if (this._box)
+                    this._box.setIsLoadingMode(!!this.isLoadingMode);
+            },
         },
 
         mounted() {
@@ -652,6 +661,7 @@
                     filterFn: this.filterFn,
                     on: this._handleBoxEvents.bind(this),
                     additionalClasses: this.additionalClassesList,
+                    isLoadingMode: this.isLoadingMode,
                 });
 
                 box.setValue(this.value === null ? undefined : this.value);
