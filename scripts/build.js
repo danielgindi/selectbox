@@ -136,7 +136,7 @@ const Path = require('path');
                 /^@danielgindi\/dom-utils(\/|$)/,
                 /^@danielgindi\/virtual-list-helper(\/|$)/,
                 'keycode-js',
-                'parse-css-transition',
+                'mitt',
             ],
         });
 
@@ -152,7 +152,7 @@ const Path = require('path');
                 '@danielgindi/dom-utils/lib/DomEventsSink': 'domUtilsDomEventsSink',
                 '@danielgindi/virtual-list-helper': 'VirtualListHelper',
                 'keycode-js': 'keyCode',
-                'parse-css-transition': 'parseCssTransition',
+                'mitt': 'mitt',
             },
         });
 
