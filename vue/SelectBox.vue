@@ -495,12 +495,14 @@
         mounted() {
             this._createBox();
 
-			this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
+            if (window.ResizeObserver === undefined) {
+                this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
 
-			this.$nextTick(() => {
-				if (this._box && this._isAttached)
-					this._box.refreshSize();
-			});
+                this.$nextTick(() => {
+                    if (this._box && this._isAttached)
+                        this._box.refreshSize();
+                });
+            }
         },
 
         updated() {
@@ -508,10 +510,12 @@
                 this._createBox();
             }
 
-			const wasAttached = this._isAttached;
-			this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
-			if (!wasAttached && this._box && this._isAttached)
-				this._box.refreshSize();
+            if (window.ResizeObserver === undefined) {
+                const wasAttached = this._isAttached;
+                this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
+                if (!wasAttached && this._box && this._isAttached)
+                    this._box.refreshSize();
+            }
         },
 
         destroyed() {
