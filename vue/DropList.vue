@@ -7,27 +7,9 @@
 </template>
 
 <script>
-    import Vue from 'vue';
     import DropList from '../lib/DropList';
     import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
-
-    const generateVNodeRenderer = vnode => {
-        return new Vue({
-            render() {
-                return vnode;
-            },
-        });
-    };
-
-    const generateVNodesRenderer = vnodes => {
-        return new Vue({
-            render(h) {
-                return h('div', vnodes);
-            },
-        });
-    };
-
-    const VueInstanceSymbol = Symbol('vue_instance');
+    import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
 
     export default {
         props: {
@@ -152,8 +134,18 @@
                     opts.keyDownHandler = this.keyDownHandler;
                 }
 
-                opts.renderItem = this.renderItem || this._createSlotBasedRenderFunc('item');
-                opts.unrenderItem = this.unrenderItem || this._createSlotBasedUnrenderFunc('item');
+                opts.renderItem = this.renderItem;
+                if (!opts.renderItem) {
+                    opts.renderItem = createSlotBasedRenderFunc(this, 'item');
+                }
+
+                opts.unrenderItem = this.unrenderItem;
+                if (!opts.unrenderItem) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'item');
+                    if (fn) {
+                        opts.unrenderItem = (item, el) => fn(el);
+                    }
+                }
 
                 return opts;
             },
@@ -239,65 +231,6 @@
                     case 'groupcheck':
                         this.$emit(event, ...(data === undefined ? [] : [data]));
                         break;
-                }
-            },
-
-            _createSlotBasedRenderFunc(slotName, onAfterUpdate) {
-                if (this.$scopedSlots[slotName]) {
-                    return (item, parent) => {
-                        let vnode = this.$scopedSlots[slotName](item);
-                        let vm;
-
-                        if (Array.isArray(vnode)) {
-                            vm = generateVNodesRenderer(vnode);
-                            vm.$mount();
-                            let nodes = vm.$el.childNodes;
-                            nodes[0][VueInstanceSymbol] = vm;
-                            for (let node of nodes)
-                                parent.appendChild(node);
-                        } else {
-                            vm = generateVNodeRenderer(vnode);
-                            vm.$mount();
-                            vm.$el[VueInstanceSymbol] = vm;
-                            parent.appendChild(vm.$el);
-                        }
-
-                        if (onAfterUpdate) {
-                            vm.$on('hook:updated', () => {
-                                vm.$nextTick(() => onAfterUpdate(item));
-                            });
-                        }
-                    };
-                }
-
-                if (this.$slots[slotName]) {
-                    return (item, parent) => {
-                        let vnode = this.$slots[slotName];
-                        let vm = generateVNodeRenderer(vnode);
-                        vm.$mount();
-                        vm.$el[VueInstanceSymbol] = vm;
-                        parent.appendChild(vm.$el);
-
-                        if (onAfterUpdate) {
-                            vm.$on('hook:updated', () => {
-                                vm.$nextTick(() => onAfterUpdate(item));
-                            });
-                        }
-                    };
-                }
-            },
-
-            _createSlotBasedUnrenderFunc(slotName) {
-                if (this.$slots[slotName] || this.$slots[slotName]) {
-                    return (_item, parent) => {
-                        if (parent.childNodes.length > 0) {
-                            let node = parent.childNodes[0][VueInstanceSymbol];
-                            if (node) {
-                                node.$destroy();
-                                delete parent.childNodes[0][VueInstanceSymbol];
-                            }
-                        }
-                    };
                 }
             },
 

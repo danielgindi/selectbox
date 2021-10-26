@@ -3,26 +3,8 @@
 </template>
 
 <script>
-    import Vue from 'vue';
     import SelectBox from '../lib/SelectBox';
-
-    const generateVNodeRenderer = vnode => {
-        return new Vue({
-            render() {
-                return vnode;
-            },
-        });
-    };
-
-    const generateVNodesRenderer = vnodes => {
-        return new Vue({
-            render(h) {
-                return h('div', vnodes);
-            },
-        });
-    };
-
-    const VueInstanceSymbol = Symbol('vue_instance');
+    import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 
     /**
      * Events:
@@ -251,43 +233,114 @@
                 }
 
                 opts.virtualMinItems = this.virtualMinItems;
-                opts.renderItem = this.renderListItem || this._createSlotBasedRenderFunc('list-item');
-                opts.unrenderItem = this.unrenderListItem || this._createSlotBasedUnrenderFunc('list-item');
                 opts.useExactTargetWidth = this.fixedDroplistWidth;
+
+                opts.renderItem = this.renderListItem;
+                if (!opts.renderItem) {
+                    opts.renderItem = createSlotBasedRenderFunc(this, 'list-item');
+                }
+
+                opts.unrenderItem = this.unrenderListItem;
+                if (!opts.unrenderItem) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'list-item');
+                    if (fn) {
+                        opts.unrenderItem = (item, el) => fn(el);
+                    }
+                }
 
                 return opts;
             },
 
             computedRenderSingleItem() {
-                return this.renderSingleItem || this._createSlotBasedRenderFunc('single-item');
+                let render = this.renderSingleItem;
+
+                if (!render) {
+                    render = createSlotBasedRenderFunc(this, 'single-item');
+                }
+
+                return render;
             },
 
             computedUnrenderSingleItem() {
-                return this.unrenderSingleItem || this._createSlotBasedUnrenderFunc('single-item');
+                let unrender = this.unrenderSingleItem;
+
+                if (!unrender) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'single-item');
+                    if (fn) {
+                        unrender = (item, el) => fn(el);
+                    }
+                }
+
+                return unrender;
             },
 
             computedRenderMultiItem() {
-                return this.renderMultiItem || this._createSlotBasedRenderFunc('multi-item');
+                let render = this.renderMultiItem;
+
+                if (!render) {
+                    render = createSlotBasedRenderFunc(this, 'multi-item');
+                }
+
+                return render;
             },
 
             computedUnrenderMultiItem() {
-                return this.unrenderMultiItem || this._createSlotBasedUnrenderFunc('multi-item');
+                let unrender = this.unrenderMultiItem;
+
+                if (!unrender) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'multi-item');
+                    if (fn) {
+                        unrender = (item, el) => fn(el);
+                    }
+                }
+
+                return unrender;
             },
 
             computedRenderRestMultiItem() {
-                return this.renderRestMultiItem || this._createSlotBasedRenderFunc('rest-multi-item');
+                let render = this.renderRestMultiItem;
+
+                if (!render) {
+                    render = createSlotBasedRenderFunc(this, 'rest-multi-item');
+                }
+
+                return render;
             },
 
             computedUnrenderRestMultiItem() {
-                return this.unrenderRestMultiItem || this._createSlotBasedUnrenderFunc('rest-multi-item');
+                let unrender = this.unrenderRestMultiItem;
+
+                if (!unrender) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'rest-multi-item');
+                    if (fn) {
+                        unrender = (item, el) => fn(el);
+                    }
+                }
+
+                return unrender;
             },
 
             computedRenderNoResultsItem() {
-                return this.renderNoResultsItem || this._createSlotBasedRenderFunc('no-results-item');
+                let render = this.renderNoResultsItem;
+
+                if (!render) {
+                    render = createSlotBasedRenderFunc(this, 'no-results-item');
+                }
+
+                return render;
             },
 
             computedUnrenderNoResultsItem() {
-                return this.unrenderNoResultsItem || this._createSlotBasedUnrenderFunc('no-results-item');
+                let unrender = this.unrenderNoResultsItem;
+
+                if (!unrender) {
+                    let fn = createSlotBasedUnrenderFunc(this, 'no-results-item');
+                    if (fn) {
+                        unrender = (item, el) => fn(el);
+                    }
+                }
+
+                return unrender;
             },
 
             additionalClassesList() {
@@ -557,65 +610,6 @@
                     case 'itemschanged':
                         this.$emit(event, ...(data === undefined ? [] : [data]));
                         break;
-                }
-            },
-
-            _createSlotBasedRenderFunc(slotName, onAfterUpdate) {
-                if (this.$scopedSlots[slotName]) {
-                    return (item, parent) => {
-                        let vnode = this.$scopedSlots[slotName](item);
-                        let vm;
-
-                        if (Array.isArray(vnode)) {
-                            vm = generateVNodesRenderer(vnode);
-                            vm.$mount();
-                            let nodes = vm.$el.childNodes;
-                            nodes[0][VueInstanceSymbol] = vm;
-                            for (let node of nodes)
-                                parent.appendChild(node);
-                        } else {
-                            vm = generateVNodeRenderer(vnode);
-                            vm.$mount();
-                            vm.$el[VueInstanceSymbol] = vm;
-                            parent.appendChild(vm.$el);
-                        }
-
-                        if (onAfterUpdate) {
-                            vm.$on('hook:updated', () => {
-                                vm.$nextTick(() => onAfterUpdate(item));
-                            });
-                        }
-                    };
-                }
-
-                if (this.$slots[slotName]) {
-                    return (item, parent) => {
-                        let vnode = this.$slots[slotName];
-                        let vm = generateVNodeRenderer(vnode);
-                        vm.$mount();
-                        vm.$el[VueInstanceSymbol] = vm;
-                        parent.appendChild(vm.$el);
-
-                        if (onAfterUpdate) {
-                            vm.$on('hook:updated', () => {
-                                vm.$nextTick(() => onAfterUpdate(item));
-                            });
-                        }
-                    };
-                }
-            },
-
-            _createSlotBasedUnrenderFunc(slotName) {
-                if (this.$slots[slotName] || this.$slots[slotName]) {
-                    return (_item, parent) => {
-                        if (parent.childNodes.length > 0) {
-                            let node = parent.childNodes[0][VueInstanceSymbol];
-                            if (node) {
-                                node.$destroy();
-                                delete parent.childNodes[0][VueInstanceSymbol];
-                            }
-                        }
-                    };
                 }
             },
 
