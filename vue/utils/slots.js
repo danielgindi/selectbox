@@ -1,4 +1,4 @@
-import Vue, { Component as VueComponent } from 'vue';
+import Vue from 'vue';
 
 const generateVNodeRenderer = vnode => {
     return new Vue({
@@ -20,7 +20,7 @@ const VueInstanceSymbol = Symbol('vue_instance');
 
 /**
  *
- * @param {VueComponent} vue
+ * @param {import('vue').Component} vue
  * @param {string} slotName
  * @param {function(item: *)?} onAfterUpdate
  * @returns {(function(item: *, parent: Element): void)|undefined}
@@ -72,7 +72,7 @@ const createSlotBasedRenderFunc = (vue, slotName, onAfterUpdate) => {
 
 /**
  *
- * @param {VueComponent} vue
+ * @param {import('vue').Component} vue
  * @param {string} slotName
  * @returns {(function(parent: Element): void)|undefined}
  */
