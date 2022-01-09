@@ -54,7 +54,7 @@
             },
             sortListItems: {
                 type: Boolean,
-                default: true,
+                default: false,
             },
             sortListCheckedFirst: {
                 type: Boolean,
