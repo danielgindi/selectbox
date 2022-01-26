@@ -534,6 +534,16 @@
                     this._box.setListOptions(this.computedListOptions);
             },
 
+            $scopedSlots() {
+                if (this._box)
+                    this._box.setListOptions(this.computedListOptions);
+            },
+
+            $slots() {
+                if (this._box)
+                    this._box.setListOptions(this.computedListOptions);
+            },
+
             additionalClasses() {
                 if (this._box)
                     this._box.setAdditionalClasses(this.additionalClassesList);

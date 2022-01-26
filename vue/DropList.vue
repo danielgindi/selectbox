@@ -183,6 +183,22 @@
                 if (this._list)
                     this._list.setAdditionalClasses(this.additionalClassesList);
             },
+
+            renderItem() {
+                this._recreateList();
+            },
+
+            unrenderItem() {
+                this._recreateList();
+            },
+
+            $scopedSlots() {
+                this._recreateList();
+            },
+
+            $slots() {
+                this._recreateList();
+            },
         },
 
         mounted() {
@@ -266,6 +282,11 @@
                     this._list.destroy();
                     delete this._list;
                 }
+            },
+
+            _recreateList() {
+                this._destroyList();
+                this._createList();
             },
 
             _concatClassesObject(classes) {
