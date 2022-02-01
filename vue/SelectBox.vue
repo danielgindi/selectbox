@@ -5,6 +5,7 @@
 <script>
     import SelectBox from '../lib/SelectBox';
     import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
+    import deepEqual from 'fast-deep-equal';
 
     /**
      * Events:
@@ -389,8 +390,14 @@
             },
 
             stickyValues(value) {
-                if (this._box)
-                    this._box.setStickyValues(value);
+                if (!this._box) return;
+
+                // `stickyValues` tend to be a literal array,
+                //   and Vue will get a different reference for each update, triggering this watcher.
+                // so use deepEqual here to avoid redoing the list items on each selection change.
+                if (deepEqual(this.stickyValues, value)) return;
+
+                this._box.setStickyValues(value);
             },
 
             sortItemComparator(value) {
