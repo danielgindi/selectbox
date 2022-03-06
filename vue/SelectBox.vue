@@ -541,6 +541,11 @@
                     this._box.setListOptions(this.computedListOptions);
             },
 
+            filterFn() {
+                if (this._box)
+                    this._box.setFilterFn(this.filterFn);
+            },
+
             $scopedSlots() {
                 if (this._box)
                     this._box.setListOptions(this.computedListOptions);
