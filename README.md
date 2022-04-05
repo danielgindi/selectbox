@@ -22,11 +22,11 @@ I really hope to get this documented so everyone can enjoy it.
 * adding to package.json: `npm i --save @danielgindi/selectbox`
 * vanilla js:
   ```js
-  import { SelectBox, DropBox } from '@danielgindi/selectbox';
+  import { SelectBox, DropList } from '@danielgindi/selectbox';
   ```
 * vuejs:
   ```js
-  import { SelectBox, DropBox } from '@danielgindi/selectbox/vue';
+  import { SelectBox, DropList } from '@danielgindi/selectbox/vue';
   ```
 * add the scss:
   ```scss
