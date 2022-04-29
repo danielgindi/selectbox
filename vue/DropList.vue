@@ -246,6 +246,7 @@ export default {
                 return;
 
             let list = new DropList(this.computedOptions);
+            this.el = list.el;
 
             this.sink.remove(null, 'blur');
             this.sink.add(list.el, 'blur', event => this.$emit('blur', event));
@@ -273,6 +274,8 @@ export default {
                 this._list.destroy();
                 delete this._list;
             }
+
+            this.el = undefined;
 
             this.sink.remove(null, 'blur');
         },
