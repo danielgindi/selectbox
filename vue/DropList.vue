@@ -1,5 +1,5 @@
 <template>
-    <span v-show="false" />
+  <span v-show="false" />
 </template>
 
 <script>
@@ -194,6 +194,10 @@ export default {
         $slots() {
             this._recreateList();
         },
+
+        $listeners() {
+            this._rebindVueListeners();
+        },
     },
 
     mounted() {
@@ -205,6 +209,16 @@ export default {
     },
 
     methods: {
+        _rebindVueListeners() {
+            this.sink.remove();
+
+            if (this._list.el) {
+                for (let [key, fn] of Object.entries(this.$listeners)) {
+                    this.sink.add(this._list.el, key + '.vue', fn);
+                }
+            }
+        },
+
         _handleListEvents(event, data) {
             if (event === 'select' ||
                 event === 'check' && !event.isCheckingGroup ||
@@ -247,9 +261,7 @@ export default {
 
             let list = new DropList(this.computedOptions);
             this.el = list.el;
-
-            this.sink.remove(null, 'blur');
-            this.sink.add(list.el, 'blur', event => this.$emit('blur', event));
+            this._rebindVueListeners();
 
             if (Array.isArray(this.items))
                 list.addItems(this.items);
@@ -277,7 +289,7 @@ export default {
 
             this.el = undefined;
 
-            this.sink.remove(null, 'blur');
+            this.sink.remove(null, '.vue');
         },
 
         _recreateList() {
