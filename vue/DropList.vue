@@ -1,11 +1,13 @@
 <template>
-  <span v-show="false" />
+    <span v-show="false" />
 </template>
 
 <script>
 import DropList from '../lib/DropList';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
+
+const AllListEvents = ['itemfocus', 'itemblur', 'select', 'show:before', 'show', 'hide:before', 'hide', 'hide:after', 'check', 'groupcheck'];
 
 export default {
     props: {
@@ -214,6 +216,8 @@ export default {
 
             if (this._list?.el) {
                 for (let [key, fn] of Object.entries(this.$listeners)) {
+                    if (AllListEvents.includes(key))
+                        continue;
                     this.sink.add(this._list.el, key + '.vue', fn);
                 }
             }
@@ -261,6 +265,7 @@ export default {
 
             let list = new DropList(this.computedOptions);
             this.el = list.el;
+            this._list = list;
             this._rebindVueListeners();
 
             if (Array.isArray(this.items))
@@ -271,8 +276,6 @@ export default {
             } else {
                 list.setSingleSelectedItemByValue(this.value === null ? undefined : this.value);
             }
-
-            this._list = list;
 
             list.show(this.positionOptions);
 
