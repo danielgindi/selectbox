@@ -210,9 +210,9 @@ export default {
 
     methods: {
         _rebindVueListeners() {
-            this.sink.remove();
+            this.sink.remove(null, '.vue');
 
-            if (this._list.el) {
+            if (this._list?.el) {
                 for (let [key, fn] of Object.entries(this.$listeners)) {
                     this.sink.add(this._list.el, key + '.vue', fn);
                 }
