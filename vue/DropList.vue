@@ -21,6 +21,14 @@ export default {
             type: Boolean,
             default: true,
         },
+        autoItemBlur: {
+            type: Boolean,
+            default: true,
+        },
+        autoItemBlurDelay: {
+            type: Number,
+            default: 300,
+        },
         capturesFocus: {
             type: Boolean,
             default: true,
@@ -107,7 +115,7 @@ export default {
                 opts.additionalClasses = this.additionalClassesList;
             }
 
-            for (let key of ['capturesFocus', 'multi',
+            for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
                 'autoFlipDirection', 'estimateWidth']) {
                 if (typeof this[key] === 'boolean') {
@@ -115,7 +123,7 @@ export default {
                 }
             }
 
-            for (let key of ['estimatedItemHeight', 'virtualMinItems']) {
+            for (let key of ['autoItemBlurDelay', 'estimatedItemHeight', 'virtualMinItems']) {
                 if (typeof this[key] === 'number') {
                     opts[key] = this[key];
                 }
