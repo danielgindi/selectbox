@@ -176,6 +176,8 @@ $spinner-transition-duration: .15s;
 .selectbox__open_indicator {
     position: absolute;
     right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 2;
     font-size: 1em;
     width: 1em;
@@ -213,19 +215,13 @@ $spinner-transition-duration: .15s;
         right: auto;
         left: 4px;
     }
-
-    .selectbox__multi & {
-        top: 11px;
-    }
-
-    .selectbox__single & {
-        top: 8px;
-    }
 }
 
 .selectbox__clear {
     position: absolute;
     right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 2;
 
     > button {
@@ -257,14 +253,6 @@ $spinner-transition-duration: .15s;
         left: 2px;
     }
 
-    .selectbox__multi & {
-        top: 5px;
-    }
-
-    .selectbox__single & {
-        top: 4px;
-    }
-
     .selectbox__has_open_indicator.selectbox__has_clear & {
         right: 14px;
 
@@ -278,32 +266,31 @@ $spinner-transition-duration: .15s;
 .selectbox__spinner {
     position: absolute;
     right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 2;
-    font-size: 1em;
-    width: 1em;
-    height: 1em;
-    text-indent: -9999em;
-    overflow: hidden;
-    border-top: 0.3em solid rgba(100, 100, 100, 0.1);
-    border-right: 0.3em solid rgba(100, 100, 100, 0.1);
-    border-bottom: 0.3em solid rgba(100, 100, 100, 0.1);
-    border-left: 0.3em solid rgba(60, 60, 60, 0.45);
-    border-radius: 50%;
-    transform: translateZ(0);
-    animation: selectbox__spinner_anim 1.1s infinite linear;
-    transition: opacity .1s;
+
+    &::before {
+        content: '';
+        display: block;
+        font-size: 1em;
+        width: 1em;
+        height: 1em;
+        text-indent: -9999em;
+        overflow: hidden;
+        border-top: 0.3em solid rgba(100, 100, 100, 0.1);
+        border-right: 0.3em solid rgba(100, 100, 100, 0.1);
+        border-bottom: 0.3em solid rgba(100, 100, 100, 0.1);
+        border-left: 0.3em solid rgba(60, 60, 60, 0.45);
+        border-radius: 50%;
+        transform: translateZ(0);
+        animation: selectbox__spinner_anim 1.1s infinite linear;
+        transition: opacity .1s;
+    }
 
     [dir=rtl] & {
         right: auto;
         left: 2px;
-    }
-
-    .selectbox__multi & {
-        top: 4px;
-    }
-
-    .selectbox__single & {
-        top: 3px;
     }
 
     .selectbox__has_spinner.selectbox__has_open_indicator & {
