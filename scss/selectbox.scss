@@ -190,11 +190,11 @@ $spinner-transition-duration: .15s;
     &::before {
         border-style: solid;
         border-color: #9d9d9d;
-        border-width: 0.25em 0.25em 0 0;
+        border-width: 0.2em 0.2em 0 0;
         content: '';
         display: inline-block;
         height: 0.45em;
-        left: 0.15em;
+        left: 0.2em;
         position: relative;
         top: -0.18em;
         transform: rotate(135deg);
