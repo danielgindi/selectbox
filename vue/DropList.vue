@@ -235,7 +235,10 @@ export default {
             if (event === 'select' ||
                 event === 'check' && !event.isCheckingGroup ||
                 event === 'groupcheck') {
-                this.$emit('input', event === 'select' ? data.value : this._list.getCheckedValues(false));
+                this.$emit('input',
+                    (event === 'select' && !this.multi)
+                        ? data.value
+                        : this._list.getCheckedValues(false));
             }
 
             if (event === 'hide') {
