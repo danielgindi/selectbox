@@ -232,11 +232,11 @@ export default {
         },
 
         _handleListEvents(event, data) {
-            if (event === 'select' ||
+            if ((event === 'select' && !this.multi) ||
                 event === 'check' && !event.isCheckingGroup ||
                 event === 'groupcheck') {
                 this.$emit('input',
-                    (event === 'select' && !this.multi)
+                    event === 'select'
                         ? data.value
                         : this._list.getCheckedValues(false));
             }
