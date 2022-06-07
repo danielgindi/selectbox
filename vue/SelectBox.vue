@@ -213,6 +213,18 @@
                 type: Boolean,
                 default: false,
             },
+            autoCheckGroupChildren: {
+                type: Boolean,
+                default: true,
+            },
+            constrainListToWindow: {
+                type: Boolean,
+                default: true,
+            },
+            autoFlipListDirection: {
+                type: Boolean,
+                default: true,
+            },
         },
 
         data() {
@@ -231,6 +243,18 @@
 
                 if (this.additionalDroplistClassesList) {
                     opts.additionalClasses = this.additionalDroplistClassesList;
+                }
+
+                if (typeof this.autoCheckGroupChildren === 'boolean' && this.multi) {
+                    opts.autoCheckGroupChildren = this.autoCheckGroupChildren;
+                }
+
+                if (typeof this.constrainListToWindow === 'boolean') {
+                    opts.constrainToWindow = this.constrainListToWindow;
+                }
+
+                if (typeof this.autoFlipListDirection === 'boolean') {
+                    opts.autoFlipDirection = this.autoFlipListDirection;
                 }
 
                 opts.virtualMinItems = this.virtualMinItems;
