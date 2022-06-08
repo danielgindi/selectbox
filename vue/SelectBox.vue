@@ -213,6 +213,10 @@
                 type: Boolean,
                 default: false,
             },
+            treatGroupSelectionAsItems: {
+                type: Boolean,
+                default: false,
+            },
             autoCheckGroupChildren: {
                 type: Boolean,
                 default: true,
@@ -589,6 +593,11 @@
                 if (this._box)
                     this._box.setIsLoadingMode(!!this.isLoadingMode);
             },
+
+            treatGroupSelectionAsItems() {
+                if (this._box)
+                    this._box.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
+            },
         },
 
         mounted() {
@@ -706,6 +715,7 @@
                     on: this._handleBoxEvents.bind(this),
                     additionalClasses: this.additionalClassesList,
                     isLoadingMode: this.isLoadingMode,
+                    treatGroupSelectionAsItems: this.treatGroupSelectionAsItems,
                 });
 
                 box.setValue(this.value === null ? undefined : this.value);
