@@ -234,7 +234,7 @@ $spinner-transition-duration: .15s;
         font-size: 13px;
         line-height: 1.4;
         margin: 0;
-        padding: 0 0 3px;
+        padding: 0;
         border: 0;
         background: none;
 
@@ -260,6 +260,10 @@ $spinner-transition-duration: .15s;
             right: auto;
             left: 14px;
         }
+    }
+
+    .selectbox[aria-disabled=true] > & {
+        display: none;
     }
 }
 
