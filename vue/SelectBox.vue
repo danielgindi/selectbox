@@ -24,7 +24,7 @@
      * 'search:focus': input box has gained focus
      * 'search:blur': input box has lost focus
      * 'input:resize': input box resized
-     * 'input': (on select, clear, addsel, removesel)
+     * 'input': (on select, clear, addsel, removesel) - fired after any of the above events.
      * 'itemschanged': `{term, mutated, count}` = the current set of items has changed
      *
      * Slots:
@@ -632,27 +632,11 @@
 
         methods: {
             _handleBoxEvents(event, data) {
-                if (event === 'select' ||
-                    event === 'clear' ||
-                    event === 'addsel' ||
-                    event === 'removesel') {
-                    let value = event === 'select' ? data.value : this._box.getValue();
-                    if (value === undefined && event !== 'select' && this.useNullForEmptyValue)
-                        value = null;
-                    this.$emit('input', value);
-                }
-
-                if (event === 'search') {
-                    this.$emit(event, data.value);
-                    return;
-                }
-
                 switch (event) {
                     case 'clear:before':
                     case 'clear':
                     case 'open':
                     case 'close':
-                    case 'search':
                     case 'search:focus':
                     case 'search:blur':
                     case 'addsel:before':
@@ -665,6 +649,20 @@
                     case 'itemschanged':
                         this.$emit(event, ...(data === undefined ? [] : [data]));
                         break;
+
+                    case 'search':
+                        this.$emit(event, data.value);
+                        break;
+                }
+
+                if (event === 'select' ||
+                    event === 'clear' ||
+                    event === 'addsel' ||
+                    event === 'removesel') {
+                    let value = event === 'select' ? data.value : this._box.getValue();
+                    if (value === undefined && event !== 'select' && this.useNullForEmptyValue)
+                        value = null;
+                    this.$emit('input', value);
                 }
             },
 
