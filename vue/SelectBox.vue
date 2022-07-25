@@ -77,6 +77,10 @@
                 type: Boolean,
                 default: true,
             },
+            showPlaceholderInTooltip: {
+                type: Boolean,
+                default: true,
+            },
             multiPlaceholderFormatter: {
                 type: Function,
                 required: false,
@@ -443,6 +447,11 @@
                     this._box.setShowSelection(value);
             },
 
+            showPlaceholderInTooltip(value) {
+                if (this._box)
+                    this._box.setShowPlaceholderInTooltip(value);
+            },
+
             multiPlaceholderFormatter(formatter) {
                 if (this._box)
                     this._box.setMultiPlaceholderFormatter(formatter);
@@ -687,6 +696,7 @@
                     sortItemComparator: this.sortItemComparator,
                     splitListCheckedGroups: this.splitListCheckedGroups,
                     showSelection: this.showSelection,
+                    showPlaceholderInTooltip: this.showPlaceholderInTooltip,
                     multiPlaceholderFormatter: this.multiPlaceholderFormatter,
                     blurOnSingleSelection: this.blurOnSingleSelection,
                     multi: this.multi,
