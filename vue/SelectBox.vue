@@ -185,6 +185,10 @@
                 type: Function,
                 default: undefined,
             },
+            // eslint-disable-next-line vue/require-prop-types
+            filterDependencies: {
+                default: undefined,
+            },
             virtualMinItems: {
                 type: Number,
                 default: 10,
@@ -606,6 +610,11 @@
             treatGroupSelectionAsItems() {
                 if (this._box)
                     this._box.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
+            },
+
+            filterDependencies() {
+                if (this._box)
+                    this._box.invokeRefilter();
             },
         },
 
