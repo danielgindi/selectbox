@@ -226,7 +226,16 @@ export default {
                 for (let [key, fn] of Object.entries(this.$listeners)) {
                     if (AllListEvents.includes(key))
                         continue;
-                    this.sink.add(this._list.el, key + '.vue', fn);
+
+                    if (key === 'blur') {
+                        this.sink.add(this._list.el, key + '.vue', evt => {
+                            if (this._list.el.contains(evt.relatedTarget))
+                                return;
+                            fn(evt);
+                        }, true);
+                    } else {
+                        this.sink.add(this._list.el, key + '.vue', fn);
+                    }
                 }
             }
         },
