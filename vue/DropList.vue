@@ -1,15 +1,20 @@
 <template>
-    <span v-show="false" />
+  <span v-show="false" />
 </template>
 
 <script>
 import DropList from '../lib/DropList';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
+import Vue from 'vue';
+
+const isVue3 = Vue.version > '3.';
 
 const AllListEvents = ['itemfocus', 'itemblur', 'select', 'show:before', 'show', 'hide:before', 'hide', 'hide:after', 'check', 'groupcheck'];
 
 export default {
+    inheritAttrs: false,
+
     props: {
         baseClassName: {
             type: String,
@@ -80,7 +85,7 @@ export default {
             type: Array,
             default: () => [],
         },
-        value: {
+        [isVue3 ? 'modelValue' : 'value']: { // Vue 2
             type: [Number, String, Object, Array],
         },
         renderItem: {
@@ -93,6 +98,21 @@ export default {
             type: Object,
         },
     },
+
+    emits: [
+        'update:modelValue',
+        'itemfocus',
+        'itemblur',
+        'select',
+        'show:before',
+        'show',
+        'hide:before',
+        'hide',
+        'check',
+        'groupcheck',
+        'blur',
+        'keypress',
+    ],
 
     data() {
         return {
@@ -170,7 +190,7 @@ export default {
             }
         },
 
-        value(value, old) {
+        [isVue3 ? 'modelValue' : 'value'](value, old) {
             if (Array.isArray(value) && Array.isArray(old) &&
                 value.length === old && value.every((v, i) => old[i] === v))
                 return;
@@ -197,16 +217,14 @@ export default {
             this._recreateList();
         },
 
-        $scopedSlots() {
-            this._recreateList();
-        },
+        ...(isVue3 ? {} : {
+            $scopedSlots() { // Vue 2
+                this._recreateList();
+            },
+        }),
 
         $slots() {
             this._recreateList();
-        },
-
-        $listeners() {
-            this._rebindVueListeners();
         },
     },
 
@@ -214,37 +232,16 @@ export default {
         this._createList();
     },
 
-    destroyed() {
+    [isVue3 ? 'unmounted' : 'destroyed']() {
         this._destroyList();
     },
 
     methods: {
-        _rebindVueListeners() {
-            this.sink.remove(null, '.vue');
-
-            if (this._list?.el) {
-                for (let [key, fn] of Object.entries(this.$listeners)) {
-                    if (AllListEvents.includes(key))
-                        continue;
-
-                    if (key === 'blur') {
-                        this.sink.add(this._list.el, key + '.vue', evt => {
-                            if (this._list.el.contains(evt.relatedTarget))
-                                return;
-                            fn(evt);
-                        }, true);
-                    } else {
-                        this.sink.add(this._list.el, key + '.vue', fn);
-                    }
-                }
-            }
-        },
-
         _handleListEvents(event, data) {
             if ((event === 'select' && !this.multi) ||
                 event === 'check' && !event.isCheckingGroup ||
                 event === 'groupcheck') {
-                this.$emit('input',
+                this.$emit(isVue3 ? 'update:modelValue' : 'input',
                     event === 'select'
                         ? data.value
                         : this._list.getCheckedValues(false));
@@ -286,15 +283,25 @@ export default {
             let list = new DropList(this.computedOptions);
             this.el = list.el;
             this._list = list;
-            this._rebindVueListeners();
+
+            this.sink.add(this._list.el, 'blur.vue', evt => {
+                if (this._list.el.contains(evt.relatedTarget))
+                    return;
+                this.$emit('blur', evt);
+            }, true);
+
+            this.sink.add(this._list.el, 'keydown.vue', evt => {
+                this.$emit('keydown', evt);
+            }, true);
 
             if (Array.isArray(this.items))
                 list.addItems(this.items);
 
+            const modelValue = isVue3 ? this.modelValue : this.value;
             if (this.multi) {
-                list.setCheckedValues(Array.isArray(this.value) ? this.value : this.value == null ? [] : [this.value]);
+                list.setCheckedValues(Array.isArray(modelValue) ? modelValue : modelValue == null ? [] : [modelValue]);
             } else {
-                list.setSingleSelectedItemByValue(this.value === null ? undefined : this.value);
+                list.setSingleSelectedItemByValue(modelValue === null ? undefined : modelValue);
             }
 
             list.show(this.positionOptions);

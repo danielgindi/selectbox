@@ -3,9 +3,12 @@
 </template>
 
 <script>
+    import Vue from 'vue';
     import SelectBox from '../lib/SelectBox';
     import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
     import deepEqual from 'fast-deep-equal';
+
+    const isVue3 = Vue.version > '3.';
 
     /**
      * Events:
@@ -24,7 +27,8 @@
      * 'search:focus': input box has gained focus
      * 'search:blur': input box has lost focus
      * 'input:resize': input box resized
-     * 'input': (on select, clear, addsel, removesel) - fired after any of the above events.
+     * 'input' (Vue v2): (on select, clear, addsel, removesel) - fired after any of the above events.
+     * 'update:modelValue' (Vue v3): (on select, clear, addsel, removesel) - fired after any of the above events.
      * 'itemschanged': `{term, mutated, count}` = the current set of items has changed
      *
      * Slots:
@@ -32,6 +36,8 @@
      */
 
     export default {
+        inheritAttrs: false,
+
         props: {
             disabled: {
                 type: Boolean,
@@ -129,7 +135,7 @@
                 type: Array,
                 default: () => [],
             },
-            value: {
+            [isVue3 ? 'modelValue' : 'value']: {
                 type: [String, Number, Boolean, Object, Array],
                 default: undefined,
             },
@@ -238,6 +244,25 @@
                 default: true,
             },
         },
+
+        emits: [
+            'update:modelValue',
+            'clear:before',
+            'clear',
+            'open',
+            'close',
+            'search:focus',
+            'search:blur',
+            'addsel:before',
+            'addsel',
+            'removesel:before',
+            'removesel',
+            'select:before',
+            'select',
+            'input:resize',
+            'itemschanged',
+            'search',
+        ],
 
         data() {
             return {
@@ -519,11 +544,13 @@
             items(value) {
                 if (this._box) {
                     this._box.setItems(value, false);
-                    this._box.setValue(this.value === null ? undefined : this.value);
+
+                    const modelValue = isVue3 ? this.modelValue : this.value;
+                    this._box.setValue(modelValue === null ? undefined : modelValue);
                 }
             },
 
-            value(value, old) {
+            [isVue3 ? 'modelValue' : 'value'](value, old) {
                 if (Array.isArray(value) && Array.isArray(old) &&
                     value.length === old && value.every((v, i) => old[i] === v))
                     return;
@@ -587,10 +614,12 @@
                     this._box.setFilterFn(this.filterFn);
             },
 
-            $scopedSlots() {
-                if (this._box)
-                    this._box.setListOptions(this.computedListOptions);
-            },
+            ...(isVue3 ? {} : {
+                $scopedSlots() { // Vue 2
+                    if (this._box)
+                        this._box.setListOptions(this.computedListOptions);
+                },
+            }),
 
             $slots() {
                 if (this._box)
@@ -644,7 +673,7 @@
             }
         },
 
-        destroyed() {
+        [isVue3 ? 'unmounted' : 'destroyed']() {
             this._destroyBox();
         },
 
@@ -680,7 +709,7 @@
                     let value = event === 'select' ? data.value : this._box.getValue();
                     if (value === undefined && event !== 'select' && this.useNullForEmptyValue)
                         value = null;
-                    this.$emit('input', value);
+                    this.$emit(isVue3 ? 'update:modelValue' : 'input', value);
                 }
             },
 
@@ -735,7 +764,8 @@
                     treatGroupSelectionAsItems: this.treatGroupSelectionAsItems,
                 });
 
-                box.setValue(this.value === null ? undefined : this.value);
+                const modelValue = isVue3 ? this.modelValue : this.value;
+                box.setValue(modelValue === null ? undefined : modelValue);
 
                 this._box = box;
             },

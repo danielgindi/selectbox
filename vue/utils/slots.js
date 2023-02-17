@@ -1,6 +1,8 @@
 import Vue from 'vue';
 
-const generateVNodeRenderer = vnode => {
+const isVue3 = Vue.version > '3.';
+
+const createInstanceFromVnode = vnode => {
     return new Vue({
         render() {
             return vnode;
@@ -8,7 +10,7 @@ const generateVNodeRenderer = vnode => {
     });
 };
 
-const generateVNodesRenderer = vnodes => {
+const createInstanceFromVnodes = vnodes => {
     return new Vue({
         render(h) {
             return h('div', vnodes);
@@ -22,49 +24,46 @@ const VueInstanceSymbol = Symbol('vue_instance');
  *
  * @param {import('vue').Component} vue
  * @param {string} slotName
- * @param {function(item: *)?} onAfterUpdate
  * @returns {(function(item: *, parent: Element): void)|undefined}
  */
-const createSlotBasedRenderFunc = (vue, slotName, onAfterUpdate) => {
-    if (vue.$scopedSlots[slotName]) {
+const createSlotBasedRenderFunc = (vue, slotName) => {
+    if (vue.$slots[slotName]) {
+        return (item, parent) => {
+            let slotVnode = vue.$slots[slotName](item);
+            let vnode = Vue.createVNode({
+                render() {
+                    return slotVnode;
+                },
+            });
+            if (isVue3) {
+                Vue.render(vnode, parent);
+                parent[VueInstanceSymbol] = true;
+            } else {
+                let vm = createInstanceFromVnode(vnode);
+                vm.$mount();
+                parent[VueInstanceSymbol] = vm;
+                parent.appendChild(vm.$el);
+            }
+        };
+    }
+
+    if (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName]) { // Removed in Vue 3
         return (item, parent) => {
             let vnode = vue.$scopedSlots[slotName](item);
             let vm;
 
             if (Array.isArray(vnode)) {
-                vm = generateVNodesRenderer(vnode);
+                vm = createInstanceFromVnodes(vnode);
                 vm.$mount();
                 let nodes = vm.$el.childNodes;
-                nodes[0][VueInstanceSymbol] = vm;
+                parent[VueInstanceSymbol] = vm;
                 for (let node of nodes)
                     parent.appendChild(node);
             } else {
-                vm = generateVNodeRenderer(vnode);
+                vm = createInstanceFromVnode(vnode);
                 vm.$mount();
-                vm.$el[VueInstanceSymbol] = vm;
+                parent[VueInstanceSymbol] = vm;
                 parent.appendChild(vm.$el);
-            }
-
-            if (onAfterUpdate) {
-                vm.$on('hook:updated', () => {
-                    vm.$nextTick(() => onAfterUpdate(item));
-                });
-            }
-        };
-    }
-
-    if (vue.$slots[slotName]) {
-        return (item, parent) => {
-            let vnode = vue.$slots[slotName];
-            let vm = generateVNodeRenderer(vnode);
-            vm.$mount();
-            vm.$el[VueInstanceSymbol] = vm;
-            parent.appendChild(vm.$el);
-
-            if (onAfterUpdate) {
-                vm.$on('hook:updated', () => {
-                    vm.$nextTick(() => onAfterUpdate(item));
-                });
             }
         };
     }
@@ -77,22 +76,18 @@ const createSlotBasedRenderFunc = (vue, slotName, onAfterUpdate) => {
  * @returns {(function(parent: Element): void)|undefined}
  */
 const createSlotBasedUnrenderFunc = (vue, slotName) => {
-    if (vue.$slots[slotName] || vue.$slots[slotName]) {
+    if (vue.$slots[slotName] || (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName])) {
         return (parent) => {
-            if (parent.childNodes.length > 0) {
-                let node = parent.childNodes[0][VueInstanceSymbol];
-                if (node) {
-                    node.$destroy();
-                    delete parent.childNodes[0][VueInstanceSymbol];
-                }
-            }
+            const vmOrApp = parent[VueInstanceSymbol];
+            if (!vmOrApp) return;
+            if (isVue3) Vue.render(null, parent);
+            else vmOrApp.$destroy();
+            delete parent[VueInstanceSymbol];
         };
     }
 };
 
 export {
-    generateVNodeRenderer,
-    generateVNodesRenderer,
     createSlotBasedRenderFunc,
     createSlotBasedUnrenderFunc,
 };
