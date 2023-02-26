@@ -6,9 +6,9 @@
 import DropList from '../lib/DropList';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
-import Vue from 'vue';
+import { version } from 'vue';
 
-const isVue3 = Vue.version > '3.';
+const isVue3 = version > '3.';
 
 const AllListEvents = ['itemfocus', 'itemblur', 'select', 'show:before', 'show', 'hide:before', 'hide', 'hide:after', 'check', 'groupcheck'];
 

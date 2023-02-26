@@ -1,9 +1,12 @@
-import Vue from 'vue';
+import * as VueModule from 'vue';
 
-const isVue3 = Vue.version > '3.';
+const isVue3 = VueModule.version > '3.';
+const render3 = VueModule.render;
+const createVNode3 = VueModule.createVNode;
+const Vue2 = VueModule.Vue;
 
 const createInstanceFromVnode = vnode => {
-    return new Vue({
+    return new Vue2({
         render() {
             return vnode;
         },
@@ -11,7 +14,7 @@ const createInstanceFromVnode = vnode => {
 };
 
 const createInstanceFromVnodes = vnodes => {
-    return new Vue({
+    return new Vue2({
         render(h) {
             return h('div', vnodes);
         },
@@ -30,16 +33,16 @@ const createSlotBasedRenderFunc = (vue, slotName) => {
     if (vue.$slots[slotName]) {
         return (item, parent) => {
             let slotVnode = vue.$slots[slotName](item);
-            let vnode = Vue.createVNode({
-                render() {
-                    return slotVnode;
-                },
-            });
             if (isVue3) {
-                Vue.render(vnode, parent);
+                let vnode = createVNode3({
+                    render() {
+                        return slotVnode;
+                    },
+                });
+                render3(vnode, parent);
                 parent[VueInstanceSymbol] = true;
             } else {
-                let vm = createInstanceFromVnode(vnode);
+                let vm = createInstanceFromVnode(slotVnode);
                 vm.$mount();
                 parent[VueInstanceSymbol] = vm;
                 parent.appendChild(vm.$el);
@@ -80,7 +83,7 @@ const createSlotBasedUnrenderFunc = (vue, slotName) => {
         return (parent) => {
             const vmOrApp = parent[VueInstanceSymbol];
             if (!vmOrApp) return;
-            if (isVue3) Vue.render(null, parent);
+            if (isVue3) render3(null, parent);
             else vmOrApp.$destroy();
             delete parent[VueInstanceSymbol];
         };

@@ -3,12 +3,12 @@
 </template>
 
 <script>
-    import Vue from 'vue';
+    import { version } from 'vue';
     import SelectBox from '../lib/SelectBox';
     import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
     import deepEqual from 'fast-deep-equal';
 
-    const isVue3 = Vue.version > '3.';
+    const isVue3 = version > '3.';
 
     /**
      * Events:
