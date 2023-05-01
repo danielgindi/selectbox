@@ -47,6 +47,19 @@ You are welcome to open a PR and add examples, docs, and demo pages :-)
 
 You are welcome to open a PR and add some api docs :-)
 
+## Vite
+
+When using with Vite - you'll need to add this `optimizeDeps to` `vite.config.js`:
+```
+optimizeDeps: {
+  include: [
+    'fast-deep-equal',
+  ],
+},
+```
+
+Otherwise, Vite will complain about `fast-deep-equal` entry point.
+
 ## Me
 * Hi! I am Daniel Cohen Gindi. Or in short- Daniel.
 * danielgindi@gmail.com is my email address.
