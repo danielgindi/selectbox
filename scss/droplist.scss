@@ -1,3 +1,4 @@
+
 ul.droplist {
 	box-sizing: border-box;
 	z-index: 10000;
@@ -13,10 +14,6 @@ ul.droplist {
 	outline: 0;
 	border-radius: 5px;
 	background: #fff;
-
-	[dir=rtl] & {
-		direction: rtl;
-	}
 
 	&.droplist__is_above {
 		border-bottom-left-radius: 0;
@@ -66,11 +63,6 @@ ul.droplist {
 			/* unchecked style */
 			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3C/svg%3E");
 			background-size: 100% 100%;
-
-			[dir=rtl] & {
-				left: auto;
-				right: 6px;
-			}
 		}
 		&:hover .checkbox {
 			/* unchecked hover style */
@@ -106,17 +98,9 @@ ul.droplist {
 	li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
 		padding: 1px 6px 2px 2px;
 
-		[dir=rtl] & {
-			padding: 1px 2px 2px 6px;
-		}
-
 		.droplist__item_label {
 			display: block;
 			margin: 1px 0 0 24px;
-
-			[dir=rtl] & {
-				margin: 1px 24px 0 0;
-			}
 		}
 	}
 
@@ -126,21 +110,11 @@ ul.droplist {
 
 	li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
 		padding-left: 15px;
-
-		[dir=rtl] & {
-			padding-left: 6px;
-			padding-right: 15px;
-		}
 	}
 
 	li.droplist__item_child.droplist__item_single,
 	li.droplist__item_child.droplist__item_multi_nocheck {
 		padding-left: 24px;
-
-		[dir=rtl] & {
-			padding-left: 0;
-			padding-right: 24px;
-		}
 	}
 
 	.droplist__no_results_content {
@@ -169,17 +143,46 @@ ul.droplist {
 			content: 'x';
 			color: #fff;
 		}
-
-		[dir=rtl] & {
-			right: auto;
-			left: 2px;
-		}
 	}
 
 	.droplist__item_focus .remove {
 		display: block;
 	}
 
+	&.droplist__rtl, [dir=rtl] &:not(.droplist__ltr) {
+		direction: rtl;
+
+		li {
+			.checkbox {
+				left: auto;
+				right: 6px;
+			}
+		}
+
+		li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
+			padding: 1px 2px 2px 6px;
+
+			.droplist__item_label {
+				margin: 1px 24px 0 0;
+			}
+		}
+
+		li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
+			padding-left: 6px;
+			padding-right: 15px;
+		}
+
+		li.droplist__item_child.droplist__item_single,
+		li.droplist__item_child.droplist__item_multi_nocheck {
+			padding-left: 0;
+			padding-right: 24px;
+		}
+
+		.remove {
+			right: auto;
+			left: 2px;
+		}
+	}
 }
 
 .has_droplist_above {

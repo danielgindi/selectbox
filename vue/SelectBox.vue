@@ -215,6 +215,10 @@
                 type: [Object, Array, String],
                 default: undefined,
             },
+            direction: {
+                type: String,
+                default: undefined,
+            },
             fixedDroplistWidth: {
                 type: Boolean,
                 default: false,
@@ -280,6 +284,10 @@
 
                 if (this.additionalDroplistClassesList) {
                     opts.additionalClasses = this.additionalDroplistClassesList;
+                }
+
+                if (this.direction) {
+                    opts.direction = this.direction;
                 }
 
                 if (typeof this.autoCheckGroupChildren === 'boolean' && this.multi) {
@@ -423,6 +431,11 @@
             clearable(value) {
                 if (this._box)
                     this._box.setClearable(value);
+            },
+
+            direction(value) {
+                if (this._box)
+                    this._box.setDirection(value);
             },
 
             hasOpenIndicator(value) {

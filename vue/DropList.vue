@@ -22,6 +22,10 @@ export default {
         additionalClasses: {
             type: [Object, Array, String],
         },
+        direction: {
+            type: String,
+            default: undefined,
+        },
         autoFocus: {
             type: Boolean,
             default: true,
@@ -135,6 +139,10 @@ export default {
                 opts.additionalClasses = this.additionalClassesList;
             }
 
+            if (this.direction) {
+                opts.direction = this.direction;
+            }
+
             for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
                 'autoFlipDirection', 'estimateWidth']) {
@@ -207,6 +215,11 @@ export default {
         additionalClasses() {
             if (this._list)
                 this._list.setAdditionalClasses(this.additionalClassesList);
+        },
+
+        direction(value) {
+            if (this._list)
+                this._list.setDirection(value);
         },
 
         renderItem() {

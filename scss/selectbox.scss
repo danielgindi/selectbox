@@ -1,6 +1,18 @@
 ﻿$spinner-transition-timing-function: cubic-bezier(1.0, 0.5, 0.8, 1.0);
 $spinner-transition-duration: .15s;
 
+@mixin currentIsRtl {
+    &.selectbox__rtl, [dir=rtl] &:not(.selectbox__ltr) {
+        @content;
+    }
+}
+
+@mixin insideRtlSelectBox {
+    .selectbox__rtl &, [dir=rtl] &.selectbox:not(.selectbox__ltr) & {
+        @content;
+    }
+}
+
 .selectbox {
     position: relative;
     box-sizing: border-box;
@@ -46,7 +58,7 @@ $spinner-transition-duration: .15s;
         &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
             padding-right: 17px;
 
-            [dir=rtl] & {
+            @include currentIsRtl {
                 padding-right: 0;
                 padding-left: 17px;
             }
@@ -56,7 +68,7 @@ $spinner-transition-duration: .15s;
         &.selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) {
             padding-right: 27px;
 
-            [dir=rtl] & {
+            @include currentIsRtl {
                 padding-right: 0;
                 padding-left: 27px;
             }
@@ -66,7 +78,7 @@ $spinner-transition-duration: .15s;
         &.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) {
             padding-right: 44px;
 
-            [dir=rtl] & {
+            @include currentIsRtl {
                 padding-right: 0;
                 padding-left: 44px;
             }
@@ -75,7 +87,7 @@ $spinner-transition-duration: .15s;
         &.selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) {
             padding-right: 54px;
 
-            [dir=rtl] & {
+            @include currentIsRtl {
                 padding-right: 0;
                 padding-left: 54px;
             }
@@ -84,7 +96,7 @@ $spinner-transition-duration: .15s;
         &.selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner {
             padding-right: 74px;
 
-            [dir=rtl] & {
+            @include currentIsRtl {
                 padding-right: 0;
                 padding-left: 74px;
             }
@@ -125,8 +137,11 @@ $spinner-transition-duration: .15s;
         content: '';
         width: 0;
         height: 25px;
+    }
 
-        [dir=rtl] & {
+
+    @include insideRtlSelectBox {
+        &::before {
             float: left;
         }
     }
@@ -203,17 +218,17 @@ $spinner-transition-duration: .15s;
         transition: transform 150ms cubic-bezier(1, -0.115, 0.975, 0.855);
     }
 
-    [dir=rtl] &::before {
-        transform: rotate(-225deg);
-    }
-
     .selectbox__open_list &::before {
         transform: translateY(50%) rotate(-45deg);
     }
 
-    [dir=rtl] & {
+    @include insideRtlSelectBox {
         right: auto;
         left: 4px;
+
+        &::before {
+            transform: rotate(-225deg);
+        }
     }
 }
 
@@ -248,7 +263,7 @@ $spinner-transition-duration: .15s;
         }
     }
 
-    [dir=rtl] & {
+    @include insideRtlSelectBox {
         right: auto;
         left: 2px;
     }
@@ -256,7 +271,7 @@ $spinner-transition-duration: .15s;
     .selectbox__has_open_indicator.selectbox__has_clear & {
         right: 14px;
 
-        [dir=rtl] & {
+        @include insideRtlSelectBox {
             right: auto;
             left: 14px;
         }
@@ -292,7 +307,7 @@ $spinner-transition-duration: .15s;
         transition: opacity .1s;
     }
 
-    [dir=rtl] & {
+    @include insideRtlSelectBox {
         right: auto;
         left: 2px;
     }
@@ -300,7 +315,7 @@ $spinner-transition-duration: .15s;
     .selectbox__has_spinner.selectbox__has_open_indicator & {
         right: 22px;
 
-        [dir=rtl] & {
+        @include insideRtlSelectBox {
             right: auto;
             left: 22px;
         }
@@ -309,7 +324,7 @@ $spinner-transition-duration: .15s;
     .selectbox__has_spinner.selectbox__has_clear & {
         right: 36px;
 
-        [dir=rtl] & {
+        @include insideRtlSelectBox {
             right: auto;
             left: 36px;
         }
@@ -340,7 +355,7 @@ $spinner-transition-duration: .15s;
 		outline: 0;
 	}
 
-    [dir=rtl] & {
+    @include insideRtlSelectBox {
         float: right;
         margin-left: 5px;
         margin-right: 0;
@@ -359,7 +374,7 @@ $spinner-transition-duration: .15s;
 		content: '×';
 	}
 
-    [dir=rtl] & {
+    @include insideRtlSelectBox {
         margin-left: 2px;
         margin-right: 0;
     }
@@ -396,7 +411,7 @@ $spinner-transition-duration: .15s;
         float: left;
         margin-top: 5px;
 
-        [dir=rtl] & {
+        @include insideRtlSelectBox {
             float: right;
         }
     }
@@ -407,7 +422,7 @@ $spinner-transition-duration: .15s;
         left: 0;
         top: 4px;
 
-        [dir=rtl] & {
+        @include insideRtlSelectBox {
             right: 0;
             left: auto;
         }
