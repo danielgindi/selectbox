@@ -8,7 +8,7 @@ $spinner-transition-duration: .15s;
 }
 
 @mixin insideRtlSelectBox {
-    .selectbox__rtl &, [dir=rtl] &.selectbox:not(.selectbox__ltr) & {
+    .selectbox__rtl &, [dir=rtl] .selectbox:not(.selectbox__ltr) & {
         @content;
     }
 }
