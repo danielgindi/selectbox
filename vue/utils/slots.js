@@ -32,8 +32,8 @@ const VueInstanceSymbol = Symbol('vue_instance');
 const createSlotBasedRenderFunc = (vue, slotName) => {
     if (vue.$slots[slotName]) {
         return (item, parent) => {
-            let slotVnode = vue.$slots[slotName](item);
             if (isVue3) {
+                let slotVnode = vue.$slots[slotName](item);
                 let vnode = createVNode3({
                     render() {
                         return slotVnode;
@@ -42,6 +42,7 @@ const createSlotBasedRenderFunc = (vue, slotName) => {
                 render3(vnode, parent);
                 parent[VueInstanceSymbol] = true;
             } else {
+                let slotVnode = vue.$slots[slotName];
                 let vm = createInstanceFromVnode(slotVnode);
                 vm.$mount();
                 parent[VueInstanceSymbol] = vm;
