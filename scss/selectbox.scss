@@ -270,11 +270,12 @@ $spinner-transition-duration: .15s;
 
     .selectbox__has_open_indicator.selectbox__has_clear & {
         right: 14px;
+    }
 
-        @include insideRtlSelectBox {
-            right: auto;
-            left: 14px;
-        }
+    .selectbox__has_open_indicator.selectbox__has_clear.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__ltr) & {
+        right: auto;
+        left: 14px;
     }
 
     .selectbox[aria-disabled=true] > & {
@@ -314,20 +315,22 @@ $spinner-transition-duration: .15s;
 
     .selectbox__has_spinner.selectbox__has_open_indicator & {
         right: 22px;
-
-        @include insideRtlSelectBox {
-            right: auto;
-            left: 22px;
-        }
     }
 
     .selectbox__has_spinner.selectbox__has_clear & {
         right: 36px;
+    }
 
-        @include insideRtlSelectBox {
-            right: auto;
-            left: 36px;
-        }
+    .selectbox__has_spinner.selectbox__has_open_indicator.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__ltr) & {
+        right: auto;
+        left: 22px;
+    }
+
+    .selectbox__has_spinner.selectbox__has_clear.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clear:not(.selectbox__ltr) & {
+        right: auto;
+        left: 36px;
     }
 }
 
@@ -410,10 +413,6 @@ $spinner-transition-duration: .15s;
     .selectbox__multi & {
         float: left;
         margin-top: 5px;
-
-        @include insideRtlSelectBox {
-            float: right;
-        }
     }
 
     .selectbox__single & {
@@ -421,11 +420,17 @@ $spinner-transition-duration: .15s;
         z-index: 1;
         left: 0;
         top: 4px;
+    }
 
-        @include insideRtlSelectBox {
-            right: 0;
-            left: auto;
-        }
+    .selectbox__multi.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__multi:not(.selectbox__ltr) & {
+        float: right;
+    }
+
+    .selectbox__single.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__single:not(.selectbox__ltr) & {
+        right: 0;
+        left: auto;
     }
 }
 
