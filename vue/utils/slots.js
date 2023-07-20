@@ -3,10 +3,9 @@ import * as VueModule from 'vue';
 const isVue3 = VueModule.version > '3.';
 const render3 = VueModule.render;
 const createVNode3 = VueModule.createVNode;
-const { Vue: Vue2 } = VueModule; // With destructuring it avoids generating a missing export warning
 
 const createInstanceFromVnode = vnode => {
-    return new Vue2({
+    return new VueModule({
         render() {
             return vnode;
         },
@@ -14,7 +13,7 @@ const createInstanceFromVnode = vnode => {
 };
 
 const createInstanceFromVnodes = vnodes => {
-    return new Vue2({
+    return new VueModule({
         render(h) {
             return h('div', vnodes);
         },
