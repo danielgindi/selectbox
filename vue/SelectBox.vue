@@ -286,10 +286,6 @@
                     opts.additionalClasses = this.additionalDroplistClassesList;
                 }
 
-                if (this.direction) {
-                    opts.direction = this.direction;
-                }
-
                 if (typeof this.autoCheckGroupChildren === 'boolean' && this.multi) {
                     opts.autoCheckGroupChildren = this.autoCheckGroupChildren;
                 }
@@ -736,6 +732,7 @@
                 let box = new SelectBox({
                     el: this.el,
                     baseClass: this.baseClass,
+                    direction: this.direction,
                     disabled: this.disabled,
                     clearable: this.clearable,
                     hasOpenIndicator: this.hasOpenIndicator,
