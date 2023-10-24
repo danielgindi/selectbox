@@ -230,6 +230,13 @@ export default {
             this._recreateList();
         },
 
+        positionOptions: {
+            deep: true,
+            handler() {
+                this.relayout();
+            },
+        },
+
         ...(isVue3 ? {} : {
             $scopedSlots() { // Vue 2
                 this._recreateList();
