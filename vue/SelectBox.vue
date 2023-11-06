@@ -136,7 +136,7 @@
                 default: () => [],
             },
             [isVue3 ? 'modelValue' : 'value']: {
-                type: [String, Number, Boolean, Object, Array],
+                type: [String, Number, Boolean, Object, Array, Symbol],
                 default: undefined,
             },
             maxMultiItems: {
