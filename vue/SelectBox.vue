@@ -555,7 +555,7 @@
                     this._box.setItems(value, false);
 
                     const modelValue = isVue3 ? this.modelValue : this.value;
-                    this._box.setValue(modelValue === null ? undefined : modelValue);
+                    this._box.setValue(modelValue === null && this.useNullForEmptyValue ? undefined : modelValue);
                 }
             },
 
@@ -565,7 +565,7 @@
                     return;
 
                 if (this._box)
-                    this._box.setValue(value === null ? undefined : value);
+                    this._box.setValue(value === null && this.useNullForEmptyValue ? undefined : value);
             },
 
             renderSingleItem() {
@@ -775,7 +775,7 @@
                 });
 
                 const modelValue = isVue3 ? this.modelValue : this.value;
-                box.setValue(modelValue === null ? undefined : modelValue);
+                box.setValue(modelValue === null && this.useNullForEmptyValue ? undefined : modelValue);
 
                 this._box = box;
             },
