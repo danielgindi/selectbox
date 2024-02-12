@@ -223,7 +223,11 @@
                 type: Boolean,
                 default: false,
             },
-            useNullForEmptyValue: {
+            acceptNullAsValue: {
+                type: Boolean,
+                default: false,
+            },
+            emitNullForEmptyValue: {
                 type: Boolean,
                 default: false,
             },
@@ -555,7 +559,7 @@
                     this._box.setItems(value, false);
 
                     const modelValue = isVue3 ? this.modelValue : this.value;
-                    this._box.setValue(modelValue === null && this.useNullForEmptyValue ? undefined : modelValue);
+                    this._box.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
                 }
             },
 
@@ -565,7 +569,7 @@
                     return;
 
                 if (this._box)
-                    this._box.setValue(value === null && this.useNullForEmptyValue ? undefined : value);
+                    this._box.setValue(value === null && (!this.acceptNullAsValue || this.multi) ? undefined : value);
             },
 
             renderSingleItem() {
@@ -716,7 +720,7 @@
                     event === 'addsel' ||
                     event === 'removesel') {
                     let value = event === 'select' ? data.value : this._box.getValue();
-                    if (value === undefined && event !== 'select' && this.useNullForEmptyValue)
+                    if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                         value = null;
                     this.$emit(isVue3 ? 'update:modelValue' : 'input', value);
                 }
@@ -775,7 +779,7 @@
                 });
 
                 const modelValue = isVue3 ? this.modelValue : this.value;
-                box.setValue(modelValue === null && this.useNullForEmptyValue ? undefined : modelValue);
+                box.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
 
                 this._box = box;
             },
