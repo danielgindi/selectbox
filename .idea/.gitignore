@@ -6,3 +6,5 @@
 /modules.xml
 /vcs.xml
 /*.iml
+# GitHub Copilot persisted chat sessions
+/copilot/chatSessions
