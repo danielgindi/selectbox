@@ -10,7 +10,13 @@ import { version } from 'vue';
 
 const isVue3 = version > '3.';
 
-const AllListEvents = ['itemfocus', 'itemblur', 'select', 'show:before', 'show', 'hide:before', 'hide', 'hide:after', 'check', 'groupcheck'];
+const AllListEvents = [
+    'itemfocus', 'itemblur', 'select',
+    'show:before', 'show',
+    'hide:before', 'hide', 'hide:after',
+    'check', 'groupcheck',
+    'show_subitems', 'hide_subitems', 'subitems:select',
+];
 
 export default {
     inheritAttrs: false,
