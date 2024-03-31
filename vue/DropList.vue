@@ -110,7 +110,10 @@ export default {
     },
 
     emits: [
+        // vue events
         'update:modelValue',
+
+        // DropList.js events (passthrough)
         'itemfocus',
         'itemblur',
         'select',
@@ -120,6 +123,11 @@ export default {
         'hide',
         'check',
         'groupcheck',
+        'show_subitems',
+        'hide_subitems',
+        'subitems:select',
+
+        // Element events
         'blur',
         'keypress',
         'keydown',
