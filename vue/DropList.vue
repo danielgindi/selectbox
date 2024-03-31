@@ -209,11 +209,11 @@ export default {
 
     watch: {
         items(value) {
-            if (this.nonReactive.list) {
-                this.nonReactive.list.removeAllItems();
+            if (this.nonReactive.instance) {
+                this.nonReactive.instance.removeAllItems();
 
                 if (Array.isArray(value))
-                    this.nonReactive.list.addItems(value);
+                    this.nonReactive.instance.addItems(value);
             }
         },
 
@@ -222,23 +222,23 @@ export default {
                 value.length === old && value.every((v, i) => old[i] === v))
                 return;
 
-            if (this.nonReactive.list) {
+            if (this.nonReactive.instance) {
                 if (this.multi) {
-                    this.nonReactive.list.setCheckedValues(Array.isArray(value) ? value : value == null ? [] : [value]);
+                    this.nonReactive.instance.setCheckedValues(Array.isArray(value) ? value : value == null ? [] : [value]);
                 } else {
-                    this.nonReactive.list.setSingleSelectedItemByValue(value === null ? undefined : value);
+                    this.nonReactive.instance.setSingleSelectedItemByValue(value === null ? undefined : value);
                 }
             }
         },
 
         additionalClasses() {
-            if (this.nonReactive.list)
-                this.nonReactive.list.setAdditionalClasses(this.additionalClassesList);
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setAdditionalClasses(this.additionalClassesList);
         },
 
         direction(value) {
-            if (this.nonReactive.list)
-                this.nonReactive.list.setDirection(value);
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setDirection(value);
         },
 
         renderItem() {
@@ -283,7 +283,7 @@ export default {
                 this.$emit(isVue3 ? 'update:modelValue' : 'input',
                     event === 'select'
                         ? data.value
-                        : this.nonReactive.list.getCheckedValues(false));
+                        : this.nonReactive.instance.getCheckedValues(false));
             }
 
             if (event === 'hide') {
@@ -294,7 +294,7 @@ export default {
                 this.relayout();
 
                 if (this.autoFocus) {
-                    this.nonReactive.list.el.focus();
+                    this.nonReactive.instance.el.focus();
                 }
             }
 
@@ -321,15 +321,15 @@ export default {
 
             let list = new DropList(this.computedOptions);
             this.el = list.el;
-            this.nonReactive.list = list;
+            this.nonReactive.instance = list;
 
-            this.nonReactive.sink.add(this.nonReactive.list.el, 'blur.vue', evt => {
-                if (this.nonReactive.list.el.contains(evt.relatedTarget))
+            this.nonReactive.sink.add(this.nonReactive.instance.el, 'blur.vue', evt => {
+                if (this.nonReactive.instance.el.contains(evt.relatedTarget))
                     return;
                 this.$emit('blur', evt);
             }, true);
 
-            this.nonReactive.sink.add(this.nonReactive.list.el, 'keydown.vue', evt => {
+            this.nonReactive.sink.add(this.nonReactive.instance.el, 'keydown.vue', evt => {
                 this.$emit('keydown', evt);
             }, true);
 
@@ -351,9 +351,9 @@ export default {
         _destroyList() {
             this._clearAutoRelayout();
 
-            if (this.nonReactive.list) {
-                this.nonReactive.list.destroy();
-                delete this.nonReactive.list;
+            if (this.nonReactive.instance) {
+                this.nonReactive.instance.destroy();
+                this.nonReactive.instance = undefined;
             }
 
             this.el = undefined;
@@ -389,12 +389,12 @@ export default {
         _setupAutoRelayout() {
             this._clearAutoRelayout();
 
-            if (!this.nonReactive.list)
+            if (!this.nonReactive.instance)
                 return;
 
             this.nonReactive.sink.add(window, 'resize.trackposition', () => this.relayout());
 
-            let parent = this.nonReactive.list.el.parentNode;
+            let parent = this.nonReactive.instance.el.parentNode;
             while (parent) {
                 if (parent.scrollHeight > parent.offsetHeight ||
                     parent.scrollWidth > parent.offsetWidth) {
@@ -408,8 +408,8 @@ export default {
         },
 
         relayout() {
-            if (this.nonReactive.list)
-                this.nonReactive.list.relayout(this.positionOptions);
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.relayout(this.positionOptions);
         },
 
         elContains(other, considerSublists = true) {
@@ -417,7 +417,7 @@ export default {
         },
 
         listRef() {
-            return this.nonReactive.list;
+            return this.nonReactive.instance;
         },
     },
 };
