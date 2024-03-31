@@ -122,12 +122,17 @@ export default {
         'groupcheck',
         'blur',
         'keypress',
+        'keydown',
     ],
 
     data() {
         return {
-            sink: new DomEventsSink(),
             el: undefined,
+            
+            nonReactive: Object.seal({
+                instance: undefined,
+                sink: new DomEventsSink(),
+            }),
         };
     },
 
@@ -196,11 +201,11 @@ export default {
 
     watch: {
         items(value) {
-            if (this._list) {
-                this._list.removeAllItems();
+            if (this.nonReactive.list) {
+                this.nonReactive.list.removeAllItems();
 
                 if (Array.isArray(value))
-                    this._list.addItems(value);
+                    this.nonReactive.list.addItems(value);
             }
         },
 
@@ -209,23 +214,23 @@ export default {
                 value.length === old && value.every((v, i) => old[i] === v))
                 return;
 
-            if (this._list) {
+            if (this.nonReactive.list) {
                 if (this.multi) {
-                    this._list.setCheckedValues(Array.isArray(value) ? value : value == null ? [] : [value]);
+                    this.nonReactive.list.setCheckedValues(Array.isArray(value) ? value : value == null ? [] : [value]);
                 } else {
-                    this._list.setSingleSelectedItemByValue(value === null ? undefined : value);
+                    this.nonReactive.list.setSingleSelectedItemByValue(value === null ? undefined : value);
                 }
             }
         },
 
         additionalClasses() {
-            if (this._list)
-                this._list.setAdditionalClasses(this.additionalClassesList);
+            if (this.nonReactive.list)
+                this.nonReactive.list.setAdditionalClasses(this.additionalClassesList);
         },
 
         direction(value) {
-            if (this._list)
-                this._list.setDirection(value);
+            if (this.nonReactive.list)
+                this.nonReactive.list.setDirection(value);
         },
 
         renderItem() {
@@ -270,7 +275,7 @@ export default {
                 this.$emit(isVue3 ? 'update:modelValue' : 'input',
                     event === 'select'
                         ? data.value
-                        : this._list.getCheckedValues(false));
+                        : this.nonReactive.list.getCheckedValues(false));
             }
 
             if (event === 'hide') {
@@ -281,7 +286,7 @@ export default {
                 this.relayout();
 
                 if (this.autoFocus) {
-                    this._list.el.focus();
+                    this.nonReactive.list.el.focus();
                 }
             }
 
@@ -308,15 +313,15 @@ export default {
 
             let list = new DropList(this.computedOptions);
             this.el = list.el;
-            this._list = list;
+            this.nonReactive.list = list;
 
-            this.sink.add(this._list.el, 'blur.vue', evt => {
-                if (this._list.el.contains(evt.relatedTarget))
+            this.nonReactive.sink.add(this.nonReactive.list.el, 'blur.vue', evt => {
+                if (this.nonReactive.list.el.contains(evt.relatedTarget))
                     return;
                 this.$emit('blur', evt);
             }, true);
 
-            this.sink.add(this._list.el, 'keydown.vue', evt => {
+            this.nonReactive.sink.add(this.nonReactive.list.el, 'keydown.vue', evt => {
                 this.$emit('keydown', evt);
             }, true);
 
@@ -338,14 +343,14 @@ export default {
         _destroyList() {
             this._clearAutoRelayout();
 
-            if (this._list) {
-                this._list.destroy();
-                delete this._list;
+            if (this.nonReactive.list) {
+                this.nonReactive.list.destroy();
+                delete this.nonReactive.list;
             }
 
             this.el = undefined;
 
-            this.sink.remove(null, '.vue');
+            this.nonReactive.sink.remove(null, '.vue');
         },
 
         _recreateList() {
@@ -370,33 +375,41 @@ export default {
         },
 
         _clearAutoRelayout() {
-            this.sink.remove(null, '.trackposition');
+            this.nonReactive.sink.remove(null, '.trackposition');
         },
 
         _setupAutoRelayout() {
             this._clearAutoRelayout();
 
-            if (!this._list)
+            if (!this.nonReactive.list)
                 return;
 
-            this.sink.add(window, 'resize.trackposition', () => this.relayout());
+            this.nonReactive.sink.add(window, 'resize.trackposition', () => this.relayout());
 
-            let parent = this._list.el.parentNode;
+            let parent = this.nonReactive.list.el.parentNode;
             while (parent) {
                 if (parent.scrollHeight > parent.offsetHeight ||
                     parent.scrollWidth > parent.offsetWidth) {
                     if (parent === document.documentElement) {
                         parent = window;
                     }
-                    this.sink.add(parent, 'scroll.trackposition', () => this.relayout());
+                    this.nonReactive.sink.add(parent, 'scroll.trackposition', () => this.relayout());
                 }
                 parent = parent.parentNode;
             }
         },
 
         relayout() {
-            if (this._list)
-                this._list.relayout(this.positionOptions);
+            if (this.nonReactive.list)
+                this.nonReactive.list.relayout(this.positionOptions);
+        },
+
+        elContains(other, considerSublists = true) {
+            return !!this.listRef?.elContains(other, considerSublists);
+        },
+
+        listRef() {
+            return this.nonReactive.list;
         },
     },
 };
