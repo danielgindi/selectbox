@@ -205,6 +205,10 @@ export default {
         additionalClassesList() {
             return this._concatClassesObject(this.additionalClasses);
         },
+
+        listRef() {
+            return this.nonReactive.instance;
+        },
     },
 
     watch: {
@@ -414,10 +418,6 @@ export default {
 
         elContains(other, considerSublists = true) {
             return !!this.listRef?.elContains(other, considerSublists);
-        },
-
-        listRef() {
-            return this.nonReactive.instance;
         },
     },
 };
