@@ -312,6 +312,9 @@ export default {
                 case 'hide':
                 case 'check':
                 case 'groupcheck':
+                case 'show_subitems':
+                case 'hide_subitems':
+                case 'subitems:select':
                     this.$emit(event, ...(data === undefined ? [] : [data]));
                     break;
             }
