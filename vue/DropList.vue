@@ -1,5 +1,5 @@
 <template>
-  <span v-show="false" />
+    <span v-show="false" />
 </template>
 
 <script>
@@ -14,8 +14,9 @@ const AllListEvents = [
     'itemfocus', 'itemblur', 'select',
     'show:before', 'show',
     'hide:before', 'hide', 'hide:after',
-    'check', 'groupcheck',
-    'show_subitems', 'hide_subitems', 'subitems:select',
+    'check', 'groupcheck', 'blur',
+    'show_subitems', 'hide_subitems',
+    'subitems:select', 'subitems:blur',
 ];
 
 export default {
@@ -123,12 +124,13 @@ export default {
         'hide',
         'check',
         'groupcheck',
+        'blur',
         'show_subitems',
         'hide_subitems',
         'subitems:select',
+        'subitems:blur',
 
         // Element events
-        'blur',
         'keypress',
         'keydown',
     ],
@@ -136,7 +138,7 @@ export default {
     data() {
         return {
             el: undefined,
-            
+
             nonReactive: Object.seal({
                 instance: undefined,
                 sink: new DomEventsSink(),
@@ -312,9 +314,11 @@ export default {
                 case 'hide':
                 case 'check':
                 case 'groupcheck':
+                case 'blur':
                 case 'show_subitems':
                 case 'hide_subitems':
                 case 'subitems:select':
+                case 'subitems:blur':
                     this.$emit(event, ...(data === undefined ? [] : [data]));
                     break;
             }
@@ -329,12 +333,6 @@ export default {
             let list = new DropList(this.computedOptions);
             this.el = list.el;
             this.nonReactive.instance = list;
-
-            this.nonReactive.sink.add(this.nonReactive.instance.el, 'blur.vue', evt => {
-                if (this.nonReactive.instance.el.contains(evt.relatedTarget))
-                    return;
-                this.$emit('blur', evt);
-            }, true);
 
             this.nonReactive.sink.add(this.nonReactive.instance.el, 'keydown.vue', evt => {
                 this.$emit('keydown', evt);
