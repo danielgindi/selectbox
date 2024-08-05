@@ -894,6 +894,10 @@
             blur() {
                 this.nonReactive.instance?.blurInput();
             },
+
+            droplistElContains(other, considerSublists = true) {
+                return this.nonReactive.instance?.droplistElContains(other, considerSublists);
+            },
         },
     };
 </script>
