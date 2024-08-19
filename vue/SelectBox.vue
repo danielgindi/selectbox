@@ -658,9 +658,12 @@
                     this.nonReactive.instance.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
             },
 
-            filterDependencies() {
-                if (this.nonReactive.instance)
-                    this.nonReactive.instance.invokeRefilter();
+            filterDependencies: {
+                deep: true,
+                handler() {
+                    if (this.nonReactive.instance)
+                        this.nonReactive.instance.invokeRefilter();
+                },
             },
         },
 
