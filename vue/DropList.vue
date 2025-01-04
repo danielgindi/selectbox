@@ -1,5 +1,5 @@
 <template>
-  <span v-show="false" />
+    <span v-show="false" />
 </template>
 
 <script>
@@ -216,10 +216,9 @@ export default {
     watch: {
         items(value) {
             if (this.nonReactive.instance) {
-                this.nonReactive.instance.removeAllItems();
-
-                if (Array.isArray(value))
-                    this.nonReactive.instance.addItems(value);
+                this.nonReactive.instance.setItems(
+                    Array.isArray(value) ? value : []
+                );
             }
         },
 
