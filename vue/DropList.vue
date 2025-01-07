@@ -1,5 +1,5 @@
 <template>
-    <span v-show="false" />
+  <span v-show="false" />
 </template>
 
 <script>
@@ -107,6 +107,10 @@ export default {
         },
         positionOptions: {
             type: Object,
+        },
+        autoRelayoutOnItemsChange: {
+            type: Boolean,
+            default: true,
         },
     },
 
@@ -216,9 +220,10 @@ export default {
     watch: {
         items(value) {
             if (this.nonReactive.instance) {
-                this.nonReactive.instance.setItems(
-                    Array.isArray(value) ? value : []
-                );
+                const instance = this.nonReactive.instance;
+                instance.setItems(Array.isArray(value) ? value : []);
+                if (this.autoRelayoutOnItemsChange && instance.isVisible())
+                    instance.relayout(this.positionOptions);
             }
         },
 
