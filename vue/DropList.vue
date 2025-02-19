@@ -53,6 +53,38 @@ export default {
             type: Boolean,
             default: false,
         },
+        searchable: {
+            type: Boolean,
+            default: false,
+        },
+        noResultsText: {
+            type: String,
+            default: 'No matching results',
+        },
+        filterThrottleWindow: {
+            type: Number,
+            default: 300,
+        },
+        filterOnEmptyTerm: {
+            type: Boolean,
+            default: false,
+        },
+        filterGroups: {
+            type: Boolean,
+            default: false,
+        },
+        filterEmptyGroups: {
+            type: Boolean,
+            default: false,
+        },
+        filterFn: {
+            type: Function,
+            default: undefined,
+        },
+        // eslint-disable-next-line vue/require-prop-types
+        filterDependencies: {
+            default: undefined,
+        },
         keyDownHandler: {
             type: Function,
         },
@@ -154,6 +186,7 @@ export default {
         computedOptions() {
             let opts = {
                 on: this._handleListEvents.bind(this),
+                positionOptionsProvider: () => this.positionOptions,
             };
 
             if (this.baseClassName) {
@@ -170,7 +203,9 @@ export default {
 
             for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
-                'autoFlipDirection', 'estimateWidth']) {
+                'autoFlipDirection', 'estimateWidth',
+                'searchable', 'filterOnEmptyTerm',
+                'filterGroups', 'filterEmptyGroups']) {
                 if (typeof this[key] === 'boolean') {
                     opts[key] = this[key];
                 }
@@ -192,16 +227,24 @@ export default {
                 opts.keyDownHandler = this.keyDownHandler;
             }
 
-            opts.renderItem = this.renderItem;
-            if (!opts.renderItem) {
-                opts.renderItem = createSlotBasedRenderFunc(this, 'item');
-            }
+            opts.renderItem = this.renderItem ?? createSlotBasedRenderFunc(this, 'item');
 
             opts.unrenderItem = this.unrenderItem;
             if (!opts.unrenderItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'item');
                 if (fn) {
                     opts.unrenderItem = (item, el) => fn(el);
+                }
+            }
+
+            opts.renderNoResultsItem = this.computedRenderNoResultsItem ?? createSlotBasedRenderFunc(this, 'no-results-item');
+
+            opts.unrenderNoResultsItem = this.computedUnrenderNoResultsItem;
+
+            if (!opts.unrenderNoResultsItem) {
+                let fn = createSlotBasedUnrenderFunc(this, 'no-results-item');
+                if (fn) {
+                    opts.unrenderNoResultsItem = (item, el) => fn(el);
                 }
             }
 
@@ -223,7 +266,7 @@ export default {
                 const instance = this.nonReactive.instance;
                 instance.setItems(Array.isArray(value) ? value : []);
                 if (this.autoRelayoutOnItemsChange && instance.isVisible())
-                    instance.relayout(this.positionOptions);
+                    instance.relayout();
             }
         },
 
@@ -251,11 +294,53 @@ export default {
                 this.nonReactive.instance.setDirection(value);
         },
 
+        noResultsText(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setNoResultsText(value);
+        },
+
+        filterThrottleWindow(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFilterThrottleWindow(value || 0);
+        },
+
+        filterOnEmptyTerm(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFilterOnEmptyTerm(value);
+        },
+
+        filterGroups(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFilterGroups(value);
+        },
+
+        filterEmptyGroups(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFilterEmptyGroups(value);
+        },
+
+        filterFn() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFilterFn(this.filterFn);
+        },
+
         renderItem() {
             this._recreateList();
         },
 
         unrenderItem() {
+            this._recreateList();
+        },
+
+        renderNoResultsItem() {
+            this._recreateList();
+        },
+
+        unrenderNoResultsItem() {
+            this._recreateList();
+        },
+
+        searchable() {
             this._recreateList();
         },
 
@@ -352,7 +437,7 @@ export default {
                 list.setSingleSelectedItemByValue(modelValue === null ? undefined : modelValue);
             }
 
-            list.show(this.positionOptions);
+            list.show();
 
             this._setupAutoRelayout();
         },
@@ -418,7 +503,7 @@ export default {
 
         relayout() {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.relayout(this.positionOptions);
+                this.nonReactive.instance.relayout();
         },
 
         elContains(other, considerSublists = true) {

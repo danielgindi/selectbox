@@ -119,6 +119,14 @@
                 type: Boolean,
                 default: false,
             },
+            filterFn: {
+                type: Function,
+                default: undefined,
+            },
+            // eslint-disable-next-line vue/require-prop-types
+            filterDependencies: {
+                default: undefined,
+            },
             labelProp: {
                 type: String,
                 default: 'label',
@@ -185,14 +193,6 @@
             },
             unrenderListItem: {
                 type: Function,
-                default: undefined,
-            },
-            filterFn: {
-                type: Function,
-                default: undefined,
-            },
-            // eslint-disable-next-line vue/require-prop-types
-            filterDependencies: {
                 default: undefined,
             },
             virtualMinItems: {
@@ -533,6 +533,11 @@
                     this.nonReactive.instance.setFilterOnEmptyTerm(value || false);
             },
 
+            filterFn() {
+                if (this.nonReactive.instance)
+                    this.nonReactive.instance.setFilterFn(this.filterFn);
+            },
+
             labelProp(value) {
                 if (this.nonReactive.instance)
                     this.nonReactive.instance.setLabelProp(value);
@@ -624,11 +629,6 @@
             unrenderListItem() {
                 if (this.nonReactive.instance)
                     this.nonReactive.instance.setListOptions(this.computedListOptions);
-            },
-
-            filterFn() {
-                if (this.nonReactive.instance)
-                    this.nonReactive.instance.setFilterFn(this.filterFn);
             },
 
             ...(isVue3 ? {} : {

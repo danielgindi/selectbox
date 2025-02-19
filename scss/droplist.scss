@@ -1,19 +1,26 @@
-
-ul.droplist {
+.droplist_wrapper {
 	box-sizing: border-box;
 	z-index: 10000;
 	float: left;
 	margin: 0;
 	padding: 0;
-	list-style: none;
 	border: 1px solid #b1b1b1;
-	overflow-y: auto;
-	overflow-x: hidden;
-	max-height: 300px;
-	max-width: 100%;
 	outline: 0;
 	border-radius: 5px;
 	background: #fff;
+	max-height: 300px;
+	max-width: 100%;
+
+	.droplist_header {
+		position: relative;
+		padding: 0.5em;
+		box-sizing: inherit;
+
+		input[type=search] {
+			box-sizing: inherit;
+			width: 100%;
+		}
+	}
 
 	&.droplist__is_above {
 		border-bottom-left-radius: 0;
@@ -27,131 +34,155 @@ ul.droplist {
 		margin: -1px 0 0 0;
 	}
 
-	li {
-		box-sizing: border-box;
-		position: relative;
+	ul {
+		list-style: none;
 		margin: 0;
-		padding: 3px 11px 4px 11px;
-		height: 23px;
-		font-size: 13px;
-		line-height: 17px;
-		color: #3e3f48;
-		white-space: nowrap;
-		cursor: pointer;
-
-		/** avoid jumpy scroll issues in RTL mode (Chrome),
-		  by force-clipping the item's width, so parent's scroll properties do not change */
-		width: 100%;
-		overflow: hidden;
-
-		&.droplist__item_focus {
-			/* background-color: #4c8fbd; */
-			background-color: #3e3f48;
-			color: #fff;
-		}
-	}
-
-	li {
-		.checkbox {
-			position: absolute;
-			left: 6px;
-			top: 3px;
-			display: block;
-			width: 16px;
-			height: 16px;
-
-			/* unchecked style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3C/svg%3E");
-			background-size: 100% 100%;
-		}
-		&:hover .checkbox {
-			/* unchecked hover style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3C/svg%3E");
-		}
-		&:active .checkbox,
-		&:hover:active .checkbox {
-			/* unchecked active style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3C/svg%3E");
-		}
-	}
-
-	li.droplist__item_multi.droplist__item_checked {
-		.checkbox {
-			/* checked style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
-		}
-		&:hover .checkbox {
-			/* checked hover style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
-		}
-		&:active .checkbox,
-		&:hover:active .checkbox {
-			/* checked active style */
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3Cpath fill='%23396d93' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
-		}
-	}
-
-	li.droplist__item_single.droplist__item_checked {
-		opacity: 0.5;
-	}
-
-	li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
-		padding: 1px 6px 2px 2px;
-
-		.droplist__item_label {
-			display: block;
-			margin: 1px 0 0 24px;
-		}
-	}
-
-	li.droplist__item_group {
-		font-weight: bold;
-	}
-
-	li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
-		padding-left: 15px;
-	}
-
-	li.droplist__item_child.droplist__item_single,
-	li.droplist__item_child.droplist__item_multi_nocheck {
-		padding-left: 24px;
-	}
-
-	.droplist__no_results_content {
-		text-align: center;
-	}
-
-    .remove {
-		display: none;
-		position: absolute;
-		top: 0;
-		right: 2px;
-		width: 34px;
-		height: 20px;
 		padding: 0;
 		border: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		max-height: 100%;
+		max-width: 100%;
 		background: none;
-		line-height: 20px;
-		vertical-align: middle;
-		text-align: center;
-		direction: ltr;
-		font-size: 15px;
-		cursor: pointer;
 
-		&:before {
-			display: inline-block;
-			content: 'x';
-			color: #fff;
+		li {
+			box-sizing: border-box;
+			position: relative;
+			margin: 0;
+			padding: 3px 11px 4px 11px;
+			height: 23px;
+			font-size: 13px;
+			line-height: 17px;
+			color: #3e3f48;
+			white-space: nowrap;
+			cursor: pointer;
+
+			/** avoid jumpy scroll issues in RTL mode (Chrome),
+              by force-clipping the item's width, so parent's scroll properties do not change */
+			width: 100%;
+			overflow: hidden;
+
+			&.droplist__item_focus {
+				/* background-color: #4c8fbd; */
+				background-color: #3e3f48;
+				color: #fff;
+			}
+		}
+
+		li {
+			.checkbox {
+				position: absolute;
+				left: 6px;
+				top: 3px;
+				display: block;
+				width: 16px;
+				height: 16px;
+
+				/* unchecked style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3C/svg%3E");
+				background-size: 100% 100%;
+			}
+
+			&:hover .checkbox {
+				/* unchecked hover style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3C/svg%3E");
+			}
+
+			&:active .checkbox,
+			&:hover:active .checkbox {
+				/* unchecked active style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3C/svg%3E");
+			}
+		}
+
+		li.droplist__item_multi.droplist__item_checked {
+			.checkbox {
+				/* checked style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
+			}
+
+			&:hover .checkbox {
+				/* checked hover style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
+			}
+
+			&:active .checkbox,
+			&:hover:active .checkbox {
+				/* checked active style */
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3Cpath fill='%23396d93' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
+			}
+		}
+
+		li.droplist__item_single.droplist__item_checked {
+			opacity: 0.5;
+		}
+
+		li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
+			padding: 1px 6px 2px 2px;
+
+			.droplist__item_label {
+				display: block;
+				margin: 1px 0 0 24px;
+			}
+		}
+
+		li.droplist__item_group {
+			font-weight: bold;
+		}
+
+		li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
+			padding-left: 15px;
+		}
+
+		li.droplist__item_child.droplist__item_single,
+		li.droplist__item_child.droplist__item_multi_nocheck {
+			padding-left: 24px;
+		}
+
+		li.droplist__item_nointeraction {
+			cursor: default;
+		}
+
+		.droplist__no_results_content {
+			text-align: center;
+		}
+
+		li .remove {
+			display: none;
+			position: absolute;
+			top: 0;
+			right: 2px;
+			width: 34px;
+			height: 20px;
+			padding: 0;
+			border: 0;
+			background: none;
+			line-height: 20px;
+			vertical-align: middle;
+			text-align: center;
+			direction: ltr;
+			font-size: 15px;
+			cursor: pointer;
+
+			&:before {
+				display: inline-block;
+				content: 'x';
+				color: #fff;
+			}
+		}
+
+		.droplist__item_focus .remove {
+			display: block;
 		}
 	}
 
-	.droplist__item_focus .remove {
-		display: block;
+	&.droplist__rtl,
+	[dir=rtl] &:not(.droplist__ltr) {
+		direction: rtl;
 	}
 
-	&.droplist__rtl, [dir=rtl] &:not(.droplist__ltr) {
-		direction: rtl;
-
+	&.droplist__rtl ul,
+	[dir=rtl] &:not(.droplist__ltr) ul {
 		li {
 			.checkbox {
 				left: auto;
@@ -178,7 +209,7 @@ ul.droplist {
 			padding-right: 24px;
 		}
 
-		.remove {
+		li .remove {
 			right: auto;
 			left: 2px;
 		}
