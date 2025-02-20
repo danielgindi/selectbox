@@ -53,6 +53,10 @@ export default {
             type: Boolean,
             default: false,
         },
+        isHeaderVisible: {
+            type: Boolean,
+            default: false,
+        },
         searchable: {
             type: Boolean,
             default: false,
@@ -204,6 +208,7 @@ export default {
             for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
                 'autoFlipDirection', 'estimateWidth',
+                'isHeaderVisible',
                 'searchable', 'filterOnEmptyTerm',
                 'filterGroups', 'filterEmptyGroups']) {
                 if (typeof this[key] === 'boolean') {
@@ -340,8 +345,16 @@ export default {
             this._recreateList();
         },
 
-        searchable() {
-            this._recreateList();
+        searchable(v) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setSearchable(v);
+            this.relayout();
+        },
+
+        isHeaderVisible(v) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setHeaderVisible(v);
+            this.relayout();
         },
 
         positionOptions: {
@@ -437,6 +450,11 @@ export default {
                 list.setSingleSelectedItemByValue(modelValue === null ? undefined : modelValue);
             }
 
+            const headerRenderer = createSlotBasedRenderFunc(this, 'header');
+            if (headerRenderer) {
+                headerRenderer({}, list.getHeaderElement());
+            }
+
             list.show();
 
             this._setupAutoRelayout();
@@ -504,6 +522,11 @@ export default {
         relayout() {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.relayout();
+        },
+
+        getHeaderElement() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.getHeaderElement();
         },
 
         elContains(other, considerSublists = true) {
