@@ -724,8 +724,9 @@
 
                 if (event === 'select' ||
                     event === 'clear' ||
-                    event === 'addsel' ||
-                    event === 'removesel') {
+                    event === 'groupcheck' ||
+                    (event === 'addsel' && !event.isCheckingGroup) ||
+                    (event === 'removesel' && !event.isCheckingGroup)) {
                     let value = event === 'select' ? data.value : this.nonReactive.instance.getValue();
                     if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                         value = null;
