@@ -1,5 +1,5 @@
 <template>
-    <span ref="el" />
+  <span ref="el" />
 </template>
 
 <script>
