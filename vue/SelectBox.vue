@@ -340,6 +340,19 @@ export default {
                 }
             }
 
+            opts.renderNoResultsItem = this.renderNoResultsItem;
+            if (!opts.renderNoResultsItem) {
+                opts.renderNoResultsItem = createSlotBasedRenderFunc(this, 'rest-multi-item');
+            }
+
+            opts.unrenderNoResultsItem = this.unrenderNoResultsItem;
+            if (!opts.unrenderNoResultsItem) {
+                let fn = createSlotBasedUnrenderFunc(this, 'rest-multi-item');
+                if (fn) {
+                    opts.unrenderNoResultsItem = (item, el) => fn(el);
+                }
+            }
+
             return opts;
         },
 
@@ -805,8 +818,6 @@ export default {
                 unrenderMultiItem: this.computedUnrenderMultiItem,
                 renderRestMultiItem: this.computedRenderRestMultiItem,
                 unrenderRestMultiItem: this.computedUnrenderRestMultiItem,
-                renderNoResultsItem: this.computedRenderNoResultsItem,
-                unrenderNoResultsItem: this.computedUnrenderNoResultsItem,
                 filterFn: this.filterFn,
                 on: this._handleBoxEvents.bind(this),
                 additionalClasses: this.additionalClassesList,
