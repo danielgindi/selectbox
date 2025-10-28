@@ -242,12 +242,12 @@ export default {
         clearInputWhen: {
             type: Array,
             required: false,
-            default: () => ['single_close','multi_select_single'],
+            default: () => ['single_close', 'multi_select_single'],
             validator: value => {
                 if (value && !Array.isArray(value))
                     return false;
                 for (let v of value) {
-                    if (!['never', 'onselect', 'onclose', 'always'].includes(v))
+                    if (!['single_close', 'multi_close', 'multi_select_single'].includes(v))
                         return false;
                 }
                 return true;
