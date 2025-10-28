@@ -235,6 +235,24 @@ export default {
             type: Boolean,
             default: false,
         },
+        closeListWhenLoading: {
+            type: Boolean,
+            default: true,
+        },
+        clearInputWhen: {
+            type: Array,
+            required: false,
+            default: () => ['single_close','multi_select_single'],
+            validator: value => {
+                if (value && !Array.isArray(value))
+                    return false;
+                for (let v of value) {
+                    if (!['never', 'onselect', 'onclose', 'always'].includes(v))
+                        return false;
+                }
+                return true;
+            },
+        },
         treatGroupSelectionAsItems: {
             type: Boolean,
             default: false,
@@ -653,6 +671,16 @@ export default {
                 this.nonReactive.instance.setIsLoadingMode(!!this.isLoadingMode);
         },
 
+        closeListWhenLoading() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setCloseListWhenLoading(!!this.closeListWhenLoading);
+        },
+
+        clearInputWhen() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setClearInputWhen(this.clearInputWhen);
+        },
+
         treatGroupSelectionAsItems() {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
@@ -783,6 +811,8 @@ export default {
                 on: this._handleBoxEvents.bind(this),
                 additionalClasses: this.additionalClassesList,
                 isLoadingMode: this.isLoadingMode,
+                closeListWhenLoading: this.closeListWhenLoading,
+                clearInputWhen: this.clearInputWhen,
                 treatGroupSelectionAsItems: this.treatGroupSelectionAsItems,
             });
 
