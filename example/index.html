@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>dom-selectbox - Example (dist)</title>
+    <style>
+        body { font-family: system-ui, Arial; padding: 20px; }
+    </style>
+</head>
+<body>
+<h1>selectbox — Example</h1>
+
+TODO: Samples for split groups, customizations, search in drop list, droplist from button, etc.
+
+<h3>Single selection</h3>
+<div id="example1"></div>
+
+<h3>Multiple selection</h3>
+<div id="example2"></div>
+
+<h3>Multiple selection - RTL</h3>
+<div id="example3"></div>
+
+<script type="module">
+    import SelectBox from '../lib/Selectbox.js';
+    import '../scss/droplist.scss';
+    import '../scss/selectbox.scss';
+
+    const example1 = new SelectBox({
+        direction: 'auto',
+        disabled: false,
+        clearable: true,
+        hasOpenIndicator: true,
+        placeholder: 'Select an option',
+        sortSelectedItems: true,
+        sortListItems: true,
+        multi: false,
+        showSelection: true,
+        showPlaceholderInTooltip: true,
+        labelProp: 'label',
+        valueProp: 'value',
+        items: [
+            { label: 'Espresso', value: 'espresso', color: '#6f4e37' },
+            { label: 'Cappuccino', value: 'cappuccino', color: '#d7a86e' },
+            { label: 'Americano', value: 'americano', color: '#c0a16b' },
+            { label: 'Mocha', value: 'mocha', color: '#4b3832' },
+            { label: 'Latte Macchiato', value: 'latte', color: '#f3e5ab' },
+            { label: 'Cold Brew (Not clickable)', value: 'coldbrew', color: '#3b2f2f', _nointeraction: true },
+            { label: 'Flat White', value: 'flatwhite', color: '#e0c097' },
+            { label: 'Iced Coffee', value: 'icedcoffee', color: '#a67b5b' },
+        ],
+        value: null,
+        renderSingleItem: (item, itemEl) => {
+            const label = document.createElement('span');
+            label.textContent = item.label;
+            itemEl.append(label);
+
+            const cl = document.createElement('span');
+            cl.style.display = 'inline-block';
+            cl.style.width = '2em';
+            cl.style.height = '0.8em';
+            cl.style.backgroundColor = item.color;
+            cl.style.borderRadius = '0.4em';
+            cl.style.marginLeft = '0.5em';
+            itemEl.append(cl);
+            return true;
+        },
+        listOptions: {
+            renderItem: (item, itemEl) => {
+                const label = document.createElement('span');
+                label.textContent = item.label;
+                itemEl.append(label);
+
+                const cl = document.createElement('span');
+                cl.style.display = 'inline-block';
+                cl.style.width = '0.8em';
+                cl.style.height = '0.8em';
+                cl.style.backgroundColor = item.color;
+                cl.style.borderRadius = '0.4em';
+                cl.style.marginLeft = '0.5em';
+                itemEl.append(cl);
+                return true;
+            },
+        },
+        searchable: true,
+        noResultsText: 'No matching results',
+        autoSelectTextOnCheck: true,
+        filterThrottleWindow: 150,
+        filterOnEmptyTerm: false,
+        isLoadingMode: false,
+        closeListWhenLoading: true,
+        clearInputWhen: ['single_close', 'multi_select_single'],
+    });
+
+    const example2 = new SelectBox({
+        direction: 'auto',
+        disabled: false,
+        clearable: true,
+        hasOpenIndicator: true,
+        placeholder: 'Select an option',
+        sortSelectedItems: true,
+        sortListItems: true,
+        sortListCheckedFirst: true,
+        stickyValues: ['il'],
+        multi: true,
+        showSelection: true,
+        showPlaceholderInTooltip: true,
+        labelProp: 'label',
+        valueProp: 'value',
+        multiItemLabelProp: 'short_label',
+        maxMultiItems: 5,
+        multiItemsRestLabelProvider: (restCount) => `+ ${restCount} more countries`,
+        items: [
+            { label: 'United States', short_label: 'USA', value: 'us' },
+            { label: 'Canada', value: 'ca' },
+            { label: 'United Kingdom', value: 'uk' },
+            { label: 'France', value: 'fr' },
+            { label: 'Germany', value: 'de' },
+            { label: 'Italy', value: 'it' },
+            { label: 'Spain', value: 'es' },
+            { label: 'Japan', value: 'jp' },
+            { label: 'South Korea', value: 'kr' },
+            { label: 'China', value: 'cn' },
+            { label: 'India', value: 'in' },
+            { label: 'Brazil', value: 'br' },
+            { label: 'Mexico', value: 'mx' },
+            { label: 'Australia', value: 'au' },
+            { label: 'New Zealand', value: 'nz' },
+            { label: 'Sweden', value: 'se' },
+            { label: 'Norway', value: 'no' },
+            { label: 'Denmark', value: 'dk' },
+            { label: 'Finland', value: 'fi' },
+            { label: 'Switzerland', value: 'ch' },
+            { label: 'Netherlands', value: 'nl' },
+            { label: 'Poland', value: 'pl' },
+            { label: 'Czech Republic', value: 'cz' },
+            { label: 'Greece', value: 'gr' },
+            { label: 'Israel', value: 'il' },
+        ],
+        value: ['us', 'ca', 'uk'],
+        renderMultiItem: (item, itemEl) => {
+            if (item.value !== 'us')
+                return false;
+
+            const label = document.createElement('span');
+            label.textContent = item.label;
+            itemEl.append(label);
+
+            const cl = document.createElement('span');
+            cl.style.display = 'inline-block';
+            cl.style.width = '0.8em';
+            cl.style.height = '0.8em';
+            cl.style.backgroundColor = '#3b5998';
+            cl.style.borderRadius = '0.4em';
+            cl.style.marginLeft = '0.5em';
+            itemEl.append(cl);
+            return true;
+        },
+        searchable: true,
+        noResultsText: 'No matching results',
+        autoSelectTextOnCheck: true,
+        filterThrottleWindow: 150,
+        filterOnEmptyTerm: false,
+        isLoadingMode: false,
+        closeListWhenLoading: true,
+        clearInputWhen: ['single_close', 'multi_select_single'],
+    });
+
+    const example3 = new SelectBox({
+        direction: 'rtl',
+        disabled: false,
+        clearable: true,
+        hasOpenIndicator: true,
+        placeholder: 'Select an option',
+        sortSelectedItems: true,
+        sortListItems: true,
+        splitListCheckedGroups: true,
+        sortListCheckedFirst: true,
+        treatGroupSelectionAsItems: false,
+        multi: true,
+        showSelection: true,
+        showPlaceholderInTooltip: true,
+        labelProp: 'label',
+        valueProp: 'value',
+        multiItemLabelProp: 'short_label',
+        items: [
+            { label: '🇦🇺 Australia', value: 'au', _child: true },
+            { label: '🇳🇿 New Zealand', value: 'nz', _child: true },
+        ],
+        value: ['au', 'nz'],
+        searchable: true,
+        noResultsText: 'No matching results',
+        autoSelectTextOnCheck: true,
+        filterThrottleWindow: 150,
+        filterOnEmptyTerm: false,
+        isLoadingMode: false,
+        closeListWhenLoading: true,
+        clearInputWhen: ['single_close', 'multi_select_single'],
+    });
+
+    example3.on('search:focus', () => {
+        example3.setIsLoadingMode(true);
+
+        setTimeout(() => {
+            example3.setItems([
+                { label: '🌍 Europe', _group: true },
+                { label: '🇫🇷 France', value: 'fr', _child: true },
+                { label: '🇩🇪 Germany', value: 'de', _child: true },
+                { label: '🇪🇸 Spain', value: 'es', _child: true },
+                { label: '🇮🇹 Italy', value: 'it', _child: true },
+                { label: '🇳🇱 Netherlands', value: 'nl', _child: true },
+                { label: '🇬🇷 Greece', value: 'gr', _child: true },
+
+                { label: '🌎 North America', _group: true },
+                { label: '🇺🇸 United States', value: 'us', _child: true },
+                { label: '🇨🇦 Canada', value: 'ca', _child: true },
+                { label: '🇲🇽 Mexico', value: 'mx', _child: true },
+                { label: '🇨🇺 Cuba', value: 'cu', _child: true },
+                { label: '🇨🇷 Costa Rica', value: 'cr', _child: true },
+
+                { label: '🌏 Asia', _group: true },
+                { label: '🇯🇵 Japan', value: 'jp', _child: true },
+                { label: '🇮🇳 India', value: 'in', _child: true },
+                { label: '🇨🇳 China', value: 'cn', _child: true },
+                { label: '🇰🇷 South Korea', value: 'kr', _child: true },
+                { label: '🇮🇩 Indonesia', value: 'id', _child: true },
+
+                { label: '🌍 Africa', _group: true },
+                { label: '🇪🇬 Egypt', value: 'eg', _child: true },
+                { label: '🇿🇦 South Africa', value: 'za', _child: true },
+                { label: '🇳🇬 Nigeria', value: 'ng', _child: true },
+                { label: '🇲🇦 Morocco', value: 'ma', _child: true },
+
+                { label: '🌏 Oceania', _group: true },
+                { label: '🇦🇺 Australia', value: 'au', _child: true },
+                { label: '🇳🇿 New Zealand', value: 'nz', _child: true },
+            ]);
+
+            example3.setIsLoadingMode(false);
+        }, 3000);
+    });
+
+    document.getElementById('example1').append(example1.el);
+    document.getElementById('example2').append(example2.el);
+    document.getElementById('example3').append(example3.el);
+</script>
+</body>
+</html>

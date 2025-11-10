@@ -22,7 +22,8 @@
     "lint": "eslint -f codeframe ./",
     "lint-fix": "eslint -f codeframe --fix ./",
     "prepublishOnly": "npm run build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "example": "vite"
   },
   "bugs": {
     "url": "https://github.com/danielgindi/selectbox/issues"
@@ -48,7 +49,8 @@
     "husky": "^9.1.7",
     "pinst": "^3.0.0",
     "rollup": "^4.52.5",
-    "sass": "^1.93.2"
+    "sass": "^1.93.2",
+    "vite": "^7.2.2"
   },
   "dependencies": {
     "@danielgindi/dom-utils": "^1.0.11",
