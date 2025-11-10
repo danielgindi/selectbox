@@ -53,8 +53,6 @@ $spinner-transition-duration: .15s;
 	}
 
     &.selectbox__single {
-        padding-top: 4px;
-
         &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
             padding-right: 17px;
 
@@ -123,8 +121,8 @@ $spinner-transition-duration: .15s;
     overflow: hidden;
 
     width: 100%;
-    margin: -5px 0 0;
-    padding: 0 8px 4px;
+    margin: -0.416em 0 0;
+    padding: 0 0.6667em 0.3334em;
 
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -335,7 +333,6 @@ $spinner-transition-duration: .15s;
 }
 
 .selectbox__item {
-
     box-sizing: border-box;
     float: left;
     cursor: default;
@@ -345,9 +342,10 @@ $spinner-transition-duration: .15s;
     border-radius: 4px;
 
     margin-left: 0;
-    margin-right: 5px;
-    margin-top: 5px;
-    padding: 0 5px 2px;
+    margin-right: 0.416em;
+    margin-top: 0.416em;
+    padding: 0 0.416em 0.2em;
+    line-height: 1.2;
 
 	span {
 		vertical-align: middle;
@@ -360,7 +358,7 @@ $spinner-transition-duration: .15s;
 
     @include insideRtlSelectBox {
         float: right;
-        margin-left: 5px;
+        margin-left: 0.416em;
         margin-right: 0;
     }
 }
@@ -370,7 +368,7 @@ $spinner-transition-duration: .15s;
     cursor: pointer;
     display: inline-block;
     font-weight: bold;
-    margin-right: 2px;
+    margin-right: 0.153em;
 	font-size: 13px;
 
 	&:before {
@@ -378,7 +376,7 @@ $spinner-transition-duration: .15s;
 	}
 
     @include insideRtlSelectBox {
-        margin-left: 2px;
+        margin-left: 0.153em;
         margin-right: 0;
     }
 }
@@ -387,8 +385,8 @@ $spinner-transition-duration: .15s;
     position: relative;
     min-height: 1em;
     max-width: 100%;
-    margin: 0 0 3px;
-    padding: 2px 0 1px;
+    margin: 0 0 0.25em;
+    padding: 0.1667em 0 0.0834em;
     color: currentColor;
 
     &:empty::after { content: '\200b'; }
@@ -412,14 +410,14 @@ $spinner-transition-duration: .15s;
 
     .selectbox__multi & {
         float: left;
-        margin-top: 5px;
+        margin-top: 0.56em;
     }
 
     .selectbox__single & {
         position: absolute;
         z-index: 1;
         left: 0;
-        top: 4px;
+        top: 0.1667em;
     }
 
     .selectbox__multi.selectbox__rtl &,
@@ -450,8 +448,9 @@ input.selectbox__search_field {
     border-radius: 0;
     outline: 0;
     margin: 0;
-    padding: 2px 0;
+    padding: 0;
 
+    font-family: inherit;
     font-size: 1em;
     line-height: normal;
 
