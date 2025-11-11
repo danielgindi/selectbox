@@ -14,19 +14,42 @@ $spinner-transition-duration: .15s;
 }
 
 .selectbox {
+    --selectbox-border-radius: 4px;
+    --selectbox-open-indicator-spacing: 0.25em;
+    --selectbox-open-indicator-width: 1.2em;
+    --selectbox-spinner-spacing: 0.125em;
+    --selectbox-spinner-width: 1.2em;
+    --selectbox-clear-spacing: 0.125em;
+    --selectbox-clear-width: 1.2em;
+    --selectbox-horz-padding: 0.5em;
+
+    --selectbox-multi-vert-padding: 0.357em;
+    --selectbox-multi-item-border-width: 1px;
+    --selectbox-multi-item-border-radius: 4px;
+    --selectbox-multi-item-horz-spacing: 0.416em;
+    --selectbox-multi-item-vert-spacing: 0.416em;
+    --selectbox-multi-item-horz-padding: 0.416em;
+    --selectbox-multi-item-top-padding: 0px;
+    --selectbox-multi-item-bottom-padding: 0.2em;
+
     position: relative;
     box-sizing: border-box;
     display: inline-block;
     cursor: default;
     outline: 0;
+    line-height: 1.2;
 
     user-select: none;
     -webkit-user-select: none;
 
     color: #000;
     background-color: #fff;
-    border-radius: 4px;
+    border-radius: var(--selectbox-border-radius);
     border: solid #aaa 1px;
+
+    &.selectbox__rtl {
+        direction: rtl;
+    }
 
     &.selectbox__searchable {
         cursor: text;
@@ -52,57 +75,72 @@ $spinner-transition-duration: .15s;
 		border-bottom-right-radius: 0;
 	}
 
-    &.selectbox__single {
-        &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
-            padding-right: 17px;
+    &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
+        padding-right: var(--selectbox-open-indicator-width);
 
-            @include currentIsRtl {
-                padding-right: 0;
-                padding-left: 17px;
-            }
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: var(--selectbox-open-indicator-width);
         }
+    }
 
-        &.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__has_spinner),
-        &.selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) {
-            padding-right: 27px;
+    &.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__has_spinner) {
+        padding-right: var(--selectbox-clear-width);
 
-            @include currentIsRtl {
-                padding-right: 0;
-                padding-left: 27px;
-            }
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: var(--selectbox-clear-width);
         }
+    }
 
-        &.selectbox__has_open_indicator.selectbox__has_spinner:not(.selectbox__has_clear),
-        &.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) {
-            padding-right: 44px;
+    &.selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) {
+        padding-right: var(--selectbox-spinner-width);
 
-            @include currentIsRtl {
-                padding-right: 0;
-                padding-left: 44px;
-            }
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: var(--selectbox-clear-width);
         }
+    }
 
-        &.selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) {
-            padding-right: 54px;
+    &.selectbox__has_open_indicator.selectbox__has_spinner:not(.selectbox__has_clear) {
+        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
 
-            @include currentIsRtl {
-                padding-right: 0;
-                padding-left: 54px;
-            }
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
         }
+    }
 
-        &.selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner {
-            padding-right: 74px;
+    &.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) {
+        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
 
-            @include currentIsRtl {
-                padding-right: 0;
-                padding-left: 74px;
-            }
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
+        }
+    }
+
+    &.selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) {
+        padding-right: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
+
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
+        }
+    }
+
+    &.selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner {
+        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
+
+        @include currentIsRtl {
+            padding-right: 0;
+            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
         }
     }
 
     &.selectbox__multi {
-        padding-top: 5px;
+        padding-top: var(--selectbox-multi-vert-padding);
+        padding-bottom: var(--selectbox-multi-vert-padding);
     }
 }
 
@@ -118,83 +156,30 @@ $spinner-transition-duration: .15s;
     list-style: none none;
     display: inline-block;
     vertical-align: top;
-    overflow: hidden;
 
     width: 100%;
-    margin: -0.416em 0 0;
-    padding: 0 0.6667em 0.3334em;
+    margin: calc(0px - var(--selectbox-multi-item-vert-spacing)) 0 0;
+    padding: 0 var(--selectbox-horz-padding);
 
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    &::before {
-        /* spacer for floated controls */
-        float: right;
-
-        display: block;
-        content: '';
-        width: 0;
-        height: 25px;
-    }
-
 
     @include insideRtlSelectBox {
         &::before {
             float: left;
         }
     }
-
-    .selectbox__has_open_indicator &,
-    .selectbox__has_clear &,
-    .selectbox__has_spinner & {
-        &::before {
-            margin-left: -8px;
-            margin-right: -8px;
-        }
-    }
-
-    .selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) & {
-        &::before {
-            width: 17px;
-        }
-    }
-
-    .selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__has_spinner) &,
-    .selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) & {
-        &::before {
-            width: 27px;
-        }
-    }
-
-    .selectbox__has_open_indicator.selectbox__has_spinner:not(.selectbox__has_clear) &,
-    .selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) & {
-        &::before {
-            width: 44px;
-        }
-    }
-
-    .selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) & {
-        &::before {
-            width: 54px;
-        }
-    }
-
-    .selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner & {
-        &::before {
-            width: 74px;
-        }
-    }
 }
 
 .selectbox__open_indicator {
     position: absolute;
-    right: 4px;
+    right: var(--selectbox-open-indicator-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
     font-size: 1em;
     width: 1em;
-    height: 0.6423em;
+    height: 0.5em;
     overflow: hidden;
     direction: ltr;
     text-align: left;
@@ -203,7 +188,7 @@ $spinner-transition-duration: .15s;
     &::before {
         border-style: solid;
         border-color: #9d9d9d;
-        border-width: 0.2em 0.2em 0 0;
+        border-width: 1.5px 1.5px 0 0;
         content: '';
         display: inline-block;
         height: 0.45em;
@@ -220,19 +205,25 @@ $spinner-transition-duration: .15s;
         transform: translateY(50%) rotate(-45deg);
     }
 
-    @include insideRtlSelectBox {
+    .selectbox__rtl &, [dir=rtl] .selectbox:not(.selectbox__ltr) & {
         right: auto;
-        left: 4px;
+        left: var(--selectbox-open-indicator-spacing);
 
         &::before {
             transform: rotate(-225deg);
+        }
+    }
+
+    .selectbox__rtl.selectbox__open_list &, [dir=rtl] .selectbox.selectbox__open_list:not(.selectbox__ltr) & {
+        &::before {
+            transform: translateY(50%) rotate(315deg);
         }
     }
 }
 
 .selectbox__clear {
     position: absolute;
-    right: 2px;
+    right: var(--selectbox-clear-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
@@ -263,17 +254,17 @@ $spinner-transition-duration: .15s;
 
     @include insideRtlSelectBox {
         right: auto;
-        left: 2px;
+        left: var(--selectbox-clear-spacing);
     }
 
     .selectbox__has_open_indicator.selectbox__has_clear & {
-        right: 14px;
+        right: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
     }
 
     .selectbox__has_open_indicator.selectbox__has_clear.selectbox__rtl &,
     [dir=rtl] .selectbox.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__ltr) & {
         right: auto;
-        left: 14px;
+        left: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
     }
 
     .selectbox[aria-disabled=true] > & {
@@ -283,7 +274,7 @@ $spinner-transition-duration: .15s;
 
 .selectbox__spinner {
     position: absolute;
-    right: 2px;
+    right: var(--selectbox-spinner-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
@@ -308,27 +299,37 @@ $spinner-transition-duration: .15s;
 
     @include insideRtlSelectBox {
         right: auto;
-        left: 2px;
+        left: var(--selectbox-spinner-spacing);
     }
 
-    .selectbox__has_spinner.selectbox__has_open_indicator & {
-        right: 22px;
+    .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear) & {
+        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
     }
 
-    .selectbox__has_spinner.selectbox__has_clear & {
-        right: 36px;
+    .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator) & {
+        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
     }
 
-    .selectbox__has_spinner.selectbox__has_open_indicator.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__ltr) & {
+    .selectbox__has_spinner.selectbox__has_open_indicator.selectbox__has_clear & {
+        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
+    }
+
+    .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear).selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__ltr) & {
         right: auto;
-        left: 22px;
+        left: var(var(--selectbox-spinner-spacing) + --selectbox-open-indicator-width);
     }
 
-    .selectbox__has_spinner.selectbox__has_clear.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clear:not(.selectbox__ltr) & {
+    .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator).selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__ltr) & {
         right: auto;
-        left: 36px;
+        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
+    }
+
+    .selectbox__has_spinner.selectbox__has_clear.selectbox__has_open_indicator.selectbox__rtl &,
+    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clearselectbox__has_open_indicator:not(.selectbox__ltr) & {
+        right: auto;
+        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width));
     }
 }
 
@@ -338,14 +339,14 @@ $spinner-transition-duration: .15s;
     cursor: default;
 
     background-color: #e4e4e4;
-    border: 1px solid #aaa;
-    border-radius: 4px;
+    border: var(--selectbox-multi-item-border-width) solid #aaa;
+    border-radius: var(--selectbox-multi-item-border-radius);
 
     margin-left: 0;
-    margin-right: 0.416em;
-    margin-top: 0.416em;
-    padding: 0 0.416em 0.2em;
-    line-height: 1.2;
+    margin-right: var(--selectbox-multi-item-horz-spacing);
+    margin-top: var(--selectbox-multi-item-vert-spacing);
+    padding: var(--selectbox-multi-item-top-padding) var(--selectbox-multi-item-horz-padding) var(--selectbox-multi-item-bottom-padding);
+    line-height: inherit;
 
 	span {
 		vertical-align: middle;
@@ -358,7 +359,7 @@ $spinner-transition-duration: .15s;
 
     @include insideRtlSelectBox {
         float: right;
-        margin-left: 0.416em;
+        margin-left: var(--selectbox-multi-item-horz-spacing);
         margin-right: 0;
     }
 }
@@ -410,7 +411,8 @@ $spinner-transition-duration: .15s;
 
     .selectbox__multi & {
         float: left;
-        margin-top: 0.56em;
+        margin-top: 0.5em;
+        margin-bottom: 0.277em;
     }
 
     .selectbox__single & {
@@ -484,8 +486,8 @@ input.selectbox__search_field {
 
 .selectbox__single_wrapper,
 .selectbox__single input.selectbox__search_field {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: var(--selectbox-horz-padding);
+    padding-right: var(--selectbox-horz-padding);
 }
 
 @-webkit-keyframes selectbox__spinner_anim {
