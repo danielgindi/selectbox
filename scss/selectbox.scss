@@ -390,7 +390,7 @@ $spinner-transition-duration: .15s;
     min-height: 1em;
     max-width: 100%;
     margin: 0;
-    padding: var(--selectbox-single-top-padding) 0 var(--selectbox-single-bottom-padding);
+    padding: var(--selectbox-single-top-padding) var(--selectbox-horz-padding) var(--selectbox-single-bottom-padding) var(--selectbox-horz-padding);
     color: currentColor;
 
     &:empty::after { content: '\200b'; }
@@ -489,7 +489,6 @@ input.selectbox__search_field {
 	}
 }
 
-.selectbox__single_wrapper,
 .selectbox__single input.selectbox__search_field {
     padding: 0 var(--selectbox-horz-padding);
 }
