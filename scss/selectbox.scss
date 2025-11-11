@@ -33,6 +33,7 @@ $spinner-transition-duration: .15s;
     --selectbox-multi-item-vert-spacing: 0.416em;
     --selectbox-multi-item-horz-padding: 0.416em;
     --selectbox-multi-item-top-padding: 0px;
+    --selectbox-multi-item-remove-spacing: 0.153em;
     --selectbox-multi-item-bottom-padding: 0.2em;
     --selectbox-multi-search-top-offset: 0px;
 
@@ -373,7 +374,8 @@ $spinner-transition-duration: .15s;
     cursor: pointer;
     display: inline-block;
     font-weight: bold;
-    margin-right: 0.153em;
+    margin-top: 0.2em;
+    margin-right: var(--selectbox-multi-item-remove-spacing);
 	font-size: 13px;
 
 	&:before {
@@ -381,7 +383,7 @@ $spinner-transition-duration: .15s;
 	}
 
     @include insideRtlSelectBox {
-        margin-left: 0.153em;
+        margin-left: var(--selectbox-multi-item-remove-spacing);
         margin-right: 0;
     }
 }
