@@ -34,6 +34,7 @@ $spinner-transition-duration: .15s;
     --selectbox-multi-item-horz-padding: 0.416em;
     --selectbox-multi-item-top-padding: 0px;
     --selectbox-multi-item-bottom-padding: 0.2em;
+    --selectbox-multi-search-top-offset: 0px;
 
     position: relative;
     box-sizing: border-box;
@@ -352,7 +353,7 @@ $spinner-transition-duration: .15s;
     line-height: inherit;
 
 	span {
-		vertical-align: middle;
+		vertical-align: top;
 	}
 
 	&:focus {
@@ -417,7 +418,7 @@ $spinner-transition-duration: .15s;
         margin-top: calc(var(--selectbox-multi-item-vert-spacing) +
         var(--selectbox-multi-item-border-width) +
         var(--selectbox-multi-item-top-padding) +
-        0.06em);
+        var(--selectbox-multi-search-top-offset));
     }
 
     .selectbox__single & {
