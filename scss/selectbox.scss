@@ -493,6 +493,10 @@ input.selectbox__search_field {
     padding: 0 var(--selectbox-horz-padding);
 }
 
+.selectbox__multi input.selectbox__search_field {
+    padding: 0;
+}
+
 @-webkit-keyframes selectbox__spinner_anim {
     0% {
         transform: rotate(0deg);
