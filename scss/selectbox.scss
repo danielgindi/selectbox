@@ -23,6 +23,9 @@ $spinner-transition-duration: .15s;
     --selectbox-clear-width: 1.2em;
     --selectbox-horz-padding: 0.5em;
 
+    --selectbox-single-top-padding: 0.1667em;
+    --selectbox-single-bottom-padding: 0.3334em;
+
     --selectbox-multi-vert-padding: 0.357em;
     --selectbox-multi-item-border-width: 1px;
     --selectbox-multi-item-border-radius: 4px;
@@ -386,8 +389,8 @@ $spinner-transition-duration: .15s;
     position: relative;
     min-height: 1em;
     max-width: 100%;
-    margin: 0 0 0.25em;
-    padding: 0.1667em 0 0.0834em;
+    margin: 0;
+    padding: var(--selectbox-single-top-padding) 0 var(--selectbox-single-bottom-padding);
     color: currentColor;
 
     &:empty::after { content: '\200b'; }
@@ -411,15 +414,17 @@ $spinner-transition-duration: .15s;
 
     .selectbox__multi & {
         float: left;
-        margin-top: 0.5em;
-        margin-bottom: 0.277em;
+        margin-top: calc(var(--selectbox-multi-item-vert-spacing) +
+        var(--selectbox-multi-item-border-width) +
+        var(--selectbox-multi-item-top-padding) +
+        0.06em);
     }
 
     .selectbox__single & {
         position: absolute;
         z-index: 1;
         left: 0;
-        top: 0.1667em;
+        top: var(--selectbox-single-top-padding);
     }
 
     .selectbox__multi.selectbox__rtl &,
