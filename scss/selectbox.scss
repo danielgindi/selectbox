@@ -491,8 +491,7 @@ input.selectbox__search_field {
 
 .selectbox__single_wrapper,
 .selectbox__single input.selectbox__search_field {
-    padding-left: var(--selectbox-horz-padding);
-    padding-right: var(--selectbox-horz-padding);
+    padding: 0 var(--selectbox-horz-padding);
 }
 
 @-webkit-keyframes selectbox__spinner_anim {
