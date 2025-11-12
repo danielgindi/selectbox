@@ -45,7 +45,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
             { label: 'Americano', value: 'americano', color: '#c0a16b' },
             { label: 'Mocha', value: 'mocha', color: '#4b3832' },
             { label: 'Latte Macchiato', value: 'latte', color: '#f3e5ab' },
-            { label: 'Cold Brew (Not clickable)', value: 'coldbrew', color: '#3b2f2f', _nointeraction: true },
+            { label: 'Cold Brew (Disabled)', value: 'coldbrew', color: '#3b2f2f', _nointeraction: true },
             { label: 'Flat White', value: 'flatwhite', color: '#e0c097' },
             { label: 'Iced Coffee', value: 'icedcoffee', color: '#a67b5b' },
         ],
@@ -66,6 +66,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
             return true;
         },
         listOptions: {
+            additionalClasses: 'droplist_disabled_no_interaction',
             renderItem: (item, itemEl) => {
                 const label = document.createElement('span');
                 label.textContent = item.label;

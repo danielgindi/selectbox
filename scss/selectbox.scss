@@ -500,6 +500,16 @@ input.selectbox__search_field {
     padding: 0;
 }
 
+.selectbox.has_droplist_above {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.selectbox.has_droplist_below {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 @-webkit-keyframes selectbox__spinner_anim {
     0% {
         transform: rotate(0deg);
