@@ -375,16 +375,30 @@ $spinner-transition-duration: .15s;
     display: inline-block;
     font-weight: bold;
     margin-top: 0.2em;
-    margin-right: var(--selectbox-multi-item-remove-spacing);
 	font-size: 13px;
 
 	&:before {
 		content: '×';
 	}
 
-    @include insideRtlSelectBox {
+    &:first-child {
+        margin-right: var(--selectbox-multi-item-remove-spacing);
+    }
+
+    &:last-child {
         margin-left: var(--selectbox-multi-item-remove-spacing);
-        margin-right: 0;
+    }
+
+    @include insideRtlSelectBox {
+        &:first-child {
+            margin-left: var(--selectbox-multi-item-remove-spacing);
+            margin-right: 0;
+        }
+
+        &:last-child {
+            margin-right: var(--selectbox-multi-item-remove-spacing);
+            margin-left: 0;
+        }
     }
 }
 

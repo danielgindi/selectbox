@@ -139,6 +139,13 @@ export default {
             type: String,
             default: 'short_label',
         },
+        multiItemRemovePosition: {
+            type: String,
+            default: 'after',
+            validator: value => {
+                return ['before', 'after', 'none'].includes(value);
+            },
+        },
         items: {
             type: Array,
             default: () => [],
@@ -584,6 +591,11 @@ export default {
                 this.nonReactive.instance.setMultiItemLabelProp(value);
         },
 
+        multiItemRemovePosition(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setMultiItemRemovePosition(value);
+        },
+
         maxMultiItems(value) {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setMaxMultiItems(value);
@@ -808,6 +820,7 @@ export default {
                 labelProp: this.labelProp,
                 valueProp: this.valueProp,
                 multiItemLabelProp: this.multiItemLabelProp,
+                multiItemRemovePosition: this.multiItemRemovePosition,
                 maxMultiItems: this.maxMultiItems,
                 multiItemsRestLabelProvider: this.multiItemsRestLabelProvider,
                 items: this.items,
