@@ -1,5 +1,6 @@
 .droplist_wrapper {
 	--droplist-border-radius: 5px;
+	--droplist-border-above-below-radius: 0px;
 	--droplist-above-margin: 1px;
 	--droplist-below-margin: -1px;
 	--droplist-item-height: 1.77em;
@@ -43,18 +44,25 @@
 	}
 
 	&.droplist__is_above {
-		border-bottom-left-radius: 0;
-		border-bottom-right-radius: 0;
 		margin-top: var(--droplist-above-margin);
+
+		&, ul {
+			border-bottom-left-radius: var(--droplist-border-above-below-radius);
+			border-bottom-right-radius: var(--droplist-border-above-below-radius);
+		}
 	}
 
 	&.droplist__is_below {
-		border-top-left-radius: 0;
-		border-top-right-radius: 0;
 		margin-top: var(--droplist-below-margin);
+
+		&, ul {
+			border-top-left-radius: var(--droplist-border-above-below-radius);
+			border-top-right-radius: var(--droplist-border-above-below-radius);
+		}
 	}
 
 	ul {
+		border-radius: var(--droplist-border-radius);
 		position: relative;
 		list-style: none;
 		margin: 0;
