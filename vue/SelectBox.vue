@@ -35,248 +35,250 @@ const isVue3 = version > '3.';
  * list-item, single-item, multi-item, rest-multi-item, no-results-item
  */
 
+export const PropTypes = {
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
+    clearable: {
+        type: Boolean,
+        default: true,
+    },
+    hasOpenIndicator: {
+        type: Boolean,
+        default: true,
+    },
+    placeholder: {
+        type: String,
+        default: '',
+    },
+    sortSelectedItems: {
+        type: Boolean,
+        default: true,
+    },
+    sortListItems: {
+        type: Boolean,
+        default: false,
+    },
+    sortListCheckedFirst: {
+        type: Boolean,
+        default: true,
+    },
+    stickyValues: {
+        type: Array,
+        required: false,
+    },
+    sortItemComparator: {
+        type: Function,
+        required: false,
+    },
+    splitListCheckedGroups: {
+        type: Boolean,
+        default: true,
+    },
+    showSelection: {
+        type: Boolean,
+        default: true,
+    },
+    showPlaceholderInTooltip: {
+        type: Boolean,
+        default: true,
+    },
+    multiPlaceholderFormatter: {
+        type: Function,
+        required: false,
+        default: undefined,
+    },
+    blurOnSingleSelection: {
+        type: [Boolean, String],
+        default: 'touch',
+        validator: value => {
+            return [true, false, 'touch', null].includes(value);
+        },
+    },
+    multi: {
+        type: Boolean,
+        default: false,
+    },
+    searchable: {
+        type: Boolean,
+        default: true,
+    },
+    noResultsText: {
+        type: String,
+        default: 'No matching results',
+    },
+    filterThrottleWindow: {
+        type: Number,
+        default: 300,
+    },
+    filterOnEmptyTerm: {
+        type: Boolean,
+        default: false,
+    },
+    filterFn: {
+        type: Function,
+        default: undefined,
+    },
+    filterDependencies: {
+        type: [Array, String, Number, Boolean, Object],
+        default: undefined,
+    },
+    labelProp: {
+        type: String,
+        default: 'label',
+    },
+    valueProp: {
+        type: String,
+        default: 'value',
+    },
+    multiItemLabelProp: {
+        type: String,
+        default: 'short_label',
+    },
+    multiItemRemovePosition: {
+        type: String,
+        default: 'after',
+        validator: value => {
+            return ['before', 'after', 'none'].includes(value);
+        },
+    },
+    items: {
+        type: Array,
+        default: () => [],
+    },
+    [isVue3 ? 'modelValue' : 'value']: {
+        type: [String, Number, Boolean, Object, Array, Symbol],
+        default: undefined,
+    },
+    maxMultiItems: {
+        type: Number,
+        required: false,
+    },
+    multiItemsRestLabelProvider: {
+        type: Function,
+        required: false,
+    },
+    renderSingleItem: {
+        type: Function,
+        default: undefined,
+    },
+    unrenderSingleItem: {
+        type: Function,
+        default: undefined,
+    },
+    renderMultiItem: {
+        type: Function,
+        default: undefined,
+    },
+    unrenderMultiItem: {
+        type: Function,
+        default: undefined,
+    },
+    renderRestMultiItem: {
+        type: Function,
+        default: undefined,
+    },
+    unrenderRestMultiItem: {
+        type: Function,
+        default: undefined,
+    },
+    renderNoResultsItem: {
+        type: Function,
+        default: undefined,
+    },
+    unrenderNoResultsItem: {
+        type: Function,
+        default: undefined,
+    },
+    renderListItem: {
+        type: Function,
+        default: undefined,
+    },
+    unrenderListItem: {
+        type: Function,
+        default: undefined,
+    },
+    virtualMinItems: {
+        type: Number,
+        default: 10,
+    },
+    baseClass: {
+        type: String,
+        default: undefined,
+    },
+    droplistBaseClass: {
+        type: String,
+        default: undefined,
+    },
+    additionalClasses: {
+        type: [Object, Array, String],
+        default: undefined,
+    },
+    additionalDroplistClasses: {
+        type: [Object, Array, String],
+        default: undefined,
+    },
+    direction: {
+        type: String,
+        default: undefined,
+    },
+    fixedDroplistWidth: {
+        type: Boolean,
+        default: false,
+    },
+    acceptNullAsValue: {
+        type: Boolean,
+        default: false,
+    },
+    emitNullForEmptyValue: {
+        type: Boolean,
+        default: false,
+    },
+    isLoadingMode: {
+        type: Boolean,
+        default: false,
+    },
+    closeListWhenLoading: {
+        type: Boolean,
+        default: true,
+    },
+    clearInputWhen: {
+        type: Array,
+        required: false,
+        default: () => ['single_close', 'multi_select_single'],
+        validator: value => {
+            if (value && !Array.isArray(value))
+                return false;
+            for (let v of value) {
+                if (!['single_close', 'multi_close', 'multi_select_single'].includes(v))
+                    return false;
+            }
+            return true;
+        },
+    },
+    treatGroupSelectionAsItems: {
+        type: Boolean,
+        default: false,
+    },
+    autoCheckGroupChildren: {
+        type: Boolean,
+        default: true,
+    },
+    constrainListToWindow: {
+        type: Boolean,
+        default: true,
+    },
+    autoFlipListDirection: {
+        type: Boolean,
+        default: true,
+    },
+};
+
 export default {
     inheritAttrs: false,
 
-    props: {
-        disabled: {
-            type: Boolean,
-            default: false,
-        },
-        clearable: {
-            type: Boolean,
-            default: true,
-        },
-        hasOpenIndicator: {
-            type: Boolean,
-            default: true,
-        },
-        placeholder: {
-            type: String,
-            default: '',
-        },
-        sortSelectedItems: {
-            type: Boolean,
-            default: true,
-        },
-        sortListItems: {
-            type: Boolean,
-            default: false,
-        },
-        sortListCheckedFirst: {
-            type: Boolean,
-            default: true,
-        },
-        stickyValues: {
-            type: Array,
-            required: false,
-        },
-        sortItemComparator: {
-            type: Function,
-            required: false,
-        },
-        splitListCheckedGroups: {
-            type: Boolean,
-            default: true,
-        },
-        showSelection: {
-            type: Boolean,
-            default: true,
-        },
-        showPlaceholderInTooltip: {
-            type: Boolean,
-            default: true,
-        },
-        multiPlaceholderFormatter: {
-            type: Function,
-            required: false,
-            default: undefined,
-        },
-        blurOnSingleSelection: {
-            type: [Boolean, String],
-            default: 'touch',
-            validator: value => {
-                return [true, false, 'touch', null].includes(value);
-            },
-        },
-        multi: {
-            type: Boolean,
-            default: false,
-        },
-        searchable: {
-            type: Boolean,
-            default: true,
-        },
-        noResultsText: {
-            type: String,
-            default: 'No matching results',
-        },
-        filterThrottleWindow: {
-            type: Number,
-            default: 300,
-        },
-        filterOnEmptyTerm: {
-            type: Boolean,
-            default: false,
-        },
-        filterFn: {
-            type: Function,
-            default: undefined,
-        },
-        // eslint-disable-next-line vue/require-prop-types
-        filterDependencies: {
-            default: undefined,
-        },
-        labelProp: {
-            type: String,
-            default: 'label',
-        },
-        valueProp: {
-            type: String,
-            default: 'value',
-        },
-        multiItemLabelProp: {
-            type: String,
-            default: 'short_label',
-        },
-        multiItemRemovePosition: {
-            type: String,
-            default: 'after',
-            validator: value => {
-                return ['before', 'after', 'none'].includes(value);
-            },
-        },
-        items: {
-            type: Array,
-            default: () => [],
-        },
-        [isVue3 ? 'modelValue' : 'value']: {
-            type: [String, Number, Boolean, Object, Array, Symbol],
-            default: undefined,
-        },
-        maxMultiItems: {
-            type: Number,
-            required: false,
-        },
-        multiItemsRestLabelProvider: {
-            type: Function,
-            required: false,
-        },
-        renderSingleItem: {
-            type: Function,
-            default: undefined,
-        },
-        unrenderSingleItem: {
-            type: Function,
-            default: undefined,
-        },
-        renderMultiItem: {
-            type: Function,
-            default: undefined,
-        },
-        unrenderMultiItem: {
-            type: Function,
-            default: undefined,
-        },
-        renderRestMultiItem: {
-            type: Function,
-            default: undefined,
-        },
-        unrenderRestMultiItem: {
-            type: Function,
-            default: undefined,
-        },
-        renderNoResultsItem: {
-            type: Function,
-            default: undefined,
-        },
-        unrenderNoResultsItem: {
-            type: Function,
-            default: undefined,
-        },
-        renderListItem: {
-            type: Function,
-            default: undefined,
-        },
-        unrenderListItem: {
-            type: Function,
-            default: undefined,
-        },
-        virtualMinItems: {
-            type: Number,
-            default: 10,
-        },
-        baseClass: {
-            type: String,
-            default: undefined,
-        },
-        droplistBaseClass: {
-            type: String,
-            default: undefined,
-        },
-        additionalClasses: {
-            type: [Object, Array, String],
-            default: undefined,
-        },
-        additionalDroplistClasses: {
-            type: [Object, Array, String],
-            default: undefined,
-        },
-        direction: {
-            type: String,
-            default: undefined,
-        },
-        fixedDroplistWidth: {
-            type: Boolean,
-            default: false,
-        },
-        acceptNullAsValue: {
-            type: Boolean,
-            default: false,
-        },
-        emitNullForEmptyValue: {
-            type: Boolean,
-            default: false,
-        },
-        isLoadingMode: {
-            type: Boolean,
-            default: false,
-        },
-        closeListWhenLoading: {
-            type: Boolean,
-            default: true,
-        },
-        clearInputWhen: {
-            type: Array,
-            required: false,
-            default: () => ['single_close', 'multi_select_single'],
-            validator: value => {
-                if (value && !Array.isArray(value))
-                    return false;
-                for (let v of value) {
-                    if (!['single_close', 'multi_close', 'multi_select_single'].includes(v))
-                        return false;
-                }
-                return true;
-            },
-        },
-        treatGroupSelectionAsItems: {
-            type: Boolean,
-            default: false,
-        },
-        autoCheckGroupChildren: {
-            type: Boolean,
-            default: true,
-        },
-        constrainListToWindow: {
-            type: Boolean,
-            default: true,
-        },
-        autoFlipListDirection: {
-            type: Boolean,
-            default: true,
-        },
-    },
+    props: PropTypes,
 
     emits: [
         'update:modelValue',

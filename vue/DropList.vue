@@ -19,136 +19,138 @@ const AllListEvents = [
     'subitems:select', 'subitems:blur',
 ];
 
+export const PropTypes = {
+    baseClassName: {
+        type: String,
+    },
+    additionalClasses: {
+        type: [Object, Array, String],
+    },
+    direction: {
+        type: String,
+        default: undefined,
+    },
+    autoFocus: {
+        type: Boolean,
+        default: true,
+    },
+    autoItemBlur: {
+        type: Boolean,
+        default: true,
+    },
+    autoItemBlurDelay: {
+        type: Number,
+        default: 300,
+    },
+    capturesFocus: {
+        type: Boolean,
+        default: true,
+    },
+    multi: {
+        type: Boolean,
+        default: false,
+    },
+    isHeaderVisible: {
+        type: Boolean,
+        default: false,
+    },
+    searchable: {
+        type: Boolean,
+        default: false,
+    },
+    noResultsText: {
+        type: String,
+        default: 'No matching results',
+    },
+    filterThrottleWindow: {
+        type: Number,
+        default: 300,
+    },
+    filterOnEmptyTerm: {
+        type: Boolean,
+        default: false,
+    },
+    filterGroups: {
+        type: Boolean,
+        default: false,
+    },
+    filterEmptyGroups: {
+        type: Boolean,
+        default: false,
+    },
+    filterFn: {
+        type: Function,
+        default: undefined,
+    },
+    filterDependencies: {
+        type: [Array, String, Number, Boolean, Object],
+        default: undefined,
+    },
+    keyDownHandler: {
+        type: Function,
+    },
+    autoCheckGroupChildren: {
+        type: Boolean,
+        default: true,
+    },
+    useExactTargetWidth: {
+        type: Boolean,
+        default: false,
+    },
+    constrainToWindow: {
+        type: Boolean,
+        default: true,
+    },
+    autoFlipDirection: {
+        type: Boolean,
+        default: true,
+    },
+    estimatedItemHeight: {
+        type: Number,
+        default: 20,
+    },
+    estimateWidth: {
+        type: Boolean,
+        default: false,
+    },
+    virtualMinItems: {
+        type: Number,
+        default: 10,
+    },
+    labelProp: {
+        type: String,
+        default: 'label',
+    },
+    valueProp: {
+        type: String,
+        default: 'value',
+    },
+    items: {
+        type: Array,
+        default: () => [],
+    },
+    [isVue3 ? 'modelValue' : 'value']: { // Vue 2
+        type: [Number, String, Object, Array],
+    },
+    renderItem: {
+        type: Function,
+    },
+    unrenderItem: {
+        type: Function,
+    },
+    positionOptions: {
+        type: Object,
+    },
+    autoRelayoutOnItemsChange: {
+        type: Boolean,
+        default: true,
+    },
+};
+
 export default {
     inheritAttrs: false,
 
-    props: {
-        baseClassName: {
-            type: String,
-        },
-        additionalClasses: {
-            type: [Object, Array, String],
-        },
-        direction: {
-            type: String,
-            default: undefined,
-        },
-        autoFocus: {
-            type: Boolean,
-            default: true,
-        },
-        autoItemBlur: {
-            type: Boolean,
-            default: true,
-        },
-        autoItemBlurDelay: {
-            type: Number,
-            default: 300,
-        },
-        capturesFocus: {
-            type: Boolean,
-            default: true,
-        },
-        multi: {
-            type: Boolean,
-            default: false,
-        },
-        isHeaderVisible: {
-            type: Boolean,
-            default: false,
-        },
-        searchable: {
-            type: Boolean,
-            default: false,
-        },
-        noResultsText: {
-            type: String,
-            default: 'No matching results',
-        },
-        filterThrottleWindow: {
-            type: Number,
-            default: 300,
-        },
-        filterOnEmptyTerm: {
-            type: Boolean,
-            default: false,
-        },
-        filterGroups: {
-            type: Boolean,
-            default: false,
-        },
-        filterEmptyGroups: {
-            type: Boolean,
-            default: false,
-        },
-        filterFn: {
-            type: Function,
-            default: undefined,
-        },
-        // eslint-disable-next-line vue/require-prop-types
-        filterDependencies: {
-            default: undefined,
-        },
-        keyDownHandler: {
-            type: Function,
-        },
-        autoCheckGroupChildren: {
-            type: Boolean,
-            default: true,
-        },
-        useExactTargetWidth: {
-            type: Boolean,
-            default: false,
-        },
-        constrainToWindow: {
-            type: Boolean,
-            default: true,
-        },
-        autoFlipDirection: {
-            type: Boolean,
-            default: true,
-        },
-        estimatedItemHeight: {
-            type: Number,
-            default: 20,
-        },
-        estimateWidth: {
-            type: Boolean,
-            default: false,
-        },
-        virtualMinItems: {
-            type: Number,
-            default: 10,
-        },
-        labelProp: {
-            type: String,
-            default: 'label',
-        },
-        valueProp: {
-            type: String,
-            default: 'value',
-        },
-        items: {
-            type: Array,
-            default: () => [],
-        },
-        [isVue3 ? 'modelValue' : 'value']: { // Vue 2
-            type: [Number, String, Object, Array],
-        },
-        renderItem: {
-            type: Function,
-        },
-        unrenderItem: {
-            type: Function,
-        },
-        positionOptions: {
-            type: Object,
-        },
-        autoRelayoutOnItemsChange: {
-            type: Boolean,
-            default: true,
-        },
-    },
+    props: PropTypes,
 
     emits: [
         // vue events
