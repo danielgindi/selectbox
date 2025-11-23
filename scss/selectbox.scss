@@ -70,6 +70,14 @@ $spinner-transition-duration: .15s;
 		}
 	}
 
+	&[aria-readonly=true] {
+		cursor: default;
+
+		* {
+			cursor: default;
+		}
+	}
+
 	&.has_droplist_above {
 		border-top-left-radius: 0;
 		border-top-right-radius: 0;
@@ -272,7 +280,7 @@ $spinner-transition-duration: .15s;
         left: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
     }
 
-    .selectbox[aria-disabled=true] > & {
+    .selectbox[aria-disabled=true] > &, .selectbox[aria-readonly=true] > & {
         display: none;
     }
 }

@@ -40,6 +40,10 @@ export const PropTypes = {
         type: Boolean,
         default: false,
     },
+    readonly: {
+        type: Boolean,
+        default: false,
+    },
     clearable: {
         type: Boolean,
         default: true,
@@ -472,6 +476,11 @@ export default {
                 this.nonReactive.instance.disable(value);
         },
 
+        readonly(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setReadOnly(value ?? false);
+        },
+
         clearable(value) {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setClearable(value);
@@ -801,6 +810,7 @@ export default {
                 baseClass: this.baseClass,
                 direction: this.direction,
                 disabled: this.disabled,
+                readonly: this.readonly,
                 clearable: this.clearable,
                 hasOpenIndicator: this.hasOpenIndicator,
                 placeholder: this.placeholder,
