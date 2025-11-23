@@ -42,7 +42,11 @@ export const PropTypes = {
     },
     readOnly: {
         type: Boolean,
-        default: false,
+        required: false,
+    },
+    readonly: { // compatibility with simple readonly attr of inputs
+        type: Boolean,
+        required: false,
     },
     clearable: {
         type: Boolean,
@@ -476,9 +480,14 @@ export default {
                 this.nonReactive.instance.disable(value);
         },
 
-        readOnly(value) {
+        readOnly() {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setReadOnly(value ?? false);
+                this.nonReactive.instance.setReadOnly(this.readOnly ?? this.readonly ?? false);
+        },
+
+        readonly() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setReadOnly(this.readOnly ?? this.readonly ?? false);
         },
 
         clearable(value) {
@@ -810,7 +819,7 @@ export default {
                 baseClass: this.baseClass,
                 direction: this.direction,
                 disabled: this.disabled,
-                readOnly: this.readOnly,
+                readOnly: this.readOnly ?? this.readonly ?? false,
                 clearable: this.clearable,
                 hasOpenIndicator: this.hasOpenIndicator,
                 placeholder: this.placeholder,
