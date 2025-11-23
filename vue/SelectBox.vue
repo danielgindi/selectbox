@@ -40,7 +40,7 @@ export const PropTypes = {
         type: Boolean,
         default: false,
     },
-    readonly: {
+    readOnly: {
         type: Boolean,
         default: false,
     },
@@ -476,7 +476,7 @@ export default {
                 this.nonReactive.instance.disable(value);
         },
 
-        readonly(value) {
+        readOnly(value) {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setReadOnly(value ?? false);
         },
@@ -810,7 +810,7 @@ export default {
                 baseClass: this.baseClass,
                 direction: this.direction,
                 disabled: this.disabled,
-                readonly: this.readonly,
+                readOnly: this.readOnly,
                 clearable: this.clearable,
                 hasOpenIndicator: this.hasOpenIndicator,
                 placeholder: this.placeholder,
