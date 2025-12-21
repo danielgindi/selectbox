@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import DropList from '../lib/DropList';
+import DropList, { DefaultOptions } from '../lib/DropList';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
 import { version } from 'vue';
@@ -60,11 +60,11 @@ export const PropTypes = {
     },
     noResultsText: {
         type: String,
-        default: 'No matching results',
+        required: false,
     },
     filterThrottleWindow: {
         type: Number,
-        default: 300,
+        required: false,
     },
     filterOnEmptyTerm: {
         type: Boolean,
@@ -303,12 +303,12 @@ export default {
 
         noResultsText(value) {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setNoResultsText(value);
+                this.nonReactive.instance.setNoResultsText(value ?? DefaultOptions.noResultsText);
         },
 
         filterThrottleWindow(value) {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setFilterThrottleWindow(value || 0);
+                this.nonReactive.instance.setFilterThrottleWindow(value ?? DefaultOptions.filterThrottleWindow ?? 0);
         },
 
         filterOnEmptyTerm(value) {

@@ -4,7 +4,7 @@
 
 <script>
 import { version } from 'vue';
-import SelectBox from '../lib/SelectBox';
+import SelectBox, { DefaultOptions } from '../lib/SelectBox';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 import deepEqual from 'fast-deep-equal';
 
@@ -111,11 +111,11 @@ export const PropTypes = {
     },
     noResultsText: {
         type: String,
-        default: 'No matching results',
+        required: false,
     },
     filterThrottleWindow: {
         type: Number,
-        default: 300,
+        required: false,
     },
     filterOnEmptyTerm: {
         type: Boolean,
@@ -246,7 +246,7 @@ export const PropTypes = {
     },
     closeListWhenLoading: {
         type: Boolean,
-        default: true,
+        required: false,
     },
     clearInputWhen: {
         type: Array,
@@ -570,12 +570,12 @@ export default {
 
         noResultsText(value) {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setNoResultsText(value);
+                this.nonReactive.instance.setNoResultsText(value ?? DefaultOptions.noResultsText);
         },
 
         filterThrottleWindow(value) {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setFilterThrottleWindow(value || 0);
+                this.nonReactive.instance.setFilterThrottleWindow(value ?? DefaultOptions.filterThrottleWindow ?? 0);
         },
 
         filterOnEmptyTerm(value) {
@@ -710,7 +710,7 @@ export default {
 
         closeListWhenLoading() {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.setCloseListWhenLoading(!!this.closeListWhenLoading);
+                this.nonReactive.instance.setCloseListWhenLoading(this.closeListWhenLoading ?? DefaultOptions.closeListWhenLoading);
         },
 
         clearInputWhen() {
@@ -827,8 +827,8 @@ export default {
                 blurOnSingleSelection: this.blurOnSingleSelection,
                 multi: this.multi,
                 searchable: this.searchable,
-                noResultsText: this.noResultsText,
-                filterThrottleWindow: this.filterThrottleWindow,
+                noResultsText: this.noResultsText ?? DefaultOptions.noResultsText,
+                filterThrottleWindow: this.filterThrottleWindow ?? DefaultOptions.filterThrottleWindow ?? 0,
                 filterOnEmptyTerm: this.filterOnEmptyTerm,
                 labelProp: this.labelProp,
                 valueProp: this.valueProp,
@@ -848,7 +848,7 @@ export default {
                 on: this._handleBoxEvents.bind(this),
                 additionalClasses: this.additionalClassesList,
                 isLoadingMode: this.isLoadingMode,
-                closeListWhenLoading: this.closeListWhenLoading,
+                closeListWhenLoading: this.closeListWhenLoading ?? DefaultOptions.closeListWhenLoading,
                 clearInputWhen: this.clearInputWhen,
                 treatGroupSelectionAsItems: this.treatGroupSelectionAsItems,
             });
