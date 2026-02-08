@@ -13,10 +13,10 @@
 TODO: Samples for split groups, customizations, search in drop list, droplist from button, etc.
 
 <h3>Single selection</h3>
-<div id="example1"></div>
+<div><span id="example1"></span> <label><input type="checkbox" oninput="example1.disable(event.currentTarget.checked)" /> Disabled</label></div>
 
 <h3>Multiple selection</h3>
-<div id="example2"></div>
+<div><span id="example2"></span> <label><input type="checkbox" oninput="example2.disable(event.currentTarget.checked)" /> Disabled</label></div>
 
 <h3>Multiple selection - RTL</h3>
 <div id="example3"></div>
@@ -26,7 +26,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
     import '../scss/droplist.scss';
     import '../scss/selectbox.scss';
 
-    const example1 = new SelectBox({
+    const example1 = window.example1 = new SelectBox({
         direction: 'auto',
         disabled: false,
         clearable: true,
@@ -97,7 +97,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
         clearInputWhen: ['single_close', 'multi_select_single'],
     });
 
-    const example2 = new SelectBox({
+    const example2 = window.example2 = new SelectBox({
         direction: 'auto',
         disabled: false,
         clearable: true,
@@ -173,7 +173,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
         clearInputWhen: ['single_close', 'multi_select_single'],
     });
 
-    const example3 = new SelectBox({
+    const example3 = window.example3 = new SelectBox({
         direction: 'rtl',
         disabled: false,
         clearable: true,
