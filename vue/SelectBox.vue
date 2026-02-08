@@ -109,6 +109,10 @@ export const PropTypes = {
         type: Boolean,
         default: true,
     },
+    allowTypeToSelect: {
+        type: Boolean,
+        default: true,
+    },
     noResultsText: {
         type: String,
         required: false,
@@ -568,6 +572,11 @@ export default {
                 this.nonReactive.instance.setSearchable(value);
         },
 
+        allowTypeToSelect(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setAllowTypeToSelect(value);
+        },
+
         noResultsText(value) {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setNoResultsText(value ?? DefaultOptions.noResultsText);
@@ -827,6 +836,7 @@ export default {
                 blurOnSingleSelection: this.blurOnSingleSelection,
                 multi: this.multi,
                 searchable: this.searchable,
+                allowTypeToSelect: this.allowTypeToSelect,
                 noResultsText: this.noResultsText ?? DefaultOptions.noResultsText,
                 filterThrottleWindow: this.filterThrottleWindow ?? DefaultOptions.filterThrottleWindow ?? 0,
                 filterOnEmptyTerm: this.filterOnEmptyTerm,
