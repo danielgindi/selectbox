@@ -1,5 +1,5 @@
 <template>
-  <span ref="el" />
+  <span :ref="v => el = v" />
 </template>
 
 <script>
@@ -311,6 +311,7 @@ export default {
     data() {
         return {
             el: undefined,
+            isMounted: false,
 
             nonReactive: Object.seal({
                 instance: undefined,
@@ -739,27 +740,31 @@ export default {
                     this.nonReactive.instance.invokeRefilter();
             },
         },
+
+        el(v) {
+            if (v) {
+                if (this.isMounted) {
+                    this._createBox();
+
+                    if (window.ResizeObserver === undefined) {
+                        const wasAttached = this._isAttached;
+                        this._isAttached = !!this.el && document.body.contains(this.el);
+                        if (!wasAttached && this.nonReactive.instance && this._isAttached)
+                            this.nonReactive.instance.refreshSize();
+                    }
+                }
+            } else {
+                this._destroyBox();
+            }
+        },
     },
 
     mounted() {
+        this.isMounted = true;
+
         this._createBox();
 
-        if (window.ResizeObserver === undefined) {
-            this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
-
-            this.$nextTick(() => {
-                if (this.nonReactive.instance && this._isAttached)
-                    this.nonReactive.instance.refreshSize();
-            });
-        }
-    },
-
-    updated() {
-        if (this.$refs.el && this.el !== this.$refs.el) {
-            this._createBox();
-        }
-
-        if (window.ResizeObserver === undefined) {
+        if (window.ResizeObserver === undefined && this.nonReactive.instance) {
             const wasAttached = this._isAttached;
             this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
             if (!wasAttached && this.nonReactive.instance && this._isAttached)
@@ -767,8 +772,8 @@ export default {
         }
     },
 
-    [isVue3 ? 'unmounted' : 'destroyed']() {
-        this._destroyBox();
+    unmounted() {
+        this.isMounted = false;
     },
 
     methods: {
@@ -811,7 +816,6 @@ export default {
         _createBox() {
             this._destroyBox();
 
-            this.el = this.$refs.el;
             if (!this.el)
                 return;
 
@@ -875,8 +879,6 @@ export default {
                 this.nonReactive.instance.destroy();
                 this.nonReactive.instance = undefined;
             }
-
-            this.el = undefined;
         },
 
         _concatClassesObject(classes) {
