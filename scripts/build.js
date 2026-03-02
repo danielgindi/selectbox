@@ -171,19 +171,17 @@ const Path = require('path');
     console.info('Generating css files....');
 
     const Sass = require('sass');
-    const renderSass = require('util').promisify(Sass.render.bind(Sass));
+
     for (let item of [
         { src: './scss/droplist.scss', dest: './css/droplist.css' },
         { src: './scss/selectbox.scss', dest: './css/selectbox.css' },
     ]) {
-        let compiledSassData = await renderSass({
-            file: item.src,
-            outFile: item.dest,
+        let compiledSassData = await Sass.compileAsync(item.src, {
             sourceMap: true,
-            outputStyle: 'compressed',
+            style: 'compressed',
         });
-        await Fs.promises.writeFile(item.dest, compiledSassData.css);
-        await Fs.promises.writeFile(item.dest + '.map', compiledSassData.map.toString('utf8')
+        await Fs.promises.writeFile(item.dest, compiledSassData.css + `\n\n/*# sourceMappingURL=${Path.basename(item.dest)}.map */`);
+        await Fs.promises.writeFile(item.dest + '.map', JSON.stringify(compiledSassData.sourceMap)
             .replace(/"sources":\["([^"]+)"]/, (m, x) => '"sources":["../scss/' + x.substr(x.lastIndexOf('/') + 1) + '"]'));
     }
 
