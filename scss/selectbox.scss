@@ -330,7 +330,7 @@ $spinner-transition-duration: .15s;
     .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear).selectbox__rtl &,
     [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__ltr) & {
         right: auto;
-        left: var(var(--selectbox-spinner-spacing) + --selectbox-open-indicator-width);
+        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
     }
 
     .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator).selectbox__rtl &,
