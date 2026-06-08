@@ -26,7 +26,7 @@ const isVue3 = version > '3.';
  * 'search': `string` - input box value has changed
  * 'search:focus': input box has gained focus
  * 'search:blur': input box has lost focus
- * 'search:term': search term has been updated
+ * 'search:term': search term has been updated, before results were re-filtered
  * 'input:resize': input box resized
  * 'input' (Vue v2): (on select, clear, addsel, removesel) - fired after any of the above events.
  * 'update:modelValue' (Vue v3): (on select, clear, addsel, removesel) - fired after any of the above events.
