@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { version } from 'vue';
+import { markRaw, version } from 'vue';
 import SelectBox, { DefaultOptions } from '../lib/SelectBox';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 import deepEqual from 'fast-deep-equal';
@@ -314,10 +314,7 @@ export default {
         return {
             el: undefined,
             isMounted: false,
-
-            nonReactive: Object.seal({
-                instance: undefined,
-            }),
+            instance: undefined,
         };
     },
 
@@ -480,162 +477,162 @@ export default {
 
     watch: {
         disabled(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.disable(value);
+            if (this.instance)
+                this.instance.disable(value);
         },
 
         readOnly() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setReadOnly(this.readOnly ?? false);
+            if (this.instance)
+                this.instance.setReadOnly(this.readOnly ?? false);
         },
 
         clearable(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setClearable(value);
+            if (this.instance)
+                this.instance.setClearable(value);
         },
 
         direction(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setDirection(value);
+            if (this.instance)
+                this.instance.setDirection(value);
         },
 
         hasOpenIndicator(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setHasOpenIndicator(value);
+            if (this.instance)
+                this.instance.setHasOpenIndicator(value);
         },
 
         placeholder(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setPlaceholder(value);
+            if (this.instance)
+                this.instance.setPlaceholder(value);
         },
 
         sortSelectedItems(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSortSelectedItems(value);
+            if (this.instance)
+                this.instance.setSortSelectedItems(value);
         },
 
         sortListItems(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSortListItems(value);
+            if (this.instance)
+                this.instance.setSortListItems(value);
         },
 
         sortListCheckedFirst(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSortListCheckedFirst(value);
+            if (this.instance)
+                this.instance.setSortListCheckedFirst(value);
         },
 
         stickyValues(value) {
-            if (!this.nonReactive.instance) return;
+            if (!this.instance) return;
 
             // `stickyValues` tend to be a literal array,
             //   and Vue will get a different reference for each update, triggering this watcher.
             // so use deepEqual here to avoid redoing the list items on each selection change.
             if (deepEqual(this.stickyValues, value)) return;
 
-            this.nonReactive.instance.setStickyValues(value);
+            this.instance.setStickyValues(value);
         },
 
         sortItemComparator(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSortItemComparator(value);
+            if (this.instance)
+                this.instance.setSortItemComparator(value);
         },
 
         splitListCheckedGroups(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSplitListCheckedGroups(value);
+            if (this.instance)
+                this.instance.setSplitListCheckedGroups(value);
         },
 
         showSelection(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setShowSelection(value);
+            if (this.instance)
+                this.instance.setShowSelection(value);
         },
 
         showPlaceholderInTooltip(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setShowPlaceholderInTooltip(value);
+            if (this.instance)
+                this.instance.setShowPlaceholderInTooltip(value);
         },
 
         multiPlaceholderFormatter(formatter) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMultiPlaceholderFormatter(formatter);
+            if (this.instance)
+                this.instance.setMultiPlaceholderFormatter(formatter);
         },
 
         showBlurOnSingleSelection(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setBlurOnSingleSelection(value);
+            if (this.instance)
+                this.instance.setBlurOnSingleSelection(value);
         },
 
         multi(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMulti(value);
+            if (this.instance)
+                this.instance.setMulti(value);
         },
 
         searchable(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setSearchable(value);
+            if (this.instance)
+                this.instance.setSearchable(value);
         },
 
         allowTypeToSelect(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setAllowTypeToSelect(value);
+            if (this.instance)
+                this.instance.setAllowTypeToSelect(value);
         },
 
         noResultsText(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setNoResultsText(value ?? DefaultOptions.noResultsText);
+            if (this.instance)
+                this.instance.setNoResultsText(value ?? DefaultOptions.noResultsText);
         },
 
         filterThrottleWindow(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setFilterThrottleWindow(value ?? DefaultOptions.filterThrottleWindow ?? 0);
+            if (this.instance)
+                this.instance.setFilterThrottleWindow(value ?? DefaultOptions.filterThrottleWindow ?? 0);
         },
 
         filterOnEmptyTerm(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setFilterOnEmptyTerm(value || false);
+            if (this.instance)
+                this.instance.setFilterOnEmptyTerm(value || false);
         },
 
         filterFn() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setFilterFn(this.filterFn);
+            if (this.instance)
+                this.instance.setFilterFn(this.filterFn);
         },
 
         labelProp(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setLabelProp(value);
+            if (this.instance)
+                this.instance.setLabelProp(value);
         },
 
         valueProp(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setValueProp(value);
+            if (this.instance)
+                this.instance.setValueProp(value);
         },
 
         multiItemLabelProp(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMultiItemLabelProp(value);
+            if (this.instance)
+                this.instance.setMultiItemLabelProp(value);
         },
 
         multiItemRemovePosition(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMultiItemRemovePosition(value);
+            if (this.instance)
+                this.instance.setMultiItemRemovePosition(value);
         },
 
         maxMultiItems(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMaxMultiItems(value);
+            if (this.instance)
+                this.instance.setMaxMultiItems(value);
         },
 
         multiItemsRestLabelProvider(value) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setMultiItemsRestLabelProvider(value);
+            if (this.instance)
+                this.instance.setMultiItemsRestLabelProvider(value);
         },
 
         items(value) {
-            if (this.nonReactive.instance) {
-                this.nonReactive.instance.setItems(value, false);
+            if (this.instance) {
+                this.instance.setItems(value, false);
 
                 const modelValue = isVue3 ? this.modelValue : this.value;
-                this.nonReactive.instance.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
+                this.instance.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
             }
         },
 
@@ -644,102 +641,102 @@ export default {
                 value.length === old && value.every((v, i) => old[i] === v))
                 return;
 
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setValue(value === null && (!this.acceptNullAsValue || this.multi) ? undefined : value);
+            if (this.instance)
+                this.instance.setValue(value === null && (!this.acceptNullAsValue || this.multi) ? undefined : value);
         },
 
         renderSingleItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderSingleItem(this.computedRenderSingleItem, this.computedUnrenderSingleItem);
+            if (this.instance)
+                this.instance.setRenderSingleItem(this.computedRenderSingleItem, this.computedUnrenderSingleItem);
         },
 
         unrenderSingleItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderSingleItem(this.computedRenderSingleItem, this.computedUnrenderSingleItem);
+            if (this.instance)
+                this.instance.setRenderSingleItem(this.computedRenderSingleItem, this.computedUnrenderSingleItem);
         },
 
         renderMultiItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderMultiItem(this.computedRenderMultiItem, this.computedUnrenderMultiItem);
+            if (this.instance)
+                this.instance.setRenderMultiItem(this.computedRenderMultiItem, this.computedUnrenderMultiItem);
         },
 
         unrenderMultiItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderMultiItem(this.computedRenderMultiItem, this.computedUnrenderMultiItem);
+            if (this.instance)
+                this.instance.setRenderMultiItem(this.computedRenderMultiItem, this.computedUnrenderMultiItem);
         },
 
         renderRestMultiItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
+            if (this.instance)
+                this.instance.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
         },
 
         unrenderRestMultiItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
+            if (this.instance)
+                this.instance.setRenderRestMultiItem(this.computedRenderRestMultiItem, this.computedUnrenderRestMultiItem);
         },
 
         renderNoResultsItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+            if (this.instance)
+                this.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
         },
 
         unrenderNoResultsItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+            if (this.instance)
+                this.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
         },
 
         renderListItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setListOptions(this.computedListOptions);
+            if (this.instance)
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         unrenderListItem() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setListOptions(this.computedListOptions);
+            if (this.instance)
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         ...(isVue3 ? {} : {
             $scopedSlots() { // Vue 2
-                if (this.nonReactive.instance)
-                    this.nonReactive.instance.setListOptions(this.computedListOptions);
+                if (this.instance)
+                    this.instance.setListOptions(this.computedListOptions);
             },
         }),
 
         $slots() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setListOptions(this.computedListOptions);
+            if (this.instance)
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         additionalClasses() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setAdditionalClasses(this.additionalClassesList);
+            if (this.instance)
+                this.instance.setAdditionalClasses(this.additionalClassesList);
         },
 
         isLoadingMode() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setIsLoadingMode(!!this.isLoadingMode);
+            if (this.instance)
+                this.instance.setIsLoadingMode(!!this.isLoadingMode);
         },
 
         closeListWhenLoading() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setCloseListWhenLoading(this.closeListWhenLoading ?? DefaultOptions.closeListWhenLoading);
+            if (this.instance)
+                this.instance.setCloseListWhenLoading(this.closeListWhenLoading ?? DefaultOptions.closeListWhenLoading);
         },
 
         clearInputWhen() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setClearInputWhen(this.clearInputWhen);
+            if (this.instance)
+                this.instance.setClearInputWhen(this.clearInputWhen);
         },
 
         treatGroupSelectionAsItems() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
+            if (this.instance)
+                this.instance.setTreatGroupSelectionAsItems(!!this.treatGroupSelectionAsItems);
         },
 
         filterDependencies: {
             deep: true,
             handler() {
-                if (this.nonReactive.instance)
-                    this.nonReactive.instance.invokeRefilter();
+                if (this.instance)
+                    this.instance.invokeRefilter();
             },
         },
 
@@ -751,8 +748,8 @@ export default {
                     if (window.ResizeObserver === undefined) {
                         const wasAttached = this._isAttached;
                         this._isAttached = !!this.el && document.body.contains(this.el);
-                        if (!wasAttached && this.nonReactive.instance && this._isAttached)
-                            this.nonReactive.instance.refreshSize();
+                        if (!wasAttached && this.instance && this._isAttached)
+                            this.instance.refreshSize();
                     }
                 }
             } else {
@@ -766,11 +763,11 @@ export default {
 
         this._createBox();
 
-        if (window.ResizeObserver === undefined && this.nonReactive.instance) {
+        if (window.ResizeObserver === undefined && this.instance) {
             const wasAttached = this._isAttached;
             this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
-            if (!wasAttached && this.nonReactive.instance && this._isAttached)
-                this.nonReactive.instance.refreshSize();
+            if (!wasAttached && this.instance && this._isAttached)
+                this.instance.refreshSize();
         }
     },
 
@@ -809,7 +806,7 @@ export default {
                 event === 'groupcheck' ||
                 (event === 'addsel' && !event.isCheckingGroup) ||
                 (event === 'removesel' && !event.isCheckingGroup)) {
-                let value = event === 'select' ? data.value : this.nonReactive.instance.getValue();
+                let value = event === 'select' ? data.value : this.instance.getValue();
                 if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                     value = null;
                 this.$emit(isVue3 ? 'update:modelValue' : 'input', value);
@@ -873,14 +870,14 @@ export default {
             const modelValue = isVue3 ? this.modelValue : this.value;
             box.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
 
-            this.nonReactive.instance = box;
+            this.instance = markRaw(box);
             this.el = box.el;
         },
 
         _destroyBox() {
-            if (this.nonReactive.instance) {
-                this.nonReactive.instance.destroy();
-                this.nonReactive.instance = undefined;
+            if (this.instance) {
+                this.instance.destroy();
+                this.instance = undefined;
             }
         },
 
@@ -901,39 +898,39 @@ export default {
         },
 
         toggleLoading(on) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.toggleLoading(on);
+            if (this.instance)
+                this.instance.toggleLoading(on);
         },
 
         toggleList(open) {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.toggleList(open);
+            if (this.instance)
+                this.instance.toggleList(open);
         },
 
         openList() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.openList();
+            if (this.instance)
+                this.instance.openList();
         },
 
         closeList() {
-            if (this.nonReactive.instance)
-                this.nonReactive.instance.closeList();
+            if (this.instance)
+                this.instance.closeList();
         },
 
         isListOpen() {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.isListOpen();
+            if (this.instance)
+                return this.instance.isListOpen();
             return false;
         },
 
         updateItemByValue(value, newItem) {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.updateItemByValue(value, newItem);
+            if (this.instance)
+                return this.instance.updateItemByValue(value, newItem);
         },
 
         getSelectedItems() {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.getSelectedItems();
+            if (this.instance)
+                return this.instance.getSelectedItems();
             return [];
         },
 
@@ -942,16 +939,16 @@ export default {
          * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
          */
         setSearchTerm(term, performSearch) {
-            if (term != null && this.nonReactive.instance)
-                this.nonReactive.instance.setSearchTerm(term, performSearch);
+            if (term != null && this.instance)
+                this.instance.setSearchTerm(term, performSearch);
         },
 
         /**
          * @returns {string}
          */
         getSearchTerm() {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.getSearchTerm();
+            if (this.instance)
+                return this.instance.getSearchTerm();
             return '';
         },
 
@@ -959,8 +956,8 @@ export default {
          * @returns {number}
          */
         getFilteredItemCount() {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.getFilteredItemCount();
+            if (this.instance)
+                return this.instance.getFilteredItemCount();
             return 0;
         },
 
@@ -968,21 +965,21 @@ export default {
          * @returns {boolean}
          */
         isFilterPending() {
-            if (this.nonReactive.instance)
-                return this.nonReactive.instance.isFilterPending();
+            if (this.instance)
+                return this.instance.isFilterPending();
             return false;
         },
 
         focus() {
-            this.nonReactive.instance?.focusInput();
+            this.instance?.focusInput();
         },
 
         blur() {
-            this.nonReactive.instance?.blurInput();
+            this.instance?.blurInput();
         },
 
         droplistElContains(other, considerSublists = true) {
-            return this.nonReactive.instance?.droplistElContains(other, considerSublists);
+            return this.instance?.droplistElContains(other, considerSublists);
         },
     },
 };
