@@ -5,6 +5,9 @@
     <title>dom-selectbox - Example (dist)</title>
     <style>
         body { font-family: system-ui, Arial; padding: 20px; }
+        .sample_droplist_header { font-weight: 600; }
+        .sample_droplist_footer { display: flex; justify-content: space-between; align-items: center; gap: 1em; border-top: 1px solid #ddd; }
+        .sample_droplist_footer button { cursor: pointer; }
     </style>
 </head>
 <body>
@@ -21,8 +24,12 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
 <h3>Multiple selection - RTL</h3>
 <div id="example3"></div>
 
+<h3>DropList header and footer</h3>
+<button id="example4Button" type="button" aria-haspopup="menu" aria-expanded="false">Open menu</button>
+
 <script type="module">
     import SelectBox from '../lib/Selectbox.js';
+    import DropList from '../lib/DropList.js';
     import '../scss/droplist.scss';
     import '../scss/selectbox.scss';
 
@@ -250,6 +257,60 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
     document.getElementById('example1').append(example1.el);
     document.getElementById('example2').append(example2.el);
     document.getElementById('example3').append(example3.el);
+
+    const example4Button = document.getElementById('example4Button');
+    const example4 = window.example4 = new DropList({
+        isHeaderVisible: true,
+        isFooterVisible: true,
+        positionOptionsProvider: () => ({
+            target: example4Button,
+            offset: { x: 0, y: 4 },
+            anchor: { x: 'start', y: 'bottom' },
+            position: { x: 'start', y: 'top' },
+            updateWidth: 260,
+        }),
+        on: (name, data) => {
+            if (name === 'show')
+                example4Button.setAttribute('aria-expanded', 'true');
+            else if (name === 'hide')
+                example4Button.setAttribute('aria-expanded', 'false');
+            else if (name === 'select') {
+                example4Button.textContent = `Selected: ${data.item.label}`;
+                example4.hide();
+            }
+        },
+    });
+
+    example4.setItems([
+        { label: 'Duplicate' },
+        { label: 'Archive' },
+        { label: 'Share' },
+        { label: 'Delete' },
+    ]);
+
+    const example4Header = example4.getHeaderElement();
+    example4Header.classList.add('sample_droplist_header');
+    example4Header.textContent = 'Actions';
+
+    const example4Footer = example4.getFooterElement();
+    example4Footer.classList.add('sample_droplist_footer');
+
+    const example4FooterText = document.createElement('span');
+    example4FooterText.textContent = '4 available';
+    example4Footer.append(example4FooterText);
+
+    const example4CloseButton = document.createElement('button');
+    example4CloseButton.type = 'button';
+    example4CloseButton.textContent = 'Close';
+    example4CloseButton.addEventListener('click', () => example4.hide());
+    example4Footer.append(example4CloseButton);
+
+    example4Button.addEventListener('click', () => {
+        if (example4.isVisible())
+            example4.hide();
+        else
+            example4.show();
+    });
 </script>
 </body>
 </html>

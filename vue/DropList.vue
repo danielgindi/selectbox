@@ -54,6 +54,10 @@ export const PropTypes = {
         type: Boolean,
         default: false,
     },
+    isFooterVisible: {
+        type: Boolean,
+        default: false,
+    },
     searchable: {
         type: Boolean,
         default: false,
@@ -210,7 +214,7 @@ export default {
             for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
                 'autoFlipDirection', 'estimateWidth',
-                'isHeaderVisible',
+                'isHeaderVisible', 'isFooterVisible',
                 'searchable', 'filterOnEmptyTerm',
                 'filterGroups', 'filterEmptyGroups']) {
                 if (typeof this[key] === 'boolean') {
@@ -359,6 +363,12 @@ export default {
             this.relayout();
         },
 
+        isFooterVisible(v) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setFooterVisible(v);
+            this.relayout();
+        },
+
         positionOptions: {
             deep: true,
             handler() {
@@ -457,6 +467,11 @@ export default {
                 headerRenderer({}, list.getHeaderElement());
             }
 
+            const footerRenderer = createSlotBasedRenderFunc(this, 'footer');
+            if (footerRenderer) {
+                footerRenderer({}, list.getFooterElement());
+            }
+
             list.show();
 
             this._setupAutoRelayout();
@@ -528,7 +543,12 @@ export default {
 
         getHeaderElement() {
             if (this.nonReactive.instance)
-                this.nonReactive.instance.getHeaderElement();
+                return this.nonReactive.instance.getHeaderElement();
+        },
+
+        getFooterElement() {
+            if (this.nonReactive.instance)
+                return this.nonReactive.instance.getFooterElement();
         },
 
         elContains(other, considerSublists = true) {

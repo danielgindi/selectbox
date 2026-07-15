@@ -32,11 +32,14 @@
 	max-width: 100%;
 	line-height: 1.3;
 
-	.droplist_header {
+	.droplist_header,
+	.droplist_footer {
 		position: relative;
 		padding: 0.5em;
 		box-sizing: inherit;
+	}
 
+	.droplist_header {
 		input[type=search] {
 			box-sizing: inherit;
 			width: 100%;
