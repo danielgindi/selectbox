@@ -3,7 +3,7 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const MagicString = require('magic-string');
+const MagicString = require('magic-string').MagicString;
 const Sass = require('sass');
 
 (async () => {
