@@ -96,8 +96,14 @@
 			overflow: hidden;
 
 			&.droplist__item_focus {
-				/* background-color: #4c8fbd; */
+				background-color: #c7c7c7;
+			}
+			&.droplist__item_selected {
 				background-color: #3e3f48;
+				color: #fff;
+			}
+			&.droplist__item_selected.droplist__item_focus {
+				background-color: #2e3038;
 				color: #fff;
 			}
 		}
