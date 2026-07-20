@@ -18,6 +18,9 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
 <h3>Single selection</h3>
 <div><span id="example1"></span> <label><input type="checkbox" oninput="example1.disable(event.currentTarget.checked)" /> Disabled</label></div>
 
+<h3>Single selection with subitems</h3>
+<div><span id="exampleSubitems"></span> <label><input type="checkbox" oninput="exampleSubitems.disable(event.currentTarget.checked)" /> Disabled</label></div>
+
 <h3>Multiple selection</h3>
 <div><span id="example2"></span> <label><input type="checkbox" oninput="example2.disable(event.currentTarget.checked)" /> Disabled</label></div>
 
@@ -180,6 +183,56 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
         clearInputWhen: ['single_close', 'multi_select_single'],
     });
 
+    const exampleSubitems = window.exampleSubitems = new SelectBox({
+        direction: 'auto',
+        disabled: false,
+        clearable: true,
+        hasOpenIndicator: true,
+        placeholder: 'Select a city',
+        sortSelectedItems: true,
+        sortListItems: false,
+        multi: false,
+        showSelection: true,
+        showPlaceholderInTooltip: true,
+        labelProp: 'label',
+        valueProp: 'value',
+        items: [
+            {
+                label: 'Europe',
+                value: 'europe',
+                _subitems: [
+                    { label: 'Paris', value: 'paris' },
+                    { label: 'Berlin', value: 'berlin' },
+                    {
+                        label: 'Spain',
+                        value: 'spain',
+                        _subitems: [
+                            { label: 'Madrid', value: 'madrid' },
+                            { label: 'Barcelona', value: 'barcelona' },
+                        ],
+                    },
+                ],
+            },
+            {
+                label: 'North America',
+                value: 'north-america',
+                _subitems: [
+                    { label: 'New York', value: 'new-york' },
+                    { label: 'Toronto', value: 'toronto' },
+                ],
+            },
+        ],
+        value: 'barcelona',
+        searchable: false,
+        noResultsText: 'No matching results',
+        autoSelectTextOnCheck: true,
+        filterThrottleWindow: 150,
+        filterOnEmptyTerm: false,
+        isLoadingMode: false,
+        closeListWhenLoading: true,
+        clearInputWhen: ['single_close', 'multi_select_single'],
+    });
+
     const example3 = window.example3 = new SelectBox({
         direction: 'rtl',
         disabled: false,
@@ -255,6 +308,7 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
     });
 
     document.getElementById('example1').append(example1.el);
+    document.getElementById('exampleSubitems').append(exampleSubitems.el);
     document.getElementById('example2').append(example2.el);
     document.getElementById('example3').append(example3.el);
 
