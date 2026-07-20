@@ -131,7 +131,7 @@ export default [
         },
     },
     {
-        files: ["scripts/**/*.js", "**/eslint.config.mjs"],
+        files: ["scripts/**/*.js", "benchmarks/**/*.mjs", "**/eslint.config.mjs"],
 
         languageOptions: {
             globals: {

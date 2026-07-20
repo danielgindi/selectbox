@@ -18,6 +18,7 @@
     "lib": "lib"
   },
   "scripts": {
+    "benchmark": "node ./benchmarks/selectbox-value-lookup.mjs",
     "build": "npm run lint && node ./scripts/build.js",
     "lint": "eslint -f codeframe ./",
     "lint-fix": "eslint -f codeframe --fix ./",
