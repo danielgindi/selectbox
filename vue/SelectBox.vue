@@ -2,11 +2,12 @@
   <span :ref="v => el = v" />
 </template>
 
-<script>
-import { markRaw, version } from 'vue';
+<script lang="ts">
+import { defineComponent, markRaw, version, type PropType } from 'vue';
 import SelectBox, { DefaultOptions } from '../lib/SelectBox';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 import deepEqual from 'fast-deep-equal';
+import type { SelectBoxOptions, DropListOptions, ItemBase } from '../lib/types.js';
 
 const isVue3 = version > '3.';
 
@@ -44,7 +45,7 @@ export const PropTypes = {
     readOnly: {
         type: Boolean,
         required: false,
-        default: null,
+        default: null as any,
     },
     clearable: {
         type: Boolean,
@@ -71,11 +72,11 @@ export const PropTypes = {
         default: true,
     },
     stickyValues: {
-        type: Array,
+        type: Array as PropType<any[]>,
         required: false,
     },
     sortItemComparator: {
-        type: Function,
+        type: Function as PropType<SelectBoxOptions['sortItemComparator']>,
         required: false,
     },
     splitListCheckedGroups: {
@@ -91,14 +92,14 @@ export const PropTypes = {
         default: true,
     },
     multiPlaceholderFormatter: {
-        type: Function,
+        type: Function as PropType<SelectBoxOptions['multiPlaceholderFormatter']>,
         required: false,
-        default: undefined,
+        default: undefined as any,
     },
     blurOnSingleSelection: {
-        type: [Boolean, String],
+        type: [Boolean, String] as unknown as PropType<boolean | 'touch'>,
         default: 'touch',
-        validator: value => {
+        validator: (value: any) => {
             return [true, false, 'touch', null].includes(value);
         },
     },
@@ -127,12 +128,12 @@ export const PropTypes = {
         default: false,
     },
     filterFn: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['filterFn']>,
+        default: undefined as any,
     },
     filterDependencies: {
-        type: [Array, String, Number, Boolean, Object],
-        default: undefined,
+        type: [Array, String, Number, Boolean, Object] as unknown as PropType<any>,
+        default: undefined as any,
     },
     labelProp: {
         type: String,
@@ -147,67 +148,67 @@ export const PropTypes = {
         default: 'short_label',
     },
     multiItemRemovePosition: {
-        type: String,
+        type: String as PropType<'before' | 'after' | 'none'>,
         default: 'after',
-        validator: value => {
+        validator: (value: any) => {
             return ['before', 'after', 'none'].includes(value);
         },
     },
     items: {
-        type: Array,
-        default: () => [],
+        type: Array as PropType<ItemBase[]>,
+        default: (): ItemBase[] => [],
     },
     [isVue3 ? 'modelValue' : 'value']: {
-        type: [String, Number, Boolean, Object, Array, Symbol],
-        default: undefined,
+        type: [String, Number, Boolean, Object, Array, Symbol] as unknown as PropType<any>,
+        default: undefined as any,
     },
     maxMultiItems: {
         type: Number,
         required: false,
     },
     multiItemsRestLabelProvider: {
-        type: Function,
+        type: Function as PropType<SelectBoxOptions['multiItemsRestLabelProvider']>,
         required: false,
     },
     renderSingleItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['renderSingleItem']>,
+        default: undefined as any,
     },
     unrenderSingleItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['unrenderSingleItem']>,
+        default: undefined as any,
     },
     renderMultiItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['renderMultiItem']>,
+        default: undefined as any,
     },
     unrenderMultiItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['unrenderMultiItem']>,
+        default: undefined as any,
     },
     renderRestMultiItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['renderRestMultiItem']>,
+        default: undefined as any,
     },
     unrenderRestMultiItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<SelectBoxOptions['unrenderRestMultiItem']>,
+        default: undefined as any,
     },
     renderNoResultsItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<(item: ItemBase, itemEl: Element) => (any | false)>,
+        default: undefined as any,
     },
     unrenderNoResultsItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<(item: ItemBase, itemEl: Element) => void>,
+        default: undefined as any,
     },
     renderListItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<(item: ItemBase, itemEl: Element) => (any | false)>,
+        default: undefined as any,
     },
     unrenderListItem: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<(item: ItemBase, itemEl: Element) => void>,
+        default: undefined as any,
     },
     virtualMinItems: {
         type: Number,
@@ -215,23 +216,23 @@ export const PropTypes = {
     },
     baseClass: {
         type: String,
-        default: undefined,
+        default: undefined as string | undefined,
     },
     droplistBaseClass: {
         type: String,
-        default: undefined,
+        default: undefined as string | undefined,
     },
     additionalClasses: {
-        type: [Object, Array, String],
-        default: undefined,
+        type: [Object, Array, String] as unknown as PropType<any>,
+        default: undefined as any,
     },
     additionalDroplistClasses: {
-        type: [Object, Array, String],
-        default: undefined,
+        type: [Object, Array, String] as unknown as PropType<any>,
+        default: undefined as any,
     },
     direction: {
         type: String,
-        default: undefined,
+        default: undefined as string | undefined,
     },
     fixedDroplistWidth: {
         type: Boolean,
@@ -254,10 +255,10 @@ export const PropTypes = {
         required: false,
     },
     clearInputWhen: {
-        type: Array,
+        type: Array as PropType<string[]>,
         required: false,
-        default: () => ['single_close', 'multi_select_single'],
-        validator: value => {
+        default: (): string[] => ['single_close', 'multi_select_single'],
+        validator: (value: any) => {
             if (value && !Array.isArray(value))
                 return false;
             for (let v of value) {
@@ -285,7 +286,7 @@ export const PropTypes = {
     },
 };
 
-export default {
+export default defineComponent({
     inheritAttrs: false,
 
     props: PropTypes,
@@ -312,15 +313,15 @@ export default {
 
     data() {
         return {
-            el: undefined,
+            el: undefined as HTMLElement | undefined,
             isMounted: false,
-            instance: undefined,
+            instance: undefined as SelectBox | undefined,
         };
     },
 
     computed: {
-        computedListOptions() {
-            let opts = {};
+        computedListOptions(): DropListOptions {
+            let opts: DropListOptions & { [key: string]: any } = {};
 
             if (this.droplistBaseClass) {
                 opts.baseClassName = this.droplistBaseClass;
@@ -354,7 +355,7 @@ export default {
             if (!opts.unrenderItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'list-item');
                 if (fn) {
-                    opts.unrenderItem = (item, el) => fn(el);
+                    opts.unrenderItem = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -367,7 +368,7 @@ export default {
             if (!opts.unrenderNoResultsItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'rest-multi-item');
                 if (fn) {
-                    opts.unrenderNoResultsItem = (item, el) => fn(el);
+                    opts.unrenderNoResultsItem = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -375,7 +376,7 @@ export default {
         },
 
         computedRenderSingleItem() {
-            let render = this.renderSingleItem;
+            let render: any = this.renderSingleItem;
 
             if (!render) {
                 render = createSlotBasedRenderFunc(this, 'single-item');
@@ -385,12 +386,12 @@ export default {
         },
 
         computedUnrenderSingleItem() {
-            let unrender = this.unrenderSingleItem;
+            let unrender: any = this.unrenderSingleItem;
 
             if (!unrender) {
                 let fn = createSlotBasedUnrenderFunc(this, 'single-item');
                 if (fn) {
-                    unrender = (item, el) => fn(el);
+                    unrender = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -398,7 +399,7 @@ export default {
         },
 
         computedRenderMultiItem() {
-            let render = this.renderMultiItem;
+            let render: any = this.renderMultiItem;
 
             if (!render) {
                 render = createSlotBasedRenderFunc(this, 'multi-item');
@@ -408,12 +409,12 @@ export default {
         },
 
         computedUnrenderMultiItem() {
-            let unrender = this.unrenderMultiItem;
+            let unrender: any = this.unrenderMultiItem;
 
             if (!unrender) {
                 let fn = createSlotBasedUnrenderFunc(this, 'multi-item');
                 if (fn) {
-                    unrender = (item, el) => fn(el);
+                    unrender = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -421,7 +422,7 @@ export default {
         },
 
         computedRenderRestMultiItem() {
-            let render = this.renderRestMultiItem;
+            let render: any = this.renderRestMultiItem;
 
             if (!render) {
                 render = createSlotBasedRenderFunc(this, 'rest-multi-item');
@@ -431,12 +432,12 @@ export default {
         },
 
         computedUnrenderRestMultiItem() {
-            let unrender = this.unrenderRestMultiItem;
+            let unrender: any = this.unrenderRestMultiItem;
 
             if (!unrender) {
                 let fn = createSlotBasedUnrenderFunc(this, 'rest-multi-item');
                 if (fn) {
-                    unrender = (item, el) => fn(el);
+                    unrender = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -444,7 +445,7 @@ export default {
         },
 
         computedRenderNoResultsItem() {
-            let render = this.renderNoResultsItem;
+            let render: any = this.renderNoResultsItem;
 
             if (!render) {
                 render = createSlotBasedRenderFunc(this, 'no-results-item');
@@ -454,12 +455,12 @@ export default {
         },
 
         computedUnrenderNoResultsItem() {
-            let unrender = this.unrenderNoResultsItem;
+            let unrender: any = this.unrenderNoResultsItem;
 
             if (!unrender) {
                 let fn = createSlotBasedUnrenderFunc(this, 'no-results-item');
                 if (fn) {
-                    unrender = (item, el) => fn(el);
+                    unrender = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -636,9 +637,9 @@ export default {
             }
         },
 
-        [isVue3 ? 'modelValue' : 'value'](value, old) {
+        [isVue3 ? 'modelValue' : 'value'](value: any, old: any) {
             if (Array.isArray(value) && Array.isArray(old) &&
-                value.length === old && value.every((v, i) => old[i] === v))
+                (value.length as any) === old && value.every((v: any, i: number) => old[i] === v))
                 return;
 
             if (this.instance)
@@ -677,12 +678,12 @@ export default {
 
         renderNoResultsItem() {
             if (this.instance)
-                this.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
         },
 
         unrenderNoResultsItem() {
             if (this.instance)
-                this.instance.setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
         },
 
         renderListItem() {
@@ -696,11 +697,11 @@ export default {
         },
 
         ...(isVue3 ? {} : {
-            $scopedSlots() { // Vue 2
+            $scopedSlots(this: any) { // Vue 2
                 if (this.instance)
                     this.instance.setListOptions(this.computedListOptions);
             },
-        }),
+        } as Record<string, any>),
 
         $slots() {
             if (this.instance)
@@ -746,9 +747,9 @@ export default {
                     this._createBox();
 
                     if (window.ResizeObserver === undefined) {
-                        const wasAttached = this._isAttached;
-                        this._isAttached = !!this.el && document.body.contains(this.el);
-                        if (!wasAttached && this.instance && this._isAttached)
+                        const wasAttached = (this as any)._isAttached;
+                        (this as any)._isAttached = !!this.el && document.body.contains(this.el);
+                        if (!wasAttached && this.instance && (this as any)._isAttached)
                             this.instance.refreshSize();
                     }
                 }
@@ -764,9 +765,9 @@ export default {
         this._createBox();
 
         if (window.ResizeObserver === undefined && this.instance) {
-            const wasAttached = this._isAttached;
-            this._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el);
-            if (!wasAttached && this.instance && this._isAttached)
+            const wasAttached = (this as any)._isAttached;
+            (this as any)._isAttached = !!this.$refs.el && document.body.contains(this.$refs.el as Node);
+            if (!wasAttached && this.instance && (this as any)._isAttached)
                 this.instance.refreshSize();
         }
     },
@@ -776,7 +777,7 @@ export default {
     },
 
     methods: {
-        _handleBoxEvents(event, data) {
+        _handleBoxEvents(event: string, data?: any) {
             switch (event) {
                 case 'clear:before':
                 case 'clear':
@@ -804,12 +805,12 @@ export default {
             if (event === 'select' ||
                 event === 'clear' ||
                 event === 'groupcheck' ||
-                (event === 'addsel' && !event.isCheckingGroup) ||
-                (event === 'removesel' && !event.isCheckingGroup)) {
+                (event === 'addsel' && !(event as any).isCheckingGroup) ||
+                (event === 'removesel' && !(event as any).isCheckingGroup)) {
                 let value = event === 'select' ? data.value : this.instance.getValue();
                 if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                     value = null;
-                this.$emit(isVue3 ? 'update:modelValue' : 'input', value);
+                (this.$emit as any)(isVue3 ? 'update:modelValue' : 'input', value);
             }
         },
 
@@ -819,7 +820,7 @@ export default {
             if (!this.el)
                 return;
 
-            let box = new SelectBox({
+            let box = new SelectBox(<SelectBoxOptions & { baseClass?: any }>{
                 el: this.el,
                 baseClass: this.baseClass,
                 direction: this.direction,
@@ -881,12 +882,12 @@ export default {
             }
         },
 
-        _concatClassesObject(classes) {
+        _concatClassesObject(classes: any) {
             if (Array.isArray(classes)) {
                 return classes.join(' ');
             }
             else if (classes && typeof classes === 'object') {
-                let arr = [];
+                let arr: string[] = [];
                 for (let [key, value] of Object.entries(classes)) {
                     if (value)
                         arr.push(key);
@@ -897,12 +898,12 @@ export default {
             return classes || '';
         },
 
-        toggleLoading(on) {
+        toggleLoading(on?: boolean) {
             if (this.instance)
                 this.instance.toggleLoading(on);
         },
 
-        toggleList(open) {
+        toggleList(open?: boolean) {
             if (this.instance)
                 this.instance.toggleList(open);
         },
@@ -923,7 +924,7 @@ export default {
             return false;
         },
 
-        updateItemByValue(value, newItem) {
+        updateItemByValue(value: any, newItem: ItemBase) {
             if (this.instance)
                 return this.instance.updateItemByValue(value, newItem);
         },
@@ -938,7 +939,7 @@ export default {
          * @param {string} term
          * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
          */
-        setSearchTerm(term, performSearch) {
+        setSearchTerm(term: string, performSearch?: boolean) {
             if (term != null && this.instance)
                 this.instance.setSearchTerm(term, performSearch);
         },
@@ -978,9 +979,9 @@ export default {
             this.instance?.blurInput();
         },
 
-        droplistElContains(other, considerSublists = true) {
+        droplistElContains(other: any, considerSublists = true) {
             return this.instance?.droplistElContains(other, considerSublists);
         },
     },
-};
+});
 </script>

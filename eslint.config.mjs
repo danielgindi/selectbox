@@ -25,6 +25,10 @@ export default [
             "!test/**/*_helpers.js",
             "dist/**/*",
             "example/**/*",
+            // TODO: wire up typescript-eslint and re-enable linting for these
+            // once the TS migration's follow-up typing pass lands.
+            "**/*.ts",
+            "vue/**/*.vue",
         ],
     },
     ...compat.extends("eslint:recommended", "plugin:vue/recommended"),

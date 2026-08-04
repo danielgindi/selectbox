@@ -28,8 +28,10 @@ import {
     VALUE_SPACE,
     VALUE_UP,
 } from 'keycode-js';
-import mitt from 'mitt';
 import throttle from './utils/throttle';
+import type { Throttled } from './utils/throttle.js';
+import type { DropListOptions, ItemBase, PositionOptions } from './types.js';
+import mitt, { type Emitter } from 'mitt';
 
 const ItemSymbol = Symbol('item');
 const DestroyedSymbol = Symbol('destroyed');
@@ -39,85 +41,127 @@ const NoResultsItemSymbol = Symbol('no_results_items');
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 
 /**
- * @typedef {Object} DropList.Options
- * @property {Element} [el] An element to attach to, instead of creating a new one
- * @property {string} [baseClassName='droplist'] class name for the menu root element
- * @property {string|string[]} [additionalClasses]
- * @property {'ltr'|'rtl'|'auto'} [direction='auto']
- * @property {boolean} [autoItemBlur=true] Should we automatically blur the focused item when the droplist loses focus?
- * @property {number} [autoItemBlurDelay=300] How long to wait before deciding to blur the focused item (when the droplist loses focus)?
- * @property {boolean} [capturesFocus=true] Should this DropList be added to the TAB-key stack?
- * @property {boolean} [multi=false] Does this DropList show checkboxes for multiple item selection?
- * @property {*} [singleSelectedValue] Current selected value when using single selection.
- * @property {function} [keyDownHandler=null] An alternative "keydown" event handler. Return true to prevent default behaviour.
- * @property {boolean} [autoCheckGroupChildren=true] When a group is checked/unchecked - all items beneath it will update accordingly
- * @property {boolean} [useExactTargetWidth=false] Use the exact target's width, do not allow growing
- * @property {boolean} [constrainToWindow=true] Should the position be constrained to the window, attaching to window's borders if needed?
- * @property {Boolean} [autoFlipDirection=true] Should the position/anchor be flipped automatically when there's no space in the required direction?
- * @property {number} [estimatedItemHeight=20] An estimated row height, for approximating scroll height.
- * @property {boolean} [estimateWidth=false] Use an estimation for the width instead of measuring. May be faster - needs testing and may depend on the CSS.
- * @property {number} [virtualMinItems=100] Turns into a virtual list - with items being created and showing up on viewport only. The value specified the minimum item count where a virtual list will be created.
- * @property {string} [labelProp='label']
- * @property {string} [valueProp='value']
- * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [renderItem] Function to call when rendering an item element
- * @property {function(item: DropList.ItemBase, itemEl: Element)} [unrenderItem] Function to call when rendering an item element
- * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [renderNoResultsItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element)} [unrenderNoResultsItem]
- * @property {function(name: string, data: *)} [on]
- * @property {boolean} [isHeaderVisible=false] show header element
- * @property {boolean} [isFooterVisible=false] show footer element
- * @property {boolean} [searchable=false] include inline search box
- * @property {string} [searchPlaceholder=''] placeholder text for the inline search box
- * @property {string} [noResultsText='No matching results'] text for no results (empty for none)
- * @property {number} [filterThrottleWindow=300] throttle time (milliseconds) for filtering
- * @property {boolean} [filterOnEmptyTerm=false] call the filter function on empty search term too
- * @property {boolean} [filterGroups=false] should groups be filtered?
- * @property {boolean} [filterEmptyGroups=false] should empty groups be filtered out?
- * @property {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} [filterFn]
- * @property {function(dropList: DropList):DropList.PositionOptions} [positionOptionsProvider]
- * */
-/** */
+ * The internal representation of an item, as kept in `_p.items` / `_p.filteredItems`.
+ * Wraps the original consumer-supplied item (stored under `[ItemSymbol]`).
+ */
+interface InternalItem {
+    value?: any;
+    label?: string;
+    _group?: boolean;
+    _child?: boolean;
+    _level?: number;
+    _nocheck?: boolean;
+    _nointeraction?: boolean;
+    _checked?: boolean;
+    _subitems?: ItemBase[];
+    [ItemSymbol]: any;
+}
+
+interface SubDropListState {
+    item: InternalItem;
+    itemElement: HTMLElement | null;
+    droplist: DropList;
+    showOptions: PositionOptions;
+}
 
 /**
- * @typedef {Object} DropList.PositionAnchor
- * @property {'left'|'center'|'right'|'start'|'end'|string|number} x - horizontal anchor specification (could be either `'left'|'center'|'right'|'start'|'end'` or a percentage `'50%'` or a fixed decimal `Number`)
- * @property {'top'|'center'|'bottom'|string|number} y - vertical anchor specification (could be either `'top'|'center'|'bottom'` or a percentage `'50%'` or a fixed decimal `Number`)
- * */
-/** */
+ * The shape of `DropList#_p`, the internal state bag.
+ */
+interface DropListState {
+    ownsEl?: boolean;
+    elOriginalDisplay?: string;
 
-/**
- * @typedef {Object} DropList.PositionOptions
- * @property {Element?} [target] Target element to act as anchor
- * @property {{left: number, top: number}?} [targetOffset] Override the offset of target. Automatically calculated if unspecified.
- * @property {number?} [targetHeight] Override height of the target
- * @property {number?} [targetWidth] Override width of the target
- * @property {DropList.PositionAnchor?} [position]
- * @property {DropList.PositionAnchor?} [anchor]
- * @property {boolean|number?} [updateWidth=false] `true` to set width of the menu according to `target`'s width, or specify an arbitrary number.
- * @property {string?} [targetRtl] Override for rtl mode of the target
- * @property {{x: number, y: number}} [offset=undefined] Extra rtl-aware offset to the target
- * */
-/** */
+    baseClassName?: string;
+    additionalClasses?: string | string[];
+    direction?: 'ltr' | 'rtl' | 'auto';
 
-/**
- * @typedef {Object} DropList.ItemBase
- * @property {string} [value]
- * @property {string} [label]
- * @property {boolean} [_group=false]
- * @property {boolean} [_child=false]
- * @property {boolean} [_nocheck=false]
- * @property {boolean} [_nointeraction=false]
- * @property {DropList.ItemBase[]} [_subitems]
- * */
+    autoItemBlur?: boolean;
+    autoItemBlurDelay?: number;
+    capturesFocus?: boolean;
+    multi?: boolean;
+    singleSelectedValue?: any;
+    keyDownHandler?: DropListOptions['keyDownHandler'];
+    autoCheckGroupChildren?: boolean;
+    useExactTargetWidth?: boolean;
+    constrainToWindow?: boolean;
+    autoFlipDirection?: boolean;
+    estimatedItemHeight?: number;
+    estimateWidth?: boolean;
+    virtualMinItems?: number;
+    labelProp?: string;
+    valueProp?: string;
+    renderItem?: DropListOptions['renderItem'];
+    unrenderItem?: DropListOptions['unrenderItem'];
+    renderNoResultsItem?: DropListOptions['renderNoResultsItem'];
+    unrenderNoResultsItem?: DropListOptions['unrenderNoResultsItem'];
+    on?: DropListOptions['on'] | null;
+    positionOptionsProvider?: DropListOptions['positionOptionsProvider'] | null;
 
-/**
- * @typedef {DropList.ItemBase} DropList.Item
- * @property {boolean} [_checked=false]
- * */
-/** */
+    searchable?: boolean;
+    searchPlaceholder?: string;
+    isHeaderVisible?: boolean;
+    isFooterVisible?: boolean;
 
-/** @type {DropList.Options} */
-export const DefaultOptions = {
+    silenceEvents?: boolean;
+    mitt?: Emitter<Record<string, any>>;
+
+    filterThrottleWindow?: number;
+    filterOnEmptyTerm?: boolean;
+    filterGroups?: boolean;
+    filterEmptyGroups?: boolean;
+    filterFn?: DropListOptions['filterFn'];
+    filteredItems?: InternalItem[] | null;
+    filterTerm?: string;
+    needsRefilter?: boolean;
+    throttledRefilterItems?: Throttled<() => void> | null;
+
+    focusItemIndex?: number;
+    focusItemEl?: HTMLElement | null;
+
+    sink?: any;
+
+    el?: HTMLElement;
+    menuEl?: HTMLElement;
+    headerEl?: HTMLElement;
+    footerEl?: HTMLElement;
+    searchInput?: HTMLInputElement | null;
+
+    items?: InternalItem[];
+    groupCount?: number;
+    mouseHandled?: boolean;
+
+    virtualListHelper?: any;
+
+    hasNoResultsItem?: boolean;
+    noResultsText?: string;
+
+    currentDirection?: string;
+    lastPositionOptions?: PositionOptions | null;
+    lastPositionTarget?: Element;
+
+    visible?: boolean;
+    hiding?: boolean;
+
+    singleSelectedItemEl?: HTMLElement | null;
+
+    onDocumentMouseDown?: ((event: MouseEvent) => void) | null;
+
+    blurTimer?: ReturnType<typeof setTimeout>;
+    filterTimer?: ReturnType<typeof setTimeout>;
+    previousFilter?: string;
+    lastKeyWasChar?: boolean;
+
+    currentSubDropList?: SubDropListState | null;
+
+    lastMeasureItemCount?: number;
+    lastMeasureItemWidth?: number;
+    lastMeasureLongestLabel?: number;
+    lastMeasureLongestLabelText?: string;
+
+    _isFocusingItem?: boolean;
+}
+
+export const DefaultOptions: DropListOptions = {
     baseClassName: 'droplist',
 
     autoItemBlur: true,
@@ -174,16 +218,20 @@ Emits the following events:
 
 // noinspection JSUnusedGlobalSymbols
 class DropList {
+    _p: DropListState | null;
+    [DestroyedSymbol]?: boolean;
+    _mouseHandled?: boolean;
+    silenceEvents?: boolean;
 
     /**
      * @param {DropList.Options} options
      */
-    constructor(options) {
+    constructor(options: DropListOptions) {
         const o = { ...DefaultOptions };
 
         for (let [key, value] of Object.entries(/**@type Object*/options))
             if (value !== undefined)
-                o[key] = value;
+                (o as any)[key] = value;
 
         const p = this._p = {
             ownsEl: true,
@@ -221,7 +269,7 @@ class DropList {
             isFooterVisible: o.isFooterVisible,
 
             silenceEvents: true,
-            mitt: mitt(),
+            mitt: mitt<Record<string, any>>(),
 
             filterThrottleWindow: o.filterThrottleWindow,
             filterOnEmptyTerm: o.filterOnEmptyTerm,
@@ -237,7 +285,7 @@ class DropList {
             focusItemEl: null,
 
             sink: new DomEventsSink(),
-        };
+        } as DropListState;
 
         const baseClass = p.baseClassName + '_wrapper';
 
@@ -252,7 +300,7 @@ class DropList {
             top: '-9999px',
         };
 
-        let wrapperEl = o.el;
+        let wrapperEl: HTMLElement = o.el as HTMLElement;
 
         if (wrapperEl instanceof Element) {
             p.elOriginalDisplay = wrapperEl.style.display || '';
@@ -309,7 +357,7 @@ class DropList {
                     },
                 );
             },
-            onItemRender: (itemEl, index) => {
+            onItemRender: (itemEl: HTMLElement, index: any) => {
                 let item;
 
                 if ((/**@type any*/index) === GhostSymbol) {
@@ -387,7 +435,7 @@ class DropList {
 
                 this._renderItemContent(item, itemEl);
 
-                itemEl[ItemSymbol] = item;
+                (itemEl as any)[ItemSymbol] = item;
             },
         });
 
@@ -441,7 +489,7 @@ class DropList {
                 }
             }
             for (let key of ['position', 'left', 'top', 'right', 'bottom', 'z-index']) {
-                p.el.style[key] = '';
+                (p.el.style as any)[key] = '';
             }
             p.el.style.display = p.elOriginalDisplay;
         }
@@ -459,7 +507,7 @@ class DropList {
         this._p = null;
     }
 
-    get el() {
+    get el(): HTMLElement | null {
         return this._p?.el ?? null;
     }
 
@@ -469,7 +517,7 @@ class DropList {
      * @param {boolean} [considerSubmenus=true]
      * @returns {boolean}
      */
-    elContains(other, considerSubmenus = true) {
+    elContains(other: any, considerSubmenus = true): boolean {
         if (this.el.contains(other))
             return true;
 
@@ -483,7 +531,7 @@ class DropList {
      * @param {string|string[]} classes
      * @returns {DropList}
      */
-    setAdditionalClasses(classes) {
+    setAdditionalClasses(classes: string | string[]): this {
         const p = this._p;
         p.additionalClasses = classes;
         this._syncBaseClasses();
@@ -495,7 +543,7 @@ class DropList {
      * @param {'ltr'|'rtl'|'auto'} direction
      * @return {DropList}
      */
-    setDirection(direction) {
+    setDirection(direction: 'ltr' | 'rtl' | 'auto'): this {
         const p = this._p;
         p.direction = direction === 'ltr' ? 'ltr' : direction === 'rtl' ? 'rtl' : 'auto';
         this._syncBaseClasses();
@@ -506,7 +554,7 @@ class DropList {
      * Gets the supplied direction for the droplist
      * @return {'ltr'|'rtl'|'auto'}
      */
-    getDirection() {
+    getDirection(): 'ltr' | 'rtl' | 'auto' {
         const p = this._p;
         return p.direction;
     }
@@ -515,7 +563,7 @@ class DropList {
      * @param {string} prop
      * @returns {DropList}
      */
-    setLabelProp(prop) {
+    setLabelProp(prop: string): this {
         const p = this._p;
         p.labelProp = prop;
         return this;
@@ -526,7 +574,7 @@ class DropList {
      * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [fn] Function to call when rendering an item element
      * @returns {DropList}
      */
-    setRenderItem(fn) {
+    setRenderItem(fn: DropListOptions['renderItem']): this {
         const p = this._p;
         p.renderItem = fn;
         return this;
@@ -537,7 +585,7 @@ class DropList {
      * @property {function(item: DropList.ItemBase, itemEl: Element)} [fn] Function to call when rendering an item element
      * @returns {DropList}
      */
-    setUnrenderItem(fn) {
+    setUnrenderItem(fn: DropListOptions['unrenderItem']): this {
         const p = this._p;
         p.unrenderItem = fn;
         this._setupUnrenderFunction();
@@ -549,7 +597,7 @@ class DropList {
      * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
      * @returns {DropList}
      */
-    setRenderNoResultsItem(render, unrender) {
+    setRenderNoResultsItem(render: DropListOptions['renderNoResultsItem'], unrender: DropListOptions['unrenderNoResultsItem']): this {
         const p = this._p;
         p.renderNoResultsItem = render;
         p.unrenderNoResultsItem = unrender;
@@ -566,7 +614,7 @@ class DropList {
         if (typeof p.unrenderItem === 'function' || typeof p.unrenderNoResultsItem === 'function') {
             const fn = p.unrenderItem;
             const fnNoResults = p.unrenderNoResultsItem;
-            p.virtualListHelper.setOnItemUnrender(el => {
+            p.virtualListHelper.setOnItemUnrender((el: any) => {
                 const item = el[ItemSymbol];
                 if (item === NoResultsItemSymbol) {
                     try {
@@ -587,7 +635,7 @@ class DropList {
                     p.focusItemEl = null;
             });
         } else {
-            p.virtualListHelper.setOnItemUnrender(el => {
+            p.virtualListHelper.setOnItemUnrender((el: any) => {
                 delete el[ItemSymbol];
 
                 if (p.focusItemEl === el)
@@ -602,7 +650,7 @@ class DropList {
      * @param {string} prop
      * @returns {DropList}
      */
-    setValueProp(prop) {
+    setValueProp(prop: string): this {
         const p = this._p;
         p.valueProp = prop;
         return this;
@@ -657,23 +705,23 @@ class DropList {
         this._trigger('itemblur', { value: item.value, item: item[ItemSymbol] ?? item });
     }
 
-    nextPage(event) {
+    nextPage(event: Event) {
         this._move('next_page', event);
     }
 
-    previousPage(event) {
+    previousPage(event: Event) {
         this._move('prev_page', event);
     }
 
-    goToFirst(event) {
+    goToFirst(event: Event) {
         this._move('first', event);
     }
 
-    goToLast(event) {
+    goToLast(event: Event) {
         this._move('last', event);
     }
 
-    toggleFocusedItem() {
+    toggleFocusedItem(event?: Event) {
         const p = this._p;
 
         if (this.hasFocusedItem() && p.multi) {
@@ -699,7 +747,7 @@ class DropList {
         return this;
     }
 
-    triggerItemSelection(item, event) {
+    triggerItemSelection(item: any, event: Event): boolean {
         const p = this._p;
 
         p.focusItemEl = p.focusItemEl || closestUntil(event.target, 'li', p.el);
@@ -707,7 +755,7 @@ class DropList {
         if (p.focusItemIndex === undefined)
             p.focusItemIndex = -1;
 
-        item = item ?? p.focusItemEl[ItemSymbol];
+        item = item ?? (p.focusItemEl as any)[ItemSymbol];
         if (item._nointeraction) {
             return false;
         }
@@ -741,7 +789,7 @@ class DropList {
      * @param {number} [atIndex=-1] The index to insert at (or -1)
      * @returns {DropList}
      */
-    addItem(item, atIndex = -1) {
+    addItem(item: ItemBase, atIndex = -1): this {
         return this.addItems([item], atIndex);
     }
 
@@ -751,7 +799,7 @@ class DropList {
      * @param {number} [atIndex=-1] The index to insert at (or -1)
      * @returns {DropList}
      */
-    addItems(itemsToAdd, atIndex = -1) {
+    addItems(itemsToAdd: ItemBase[], atIndex = -1): this {
         const p = this._p, labelProp = p.labelProp, valueProp = p.valueProp;
 
         let isMulti = p.multi;
@@ -767,7 +815,7 @@ class DropList {
         for (let i = 0, count = itemsToAdd.length; i < count; i++) {
             let oitem = itemsToAdd[i];
             //noinspection PointlessBooleanExpressionJS
-            let item = {
+            let item: InternalItem = {
                 [ItemSymbol]: oitem,
                 label: oitem[labelProp],
                 value: oitem[valueProp],
@@ -835,7 +883,7 @@ class DropList {
      * @param {DropList.Item[]} items The items to set. These are copied.
      * @returns {DropList}
      */
-    setItems(items) {
+    setItems(items: ItemBase[]): this {
         const p = this._p;
 
         p.items.length = 0;
@@ -851,7 +899,7 @@ class DropList {
         return this;
     }
 
-    updateItemByValue(value, newItem) {
+    updateItemByValue(value: any, newItem: ItemBase): this {
         const p = this._p;
 
         // Look for the proper item
@@ -916,7 +964,7 @@ class DropList {
         return this;
     }
 
-    removeItem(value, label) {
+    removeItem(value: any, label?: string): this {
         const p = this._p;
 
         // Look for the proper item
@@ -983,7 +1031,7 @@ class DropList {
         return this;
     }
 
-    itemDataByValue(value) {
+    itemDataByValue(value: any): any {
         const p = this._p;
 
         for (let i = 0, count = p.items.length; i < count; i++) {
@@ -996,7 +1044,7 @@ class DropList {
         return null;
     }
 
-    itemIndexByValue(value) {
+    itemIndexByValue(value: any): number {
         const p = this._p;
 
         const items = p.items;
@@ -1010,7 +1058,7 @@ class DropList {
         return -1;
     }
 
-    filteredItemIndexByValue(value) {
+    filteredItemIndexByValue(value: any): number {
         const p = this._p;
 
         const items = p.filteredItems ?? p.items;
@@ -1024,7 +1072,7 @@ class DropList {
         return -1;
     }
 
-    itemIndexByValueOrLabel(value, label) {
+    itemIndexByValueOrLabel(value: any, label?: string): number {
         const p = this._p;
 
         const items = p.items;
@@ -1038,7 +1086,7 @@ class DropList {
         return -1;
     }
 
-    filteredItemIndexByValueOrLabel(value, label) {
+    filteredItemIndexByValueOrLabel(value: any, label?: string): number {
         const p = this._p;
 
         const items = p.filteredItems ?? p.items;
@@ -1052,7 +1100,7 @@ class DropList {
         return -1;
     }
 
-    itemIndexByItem(item) {
+    itemIndexByItem(item: ItemBase): number {
         const p = this._p;
 
         const items = p.items;
@@ -1067,7 +1115,7 @@ class DropList {
         return -1;
     }
 
-    filteredItemIndexByItem(item) {
+    filteredItemIndexByItem(item: ItemBase): number {
         const p = this._p;
 
         const items = p.filteredItems ?? p.items;
@@ -1082,23 +1130,23 @@ class DropList {
         return -1;
     }
 
-    items() {
+    items(): ItemBase[] {
         return this._p.items.map(x => x[ItemSymbol]);
     }
 
-    itemsReference() {
+    itemsReference(): InternalItem[] {
         return this._p.items;
     }
 
-    itemCount() {
+    itemCount(): number {
         return this._p.items.length;
     }
 
-    itemAtIndex(index) {
+    itemAtIndex(index: number): any {
         return this._p.items[index]?.[ItemSymbol];
     }
 
-    filteredItemAtIndex(index) {
+    filteredItemAtIndex(index: number): any {
         const p = this._p;
         const items = p.filteredItems ?? p.items;
         return items[index]?.[ItemSymbol];
@@ -1110,7 +1158,7 @@ class DropList {
      * @param index
      * @returns {HTMLElement|null}
      */
-    itemElementAtIndex(index) {
+    itemElementAtIndex(index: number): HTMLElement | null {
         const p = this._p;
         if (!p.filteredItems)
             return this.filteredElementItemAtIndex(index);
@@ -1127,7 +1175,7 @@ class DropList {
      * @param index
      * @returns {HTMLElement|null}
      */
-    filteredElementItemAtIndex(index) {
+    filteredElementItemAtIndex(index: number): HTMLElement | null {
         const p = this._p;
         const li = p.virtualListHelper.getItemElementAt(index);
         return li ?? null;
@@ -1137,7 +1185,7 @@ class DropList {
      * @param {function(dropList: DropList):DropList.PositionOptions} fn
      * @returns {DropList}
      */
-    setPositionOptionsProvider(fn) {
+    setPositionOptionsProvider(fn: DropListOptions['positionOptionsProvider']): this {
         const p = this._p;
         if (p.positionOptionsProvider === fn)
             return this;
@@ -1159,7 +1207,7 @@ class DropList {
      * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
      * @returns {DropList}
      */
-    setSearchTerm(term, performSearch = false) {
+    setSearchTerm(term: string, performSearch = false): this {
         const p = this._p;
 
         if (p.searchInput) {
@@ -1216,7 +1264,7 @@ class DropList {
 
                 if (Array.isArray(filteredItems)) {
                     // And back
-                    filteredItems = filteredItems.map(oitem => {
+                    filteredItems = filteredItems.map((oitem: any) => {
                         let our = oitem[ItemSymbol]?.[ItemSymbol]; // double-unwrap sealed->item
                         if (!our) {
                             our = {
@@ -1330,7 +1378,7 @@ class DropList {
      * @param {string} noResultsText
      * @returns {DropList}
      */
-    setNoResultsText(noResultsText) {
+    setNoResultsText(noResultsText: string): this {
         const p = this._p;
 
         p.noResultsText = noResultsText;
@@ -1353,7 +1401,7 @@ class DropList {
      * @param {number} window
      * @returns {DropList}
      */
-    setFilterThrottleWindow(window) {
+    setFilterThrottleWindow(window: number): this {
         const p = this._p;
         p.filterThrottleWindow = window;
 
@@ -1381,7 +1429,7 @@ class DropList {
      * @param {boolean} value
      * @returns {DropList}
      */
-    setFilterOnEmptyTerm(value) {
+    setFilterOnEmptyTerm(value: boolean): this {
         const p = this._p;
         if (p.filterOnEmptyTerm === value)
             return this;
@@ -1401,7 +1449,7 @@ class DropList {
      * @param {boolean} value
      * @returns {DropList}
      */
-    setFilterGroups(value) {
+    setFilterGroups(value: boolean): this {
         const p = this._p;
         if (p.filterGroups === value)
             return this;
@@ -1421,7 +1469,7 @@ class DropList {
      * @param {boolean} value
      * @returns {DropList}
      */
-    setFilterEmptyGroups(value) {
+    setFilterEmptyGroups(value: boolean): this {
         const p = this._p;
         if (p.filterEmptyGroups === value)
             return this;
@@ -1441,7 +1489,7 @@ class DropList {
      * @param {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} fn
      * @returns {DropList}
      */
-    setFilterFn(fn) {
+    setFilterFn(fn: DropListOptions['filterFn']): this {
         const p = this._p;
         if (p.filterFn === fn)
             return this;
@@ -1463,7 +1511,7 @@ class DropList {
      * @returns {DropList}
      * @public
      */
-    relayout(positionOptions) {
+    relayout(positionOptions?: PositionOptions | null): this {
         const p = this._p, el = p.el, menuEl = p.menuEl;
 
         if (!this.isVisible()) return this;
@@ -1488,7 +1536,7 @@ class DropList {
             };
         }
 
-        let targetBox = {};
+        let targetBox: { left?: number; top?: number; height?: number; width?: number; bottom?: number } = {};
 
         let offset = positionOptions.targetOffset || getElementOffset(positionOptions.target);
         targetBox.left = offset.left;
@@ -1501,7 +1549,7 @@ class DropList {
             : positionOptions.targetWidth;
         targetBox.bottom = targetBox.top + targetBox.height;
 
-        let viewport = {};
+        let viewport: { top?: number; left?: number; width?: number; height?: number; bottom?: number; right?: number } = {};
         viewport.top = w.pageYOffset;
         viewport.left = w.pageXOffset;
         viewport.width = w.innerWidth;
@@ -1547,7 +1595,7 @@ class DropList {
 
         // Calculate height for dropdown
 
-        let maxViewHeight;
+        let maxViewHeight: number;
 
         const elComputedStyle = getComputedStyle(el);
 
@@ -1650,7 +1698,7 @@ class DropList {
         let scrollLeft =
             (w.pageXOffset !== undefined) ?
                 w.pageXOffset :
-                (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+                ((document.documentElement || document.body.parentNode || document.body) as HTMLElement).scrollLeft;
         scrollLeft = Math.abs(scrollLeft);
         if (isRtlDocument) {
             scrollLeft = document.documentElement.scrollWidth - scrollLeft - document.documentElement.clientWidth;
@@ -1659,7 +1707,7 @@ class DropList {
         let minX = scrollLeft,
             maxX = document.documentElement.clientWidth + scrollLeft - viewSize.width;
 
-        let viewCss = {
+        let viewCss: { position: string; left: any; top: any } = {
             'position': 'absolute',
             'left': targetBox.left,
             'top': targetBox.top + (invertYPos ? (anchor.bottom - position.bottom) : (anchor.top - position.top)),
@@ -1746,7 +1794,7 @@ class DropList {
      * @param {boolean} checked - will the value be checked?
      * @returns {DropList} self
      */
-    setItemChecked(value, checked) {
+    setItemChecked(value: any, checked: boolean): this {
         const p = this._p;
 
         checked = !!checked;
@@ -1778,7 +1826,7 @@ class DropList {
      * @param {Array<*>} values - array of values to check
      * @returns {DropList} self
      */
-    setCheckedValues(values) {
+    setCheckedValues(values: any[]): this {
         const p = this._p;
 
         this.rushRefilter();
@@ -1822,7 +1870,7 @@ class DropList {
      * @param {boolean} excludeGroups=false Exclude group items
      * @returns {Array<*>} self
      */
-    getCheckedValues(excludeGroups) {
+    getCheckedValues(excludeGroups?: boolean): any[] {
         const p = this._p;
 
         excludeGroups = excludeGroups && p.groupCount > 0;
@@ -1845,7 +1893,7 @@ class DropList {
      * @param {boolean} excludeGroups=false Exclude group items
      * @returns {DropList.Item[]}
      */
-    getCheckedItems(excludeGroups) {
+    getCheckedItems(excludeGroups?: boolean): ItemBase[] {
         const p = this._p;
 
         excludeGroups = excludeGroups && p.groupCount > 0;
@@ -1868,7 +1916,7 @@ class DropList {
      * @returns {DropList}
      * @public
      */
-    show(positionOptions) {
+    show(positionOptions?: PositionOptions | null): this {
         const p = this._p;
 
         p.hiding = false;
@@ -1945,7 +1993,7 @@ class DropList {
         return this;
     }
 
-    hide() {
+    hide(event?: Event) {
         const p = this._p, el = p.el;
 
         if (p.onDocumentMouseDown) {
@@ -1969,7 +2017,7 @@ class DropList {
 
                 // support for hide transition in css
                 const maxTransitionDuration = parseTransition(getComputedStyle(p.el).transition)
-                    .reduce((p, v) => Math.max(p, v.delay + v.duration), 0);
+                    .reduce((p: number, v: any) => Math.max(p, v.delay + v.duration), 0);
 
                 if (maxTransitionDuration > 0) {
                     setTimeout(() => {
@@ -2025,7 +2073,7 @@ class DropList {
      * You should probably call `relayout()` after this.
      * @param {boolean} visible
      */
-    setHeaderVisible(visible) {
+    setHeaderVisible(visible: boolean) {
         let isVisible = this.isHeaderVisible();
         if (isVisible === !!visible)
             return;
@@ -2058,7 +2106,7 @@ class DropList {
      * You should probably call `relayout()` after this.
      * @param {boolean} visible
      */
-    setFooterVisible(visible) {
+    setFooterVisible(visible: boolean) {
         let isVisible = this.isFooterVisible();
         if (isVisible === !!visible)
             return;
@@ -2091,7 +2139,7 @@ class DropList {
      * You should probably call `relayout()` after this.
      * @param {boolean} searchable
      */
-    setSearchable(searchable) {
+    setSearchable(searchable: boolean) {
         const p = this._p;
 
         if (!!p.searchInput === !!searchable)
@@ -2124,7 +2172,7 @@ class DropList {
      * Set the placeholder text of the inline search box
      * @param {string} placeholder
      */
-    setSearchPlaceholder(placeholder) {
+    setSearchPlaceholder(placeholder: string) {
         const p = this._p;
 
         p.searchPlaceholder = placeholder || '';
@@ -2144,7 +2192,7 @@ class DropList {
         return this._p.focusItemIndex;
     }
 
-    setFocusedItemAtIndex(itemIndex) {
+    setFocusedItemAtIndex(itemIndex: number): this {
         const p = this._p;
 
         this.rushRefilter();
@@ -2194,7 +2242,7 @@ class DropList {
         return this;
     }
 
-    _showSublist(item, itemElement) {
+    _showSublist(item: InternalItem, itemElement: HTMLElement) {
         if (!item._subitems?.length) return;
 
         const p = this._p;
@@ -2225,7 +2273,7 @@ class DropList {
             positionOptionsProvider: () => p.currentSubDropList.showOptions,
         });
 
-        let onBlur = event => {
+        let onBlur = (event: any) => {
             if (this[DestroyedSymbol]) return;
 
             if (event.relatedTarget && this.elContains(event.relatedTarget, true))
@@ -2337,7 +2385,7 @@ class DropList {
         }
     }
 
-    setFocusedItem(item) {
+    setFocusedItem(item: any) {
         const p = this._p;
 
         let itemIndex = item._nointeraction ? -1 : this._getItemIndex(item);
@@ -2349,11 +2397,11 @@ class DropList {
         return this.setFocusedItemAtIndex(itemIndex);
     }
 
-    setFocusedItemByValue(value) {
+    setFocusedItemByValue(value: any) {
         return this.setFocusedItemAtIndex(this.itemIndexByValue(value));
     }
 
-    setSingleSelectedItemAtIndex(itemIndex, value) {
+    setSingleSelectedItemAtIndex(itemIndex: number, value?: any): this {
         const p = this._p;
 
         this.rushRefilter();
@@ -2379,7 +2427,7 @@ class DropList {
         return this;
     }
 
-    setSingleSelectedItem(item) {
+    setSingleSelectedItem(item: any) {
         const p = this._p;
 
         let itemIndex = item._nointeraction ? -1 : this._getItemIndex(item);
@@ -2391,15 +2439,15 @@ class DropList {
         return this.setSingleSelectedItemAtIndex(itemIndex);
     }
 
-    setSingleSelectedItemByValue(value) {
+    setSingleSelectedItemByValue(value: any) {
         return this.setSingleSelectedItemAtIndex(this.itemIndexByValue(value), value);
     }
 
-    next(event) {
+    next(event: Event) {
         this._move('next', event);
     }
 
-    previous(event) {
+    previous(event: Event) {
         this._move('prev', event);
     }
 
@@ -2415,7 +2463,7 @@ class DropList {
         return p.focusItemIndex > -1 && p.focusItemIndex === items.length - 1;
     }
 
-    scrollItemIndexIntoView(itemIndex) {
+    scrollItemIndexIntoView(itemIndex: number): this {
         const p = this._p;
 
         if (this._hasScroll()) {
@@ -2432,7 +2480,7 @@ class DropList {
         return this;
     }
 
-    _scrollItemIndexIntoView(itemIndex) {
+    _scrollItemIndexIntoView(itemIndex: number) {
         const p = this._p;
 
         if (this._hasScroll()) {
@@ -2471,7 +2519,7 @@ class DropList {
      * @param {function(any)} handler
      * @returns {DropList}
      */
-    on(/**string|'*'*/event, /**Function?*/handler) {
+    on(event: string | '*', handler: (value: any) => void): this {
         this._p.mitt.on(event, handler);
         return this;
     }
@@ -2482,8 +2530,8 @@ class DropList {
      * @param {function(any)} handler
      * @returns {DropList}
      */
-    once(/**string|'*'*/event, /**Function?*/handler) {
-        let wrapped = (value) => {
+    once(event: string | '*', handler: (value: any) => void): this {
+        let wrapped = (value: any) => {
             this._p.mitt.off(event, wrapped);
             handler(value);
         };
@@ -2497,7 +2545,7 @@ class DropList {
      * @param {function(any)} handler
      * @returns {DropList}
      */
-    off(/**(string|'*')?*/event, /**Function?*/handler) {
+    off(event?: string | '*', handler?: (value: any) => void): this {
         if (!event && !event) {
             this._p.mitt.all.clear();
         } else {
@@ -2512,12 +2560,12 @@ class DropList {
      * @param {any} value
      * @returns {DropList}
      */
-    emit(/**string|'*'*/event, /**any?*/value) {
+    emit(event: string, value?: any): this {
         this._p.mitt.emit(event, value);
         return this;
     }
 
-    _getItemIndex(item) {
+    _getItemIndex(item: any): number {
         const p = this._p;
 
         let itemIndex = -1;
@@ -2535,7 +2583,7 @@ class DropList {
         return itemIndex;
     }
 
-    _setSingleSelectedItemEl(itemEl, value) {
+    _setSingleSelectedItemEl(itemEl: HTMLElement | null, value: any): this {
         const p = this._p;
 
         if (p.singleSelectedItemEl) {
@@ -2558,14 +2606,14 @@ class DropList {
      * @param {*} [data]
      * @private
      */
-    _trigger(event, data) {
+    _trigger(event: string, data?: any) {
         const p = this._p;
         if (p.on)
             p.on(event, ...(data === undefined ? [] : [data]));
         p.mitt.emit(event, data);
     }
 
-    _itemUpAction(event, itemEl) {
+    _itemUpAction(event: any, itemEl: HTMLElement) {
         if (closestUntil(event.target, '.requires-pointer-events,button', itemEl)) return;
 
         let p = this._p;
@@ -2592,7 +2640,7 @@ class DropList {
         const p = this._p;
 
         p.sink
-            .add(p.el, 'mouseup', (event) => {
+            .add(p.el, 'mouseup', (event: any) => {
                 const li = closestUntil(event.target, 'li', event.currentTarget);
                 if (!li) return;
 
@@ -2600,7 +2648,7 @@ class DropList {
 
                 this._itemUpAction(event, li);
             })
-            .add(p.el, 'mouseover', (event) => {
+            .add(p.el, 'mouseover', (event: any) => {
                 const li = closestUntil(event.target, 'li', event.currentTarget);
                 if (!li) return;
 
@@ -2608,16 +2656,16 @@ class DropList {
             });
     }
 
-    _handleMouseOver(event, itemEl) {
+    _handleMouseOver(event: any, itemEl: HTMLElement) {
         this._focus(event, itemEl, null, true);
     }
 
     _hookTouchEvents() {
         const p = this._p;
 
-        let currentTouchId;
+        let currentTouchId: any;
 
-        p.sink.add(p.el, 'touchstart', (event) => {
+        p.sink.add(p.el, 'touchstart', (event: any) => {
             const li = closestUntil(event.target, 'li', event.currentTarget);
             if (!li) return;
 
@@ -2648,11 +2696,11 @@ class DropList {
 
             p.sink.add(window, 'touchcancel.dropdown_touchextra', onTouchCancel);
 
-            p.sink.add(p.el, 'touchend.dropdown_touchextra', (event) => {
+            p.sink.add(p.el, 'touchend.dropdown_touchextra', (event: any) => {
                 const li = closestUntil(event.target, 'li', event.currentTarget);
                 if (!li) return onTouchCancel();
 
-                let touch = Array.prototype.find.call(event.changedTouches, (touch) => {
+                let touch = Array.prototype.find.call(event.changedTouches, (touch: any) => {
                     return touch.identifier === currentTouchId;
                 });
                 if (!touch) return onTouchCancel();
@@ -2671,7 +2719,7 @@ class DropList {
         const p = this._p;
 
         p.sink
-            .add(p.el, 'focus', event => {
+            .add(p.el, 'focus', (event: any) => {
                 if (event.target === this.el && p.searchable)
                     p.searchInput.focus();
 
@@ -2680,12 +2728,12 @@ class DropList {
                     this.elContains(event.target, true))
                     return;
 
-                let itemEl = p.focusItemEl || // focused item
-                    p.el.firstChild; // or the first item
+                let itemEl = (p.focusItemEl || // focused item
+                    p.el.firstChild) as HTMLElement | null; // or the first item
 
                 this._focus(event, itemEl, null, false);
             }, true)
-            .add(p.el, 'blur', event => {
+            .add(p.el, 'blur', (event: any) => {
                 if (event.relatedTarget &&
                     this.elContains(event.relatedTarget, true) &&
                     this.elContains(event.target, true))
@@ -2707,7 +2755,7 @@ class DropList {
     _hookKeyEvents() {
         const p = this._p;
 
-        p.sink.add(p.el, 'keydown', evt => this._keydown(evt));
+        p.sink.add(p.el, 'keydown', (evt: any) => this._keydown(evt));
     }
 
     _hookSearchEvents() {
@@ -2725,7 +2773,7 @@ class DropList {
         });
     }
 
-    _keydown(event) {
+    _keydown(event: any) {
         const p = this._p;
 
         if (p.keyDownHandler && p.keyDownHandler.call(this, event)) {
@@ -2822,7 +2870,7 @@ class DropList {
         }
     }
 
-    _keydownFreeType(evt, autoSelect) {
+    _keydownFreeType(evt: any, autoSelect?: boolean) {
         const p = this._p;
 
         // noinspection JSDeprecatedSymbols
@@ -2898,7 +2946,7 @@ class DropList {
         }
     }
 
-    _focus(event, itemEl, itemIndex, openSubitems) {
+    _focus(event: any, itemEl: HTMLElement | null, itemIndex: number | undefined, openSubitems: boolean) {
         const p = this._p;
 
         if (p._isFocusingItem)
@@ -2909,7 +2957,7 @@ class DropList {
             itemIndex = p.virtualListHelper.getItemIndexFromElement(itemEl);
         }
 
-        if (itemIndex > -1 && itemEl?.[ItemSymbol]?.[ItemSymbol] === NoResultsItemSymbol) {
+        if (itemIndex > -1 && (itemEl as any)?.[ItemSymbol]?.[ItemSymbol] === NoResultsItemSymbol) {
             itemIndex = undefined;
         }
 
@@ -2970,7 +3018,7 @@ class DropList {
         }, p.autoItemBlurDelay);
     }
 
-    _move(direction, event) {
+    _move(direction: string, event: Event): void {
         const p = this._p;
 
         let next, nextIndex, directionUp;
@@ -3108,7 +3156,7 @@ class DropList {
         return menuEl.clientHeight < menuEl.scrollHeight;
     }
 
-    _updateGroupStateForItem(item) {
+    _updateGroupStateForItem(item: InternalItem) {
         const p = this._p;
 
         if (!p.multi)
@@ -3185,7 +3233,7 @@ class DropList {
         return this;
     }
 
-    _updateGroupCheckedState(groupIndex, fireEvents) {
+    _updateGroupCheckedState(groupIndex: number, fireEvents: boolean) {
         const p = this._p;
 
         if (!(p.multi && p.autoCheckGroupChildren && groupIndex > -1))
@@ -3281,7 +3329,7 @@ class DropList {
         }
 
         if (p.estimateWidth || p.virtualListHelper.isVirtual()) {
-            p.virtualListHelper.createGhostItemElement(GhostSymbol, true, itemEl => {
+            p.virtualListHelper.createGhostItemElement(GhostSymbol, true, (itemEl: HTMLElement) => {
                 let measureScroll = createElement('span', {
                     css: {
                         display: 'block',
@@ -3317,7 +3365,7 @@ class DropList {
      * @returns {DropList}
      * @private
      */
-    _determineVirtualMode(targetItemCount) {
+    _determineVirtualMode(targetItemCount?: number) {
         const p = this._p;
 
         const items = p.filteredItems ?? p.items;
@@ -3334,7 +3382,7 @@ class DropList {
         return this;
     }
 
-    _renderItemContent(item, itemEl) {
+    _renderItemContent(item: InternalItem, itemEl: HTMLElement) {
         const p = this._p;
 
         // NOTE: a "measure" item will not have full data of original item.
@@ -3377,7 +3425,7 @@ class DropList {
      * @returns {number} new outer width
      * @private
      */
-    _updateWidth(positionOptions) {
+    _updateWidth(positionOptions?: PositionOptions): number {
         const p = this._p, el = p.el;
 
         let targetWidth = 0;
@@ -3388,7 +3436,7 @@ class DropList {
                 targetWidth = positionOptions.updateWidth;
             } else if (positionOptions.targetWidth != null) {
                 // Set from simulated target width
-                targetWidth = positionOptions.updateWidth;
+                targetWidth = positionOptions.updateWidth as unknown as number;
             } else {
                 // Measure target
                 targetWidth = getElementWidth(positionOptions.target, true, true);

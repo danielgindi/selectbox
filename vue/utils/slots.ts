@@ -1,20 +1,20 @@
 import * as VueModule from 'vue';
 
 const isVue3 = VueModule.version > '3.';
-const render3 = VueModule.render;
-const createVNode3 = VueModule.createVNode;
+const render3 = (VueModule as any).render;
+const createVNode3 = (VueModule as any).createVNode;
 
-const createInstanceFromVnode = vnode => {
-    return new VueModule({
+const createInstanceFromVnode = (vnode: any) => {
+    return new (VueModule as any)({
         render() {
             return vnode;
         },
     });
 };
 
-const createInstanceFromVnodes = vnodes => {
-    return new VueModule({
-        render(h) {
+const createInstanceFromVnodes = (vnodes: any) => {
+    return new (VueModule as any)({
+        render(h: any) {
             return h('div', vnodes);
         },
     });
@@ -28,9 +28,9 @@ const VueInstanceSymbol = Symbol('vue_instance');
  * @param {string} slotName
  * @returns {(function(item: *, parent: Element): void)|undefined}
  */
-const createSlotBasedRenderFunc = (vue, slotName) => {
+const createSlotBasedRenderFunc = (vue: any, slotName: string) => {
     if (vue.$slots[slotName]) {
-        return (item, parent) => {
+        return (item: any, parent: any) => {
             if (isVue3) {
                 let slotVnode = vue.$slots[slotName](item);
                 let vnode = createVNode3({
@@ -51,9 +51,9 @@ const createSlotBasedRenderFunc = (vue, slotName) => {
     }
 
     if (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName]) { // Removed in Vue 3
-        return (item, parent) => {
+        return (item: any, parent: any) => {
             let vnode = vue.$scopedSlots[slotName](item);
-            let vm;
+            let vm: any;
 
             if (Array.isArray(vnode)) {
                 vm = createInstanceFromVnodes(vnode);
@@ -78,9 +78,9 @@ const createSlotBasedRenderFunc = (vue, slotName) => {
  * @param {string} slotName
  * @returns {(function(parent: Element): void)|undefined}
  */
-const createSlotBasedUnrenderFunc = (vue, slotName) => {
+const createSlotBasedUnrenderFunc = (vue: any, slotName: string) => {
     if (vue.$slots[slotName] || (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName])) {
-        return (parent) => {
+        return (parent: any) => {
             const vmOrApp = parent[VueInstanceSymbol];
             if (!vmOrApp) return;
             if (isVue3) render3(null, parent);

@@ -116,7 +116,7 @@ const Sass = require('sass');
             build: {
                 emptyOutDir: false,
                 lib: {
-                    entry: Path.resolve(process.cwd(), 'lib/index.js'),
+                    entry: Path.resolve(process.cwd(), 'lib/index.ts'),
                     name: task.outputName,
                     formats: [task.outputFormat],
                     fileName: () => Path.basename(task.dest),

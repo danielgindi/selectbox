@@ -33,13 +33,113 @@ import {
     VALUE_TAB,
     VALUE_UP,
 } from 'keycode-js';
-import mitt from 'mitt';
+import mitt, { type Emitter } from 'mitt';
+import type { SelectBoxOptions, ItemBase, DropListOptions, PositionOptions } from './types.js';
 
 const DestroyedSymbol = Symbol('destroyed');
 const RestMultiItemsSymbol = Symbol('rest_multi_items');
 
+/**
+ * The shape of `SelectBox#_p`, the internal state bag.
+ */
+interface SelectBoxState {
+    ownsEl?: boolean;
+    baseClassName?: string;
+    additionalClasses?: string | string[];
+    direction?: 'ltr' | 'rtl' | 'auto';
+
+    listOptions?: DropListOptions;
+
+    disabled?: boolean;
+    readOnly?: boolean;
+    clearable?: boolean;
+    hasOpenIndicator?: boolean;
+    placeholder?: string;
+    sortSelectedItems?: boolean;
+    sortListItems?: boolean;
+    sortListCheckedFirst?: boolean;
+    stickyValues?: Set<any> | null;
+    sortItemComparator?: SelectBoxOptions['sortItemComparator'];
+    splitListCheckedGroups?: boolean;
+    treatGroupSelectionAsItems?: boolean;
+    blurOnSingleSelection?: boolean | 'touch';
+    multi?: boolean;
+    showSelection?: boolean;
+    showPlaceholderInTooltip?: boolean;
+    multiPlaceholderFormatter?: SelectBoxOptions['multiPlaceholderFormatter'];
+    searchable?: boolean;
+    allowTypeToSelect?: boolean;
+    noResultsText?: string;
+    autoSelectTextOnCheck?: boolean;
+
+    labelProp?: string;
+    valueProp?: string;
+    multiItemLabelProp?: string;
+    multiItemRemovePosition?: 'after' | 'before' | 'none';
+
+    maxMultiItems?: number | null;
+    multiItemsRestLabelProvider?: SelectBoxOptions['multiItemsRestLabelProvider'];
+
+    renderSingleItem?: SelectBoxOptions['renderSingleItem'];
+    unrenderSingleItem?: SelectBoxOptions['unrenderSingleItem'];
+    renderMultiItem?: SelectBoxOptions['renderMultiItem'];
+    unrenderMultiItem?: SelectBoxOptions['unrenderMultiItem'];
+    renderRestMultiItem?: SelectBoxOptions['renderRestMultiItem'];
+    unrenderRestMultiItem?: SelectBoxOptions['unrenderRestMultiItem'];
+
+    on?: SelectBoxOptions['on'] | null;
+    silenceEvents?: boolean;
+    mitt?: Emitter<Record<string, any>>;
+
+    isLoadingMode?: boolean;
+    closeListWhenLoading?: boolean;
+    clearInputWhen?: string[];
+
+    items?: ItemBase[];
+    itemsChanged?: boolean;
+
+    sink?: any;
+
+    resizeObserver?: any;
+
+    selectedItems?: ItemBase[];
+    selectedValues?: any[];
+    selectionChanged?: boolean;
+    resortBySelectionNeeded?: boolean;
+
+    filterThrottleWindow?: number;
+    filterOnEmptyTerm?: boolean;
+    filterFn?: SelectBoxOptions['filterFn'] | null;
+    actualFilterFn?: SelectBoxOptions['filterFn'];
+    filterTerm?: string;
+
+    el?: HTMLElement;
+    multiItemEls?: HTMLElement[];
+    input?: HTMLInputElement;
+    inputWrapper?: HTMLElement;
+    inputBackBuffer?: HTMLElement;
+    list?: HTMLElement;
+    singleWrapper?: HTMLElement;
+    clearButton?: HTMLElement;
+    clearButtonWrapper?: HTMLElement;
+    openIndicator?: HTMLElement;
+    spinner?: HTMLElement;
+
+    dropList?: DropList & { _lastSerializedBox?: string | null };
+    dropListVisible?: boolean;
+    lastActiveElement?: any;
+    lastKeyAllowsNonTypeKeys?: boolean;
+
+    itemByValueMap?: Map<any, ItemBase>;
+    subitemByValueMap?: Map<any, ItemBase> | null;
+
+    syncQueue?: any[];
+    syncTimeout?: ReturnType<typeof setTimeout>;
+    presenceInt?: ReturnType<typeof setInterval> | null;
+}
+
 const hasTouchCapability = !!('ontouchstart' in window
-    || (window.DocumentTouch && window.document instanceof window.DocumentTouch)
+    || ((window as any).DocumentTouch && window.document instanceof (window as any).DocumentTouch)
     || window.navigator.maxTouchPoints
 );
 
@@ -48,7 +148,7 @@ const hasTouchCapability = !!('ontouchstart' in window
  * @param {string} className
  * @returns {boolean}
  */
-const hasClass = function (el, className) {
+const hasClass = function (el: any, className: string) {
     if (el instanceof Element) {
         return el.classList.contains(className);
     }
@@ -70,58 +170,7 @@ const inputBackbufferCssProps = [
     'padding-right',
 ];
 
-/**
- * @typedef {Object} SelectBox.Options
- * @property {DropList.Options} [listOptions] options to pass to the `DropList`
- * @property {Element} [el] An element to attach to, instead of creating a new one
- * @property {string} [baseClassName='selectbox'] class name for the menu root element
- * @property {string|string[]} [additionalClasses]
- * @property {'ltr'|'rtl'|'auto'} [direction='auto']
- * @property {boolean} [disabled=false] Should start as disabled?
- * @property {boolean} [readOnly=false] Should start as readOnly?
- * @property {boolean} [clearable=true] Has clear button?
- * @property {boolean} [hasOpenIndicator=true] has open/close indicator?
- * @property {string} [placeholder=''] Placeholder text
- * @property {boolean} [sortSelectedItems=true] Should the selected items be sorted?
- * @property {boolean} [sortListItems=false] Sort list items
- * @property {boolean} [sortListCheckedFirst=true] When sorting - put checked items first (applicable to `multi` mode only)
- * @property {boolean} [treatGroupSelectionAsItems=false] Treat group items as normal items
- * @property {*[]} [stickyValues]
- * @property {function(a: DropList.ItemBase, b: DropList.ItemBase):number} [sortItemComparator]
- * @property {boolean} [splitListCheckedGroups=true] Split groups to "checked" and "unchecked", works with `sortListCheckedFirst` only
- * @property {boolean|'touch'} [blurOnSingleSelection='touch']
- * @property {boolean} [multi=false] can multiple values be selected?
- * @property {boolean} [showSelection=true] show selection? if false, the placeholder will take effect
- * @property {boolean} [showPlaceholderInTooltip=false] show placeholder in title attribute
- * @property {function(items: DropList.ItemBase[]):string} [multiPlaceholderFormatter] formatter for placeholder for multi items mode
- * @property {string} [labelProp='label']
- * @property {string} [valueProp='value']
- * @property {string} [multiItemLabelProp='short_label']
- * @property {'after'|'before'|'none'} [multiItemRemovePosition='after']
- * @property {number} [maxMultiItems] maximum number of multi items. The rest will get a single item to represent.
- * @property {function(count: number, items: DropList.ItemBase[]):string} [multiItemsRestLabelProvider] label for the item representing the rest of the items.
- * @property {DropList.ItemBase[]|null} [items] initial items
- * @property {*[]|null} [selectedValues] initial selected values
- * @property {*|*[]|null} [value] initial selected value
- * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [renderSingleItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element)} [unrenderSingleItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [renderMultiItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element)} [unrenderMultiItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [renderRestMultiItem]
- * @property {function(item: DropList.ItemBase, itemEl: Element)} [unrenderRestMultiItem]
- * @property {boolean} [searchable=false] is it searchable?
- * @property {boolean} [allowTypeToSelect=true] default behavior of type to select (focus first item starting with the search term) when searchable is true
- * @property {string} [noResultsText='No matching results'] text for no results (empty for none)
- * @property {boolean} [autoSelectTextOnCheck=true] automatically select text in input when an item is checked (multi mode). Used to allow the user to quickly type multiple items.
- * @property {number} [filterThrottleWindow=300] throttle time (milliseconds) for filtering
- * @property {boolean} [filterOnEmptyTerm=false] call the filter function on empty search term too
- * @property {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} [filterFn]
- * @property {function(name: string, ...args)} [on]
- * @property {boolean} [isLoadingMode]
- * @property {boolean} [closeListWhenLoading] whether we should close the list automatically when loading
- * @property {string[]} [clearInputWhen=['single_close','multi_select_single']] clear input box when closing the droplist or selecting <code>['single_close', 'multi_close', 'multi_select_single']</code>
- * */
-export const DefaultOptions = {
+export const DefaultOptions: SelectBoxOptions = {
     el: null,
     baseClassName: 'selectbox',
     disabled: false,
@@ -166,7 +215,7 @@ export const DefaultOptions = {
  * @param {string} labelProp
  * @returns {string}
  */
-const defaultMultiPlaceholderFormatter = (items, labelProp) => {
+const defaultMultiPlaceholderFormatter = (items: any[], labelProp: string) => {
     if (items.length === 0)
         return '';
 
@@ -180,11 +229,11 @@ const defaultMultiPlaceholderFormatter = (items, labelProp) => {
 };
 
 
-function getFocusState(element) {
+function getFocusState(element: any) {
     if (!element)
         return null;
 
-    const state = { element };
+    const state: any = { element };
 
     if (typeof element.selectionStart === 'number' &&
         typeof element.selectionEnd === 'number') {
@@ -196,7 +245,7 @@ function getFocusState(element) {
     return state;
 }
 
-function restoreFocusState(state) {
+function restoreFocusState(state: any) {
     if (!state?.element || !document.body.contains(state.element))
         return false;
 
@@ -241,15 +290,19 @@ Emits the following events:
 
 // noinspection JSUnusedGlobalSymbols
 class SelectBox {
+    _p: SelectBoxState | null;
+    [DestroyedSymbol]?: boolean;
+    silenceEvents?: boolean;
+
     /**
      * @param {SelectBox.Options} options
      */
-    constructor(options) {
+    constructor(options: SelectBoxOptions) {
         const o = { ...DefaultOptions };
 
         for (let [key, value] of Object.entries(/**@type Object*/options))
             if (value !== undefined)
-                o[key] = value;
+                (o as any)[key] = value;
 
         const p = this._p = {
             ownsEl: true,
@@ -299,7 +352,7 @@ class SelectBox {
 
             on: o.on || null,
             silenceEvents: true,
-            mitt: mitt(),
+            mitt: mitt<Record<string, any>>(),
 
             isLoadingMode: !!o.isLoadingMode,
             closeListWhenLoading: !!o.closeListWhenLoading,
@@ -322,9 +375,9 @@ class SelectBox {
             filterOnEmptyTerm: o.filterOnEmptyTerm,
             filterFn: null,
             filterTerm: '',
-        };
+        } as SelectBoxState;
 
-        let el = o.el;
+        let el: HTMLElement = o.el as HTMLElement;
         if (el instanceof Element) {
             p.ownsEl = false;
         } else {
@@ -351,7 +404,7 @@ class SelectBox {
 
         // --- Hook click
         p.sink
-            .add(el, 'click', (evt) => {
+            .add(el, 'click', (evt: any) => {
                 if (p.clearButtonWrapper && p.clearButtonWrapper.contains(evt.target)) {
                     return;
                 }
@@ -364,19 +417,19 @@ class SelectBox {
             });
 
         // --- Handle default focus directly to search box
-        p.sink.add(el, 'focus', evt => {
+        p.sink.add(el, 'focus', (evt: any) => {
             const target = (/**Element*/evt.target);
 
             if (!el.contains(evt.relatedTarget) &&
                 !hasClass(target, `${p.baseClassName}__search_field`) &&
                 !hasClass(target, `${p.baseClassName}__item`)) {
-                let field = el.querySelector(`.${p.baseClassName}__search_field`);
+                let field: HTMLElement | null = el.querySelector(`.${p.baseClassName}__search_field`);
                 field && field.focus();
             }
         }, true);
 
         p.sink
-            .add(p.input, 'keydown', (/**KeyboardEvent*/event) => {
+            .add(p.input, 'keydown', (/**KeyboardEvent*/event: any) => {
                 this._handleInputKeydown(event);
             })
             .add(p.input, 'input', () => {
@@ -384,7 +437,7 @@ class SelectBox {
             });
 
         const focusInOutHandler = (() => {
-            let t;
+            let t: any;
             return () => {
                 if (t) {
                     clearTimeout(t);
@@ -402,7 +455,7 @@ class SelectBox {
         p.sink.add(window, 'orientationchange', () => this._resizeInput());
 
         if (window.ResizeObserver !== undefined) {
-            let lastSize = {
+            let lastSize: any = {
                 borderBoxSize: {
                     blockSize: null,
                     inlineSize: null,
@@ -501,11 +554,11 @@ class SelectBox {
         this._p = null;
     }
 
-    get el() {
+    get el(): HTMLElement | null {
         return this._p?.el ?? null;
     }
 
-    get droplistInstance() {
+    get droplistInstance(): DropList | undefined {
         return this._p.dropList;
     }
 
@@ -515,7 +568,7 @@ class SelectBox {
      * @param {boolean} [considerSubmenus=true]
      * @returns {boolean|undefined}
      */
-    droplistElContains(other, considerSubmenus = true) {
+    droplistElContains(other: any, considerSubmenus = true): boolean | undefined {
         return this._p.dropList?.elContains(other, considerSubmenus);
     }
 
@@ -524,7 +577,7 @@ class SelectBox {
      * @param {boolean=true} enabled Should the control be enabled?
      * @returns {SelectBox}
      */
-    enable(enabled) {
+    enable(enabled?: boolean): this {
         const p = this._p;
 
         if (enabled === undefined) {
@@ -560,7 +613,7 @@ class SelectBox {
      * @param {boolean=true} disabled Should the control be disabled?
      * @returns {SelectBox}
      */
-    disable(disabled) {
+    disable(disabled?: boolean): this {
         return this.enable(disabled === undefined ? false : !disabled);
     }
 
@@ -577,7 +630,7 @@ class SelectBox {
      * @param {boolean=true} readOnly Should the control be read only?
      * @returns {SelectBox}
      */
-    setReadOnly(readOnly) {
+    setReadOnly(readOnly?: boolean): this {
         const p = this._p;
 
         if (readOnly === undefined) {
@@ -602,7 +655,7 @@ class SelectBox {
      * @param {string|string[]} classes
      * @returns {SelectBox}
      */
-    setAdditionalClasses(classes) {
+    setAdditionalClasses(classes: string | string[]): this {
         const p = this._p;
         p.additionalClasses = classes;
         this._syncBaseClasses();
@@ -615,7 +668,7 @@ class SelectBox {
      * @param {boolean} [resetValues=true] should reset values to current values (essentially refresh the data based on items & values). If set to false, use setValue to set a fresh value
      * @returns {SelectBox}
      */
-    setItems(items, resetValues = true) {
+    setItems(items?: ItemBase[], resetValues = true): this {
         const p = this._p;
 
         if (!items)
@@ -652,7 +705,7 @@ class SelectBox {
         return p.dropList?.isFilterPending() === true;
     }
 
-    updateItemByValue(value, newItem) {
+    updateItemByValue(value: any, newItem: ItemBase) {
         const p = this._p;
 
         let existingItem = this._getItemByValue(value);
@@ -683,7 +736,7 @@ class SelectBox {
      * @param {boolean} clearable
      * @returns {SelectBox}
      */
-    setClearable(clearable) {
+    setClearable(clearable: boolean): this {
         clearable = !!clearable;
 
         if (this._p.clearable === clearable)
@@ -705,7 +758,7 @@ class SelectBox {
      * @param {boolean} enabled
      * @returns {SelectBox}
      */
-    setHasOpenIndicator(enabled) {
+    setHasOpenIndicator(enabled: boolean): this {
         enabled = !!enabled;
 
         if (this._p.hasOpenIndicator === enabled)
@@ -727,7 +780,7 @@ class SelectBox {
      * @param {string} placeholder
      * @returns {SelectBox}
      */
-    setPlaceholder(placeholder) {
+    setPlaceholder(placeholder: string): this {
         this._p.placeholder = placeholder == null ? '' : String(placeholder);
         this._scheduleSync('render_base');
         return this;
@@ -745,7 +798,7 @@ class SelectBox {
      * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
      * @returns {SelectBox}
      */
-    setSearchTerm(term, performSearch = false) {
+    setSearchTerm(term: string, performSearch = false): this {
         const p = this._p;
 
         if (!p.input) return this;
@@ -783,7 +836,7 @@ class SelectBox {
      * @param {boolean} sortSelectedItems
      * @returns {SelectBox}
      */
-    setSortSelectedItems(sortSelectedItems) {
+    setSortSelectedItems(sortSelectedItems: boolean): this {
         const p = this._p;
         sortSelectedItems = !!sortSelectedItems;
         if (p.sortSelectedItems === sortSelectedItems)
@@ -805,7 +858,7 @@ class SelectBox {
      * @param {boolean} sortListItems
      * @returns {SelectBox}
      */
-    setSortListItems(sortListItems) {
+    setSortListItems(sortListItems: boolean): this {
         const p = this._p;
         sortListItems = !!sortListItems;
         if (p.sortListItems === sortListItems)
@@ -828,7 +881,7 @@ class SelectBox {
      * @param {boolean} sortListCheckedFirst
      * @returns {SelectBox}
      */
-    setSortListCheckedFirst(sortListCheckedFirst) {
+    setSortListCheckedFirst(sortListCheckedFirst: boolean): this {
         const p = this._p;
         sortListCheckedFirst = !!sortListCheckedFirst;
         if (p.sortListCheckedFirst === sortListCheckedFirst)
@@ -851,7 +904,7 @@ class SelectBox {
      * @param {*[]} values
      * @returns {SelectBox}
      */
-    setStickyValues(values) {
+    setStickyValues(values: any[]): this {
         const p = this._p;
 
         p.stickyValues = Array.isArray(values) ? new Set(values) : null;
@@ -871,7 +924,7 @@ class SelectBox {
      * @param {function(a: DropList.ItemBase, b: DropList.ItemBase):number} comparator
      * @returns {SelectBox}
      */
-    setSortItemComparator(comparator) {
+    setSortItemComparator(comparator: SelectBoxOptions['sortItemComparator']): this {
         const p = this._p;
         if (p.sortItemComparator === comparator)
             return this;
@@ -893,7 +946,7 @@ class SelectBox {
      * @param {boolean} treatGroupSelectionAsItems
      * @returns {SelectBox}
      */
-    setTreatGroupSelectionAsItems(treatGroupSelectionAsItems) {
+    setTreatGroupSelectionAsItems(treatGroupSelectionAsItems: boolean): this {
         const p = this._p;
         treatGroupSelectionAsItems = !!treatGroupSelectionAsItems;
         if (p.treatGroupSelectionAsItems === treatGroupSelectionAsItems)
@@ -918,7 +971,7 @@ class SelectBox {
      * @param {boolean} splitListCheckedGroups
      * @returns {SelectBox}
      */
-    setSplitListCheckedGroups(splitListCheckedGroups) {
+    setSplitListCheckedGroups(splitListCheckedGroups: boolean): this {
         const p = this._p;
         splitListCheckedGroups = !!splitListCheckedGroups;
         if (p.splitListCheckedGroups === splitListCheckedGroups)
@@ -941,7 +994,7 @@ class SelectBox {
      * @param {boolean} showSelection
      * @returns {SelectBox}
      */
-    setShowSelection(showSelection) {
+    setShowSelection(showSelection: boolean): this {
         const p = this._p;
         showSelection = !!showSelection;
         if (p.showSelection === showSelection)
@@ -963,7 +1016,7 @@ class SelectBox {
      * @param {boolean} showPlaceholderInTooltip
      * @returns {SelectBox}
      */
-    setShowPlaceholderInTooltip(showPlaceholderInTooltip) {
+    setShowPlaceholderInTooltip(showPlaceholderInTooltip: boolean): this {
         const p = this._p;
         showPlaceholderInTooltip = !!showPlaceholderInTooltip;
         if (p.showPlaceholderInTooltip === showPlaceholderInTooltip)
@@ -985,7 +1038,7 @@ class SelectBox {
      * @param {function(items: DropList.ItemBase[]):string} formatter
      * @returns {SelectBox}
      */
-    setMultiPlaceholderFormatter(formatter) {
+    setMultiPlaceholderFormatter(formatter: SelectBoxOptions['multiPlaceholderFormatter']): this {
         const p = this._p;
 
         if (p.multiPlaceholderFormatter === formatter)
@@ -1000,7 +1053,7 @@ class SelectBox {
      * @param {boolean|'touch'} value
      * @returns {SelectBox}
      */
-    setBlurOnSingleSelection(value) {
+    setBlurOnSingleSelection(value: boolean | 'touch'): this {
         const p = this._p;
         if (p.blurOnSingleSelection === value)
             return this;
@@ -1020,7 +1073,7 @@ class SelectBox {
      * @param {boolean} multi
      * @returns {SelectBox}
      */
-    setMulti(multi) {
+    setMulti(multi: boolean): this {
         const p = this._p;
         multi = !!multi;
         if (p.multi === multi)
@@ -1057,7 +1110,7 @@ class SelectBox {
      * @param {boolean} searchable
      * @returns {SelectBox}
      */
-    setSearchable(searchable) {
+    setSearchable(searchable: boolean): this {
         const p = this._p;
         searchable = !!searchable;
         if (p.searchable === searchable)
@@ -1073,7 +1126,7 @@ class SelectBox {
      * @param {boolean} allowTypeToSelect
      * @returns {SelectBox}
      */
-    setAllowTypeToSelect(allowTypeToSelect) {
+    setAllowTypeToSelect(allowTypeToSelect: boolean): this {
         const p = this._p;
         allowTypeToSelect = !!allowTypeToSelect;
         if (p.allowTypeToSelect === allowTypeToSelect)
@@ -1094,7 +1147,7 @@ class SelectBox {
      * @param {string} noResultsText
      * @returns {SelectBox}
      */
-    setNoResultsText(noResultsText) {
+    setNoResultsText(noResultsText: string): this {
         this._p.dropList?.setNoResultsText(noResultsText);
         return this;
     }
@@ -1110,7 +1163,7 @@ class SelectBox {
      * @param {boolean} autoSelectTextOnCheck
      * @returns {SelectBox}
      */
-    setAutoSelectTextOnCheck(autoSelectTextOnCheck) {
+    setAutoSelectTextOnCheck(autoSelectTextOnCheck: boolean): this {
         this._p.autoSelectTextOnCheck = autoSelectTextOnCheck;
         return this;
     }
@@ -1126,7 +1179,7 @@ class SelectBox {
      * @param {number} window
      * @returns {SelectBox}
      */
-    setFilterThrottleWindow(window) {
+    setFilterThrottleWindow(window: number): this {
         const p = this._p;
         p.filterThrottleWindow = window;
         p.dropList?.setFilterThrottleWindow(window);
@@ -1144,7 +1197,7 @@ class SelectBox {
      * @param {boolean} value
      * @returns {SelectBox}
      */
-    setFilterOnEmptyTerm(value) {
+    setFilterOnEmptyTerm(value: boolean): this {
         const p = this._p;
         if (p.filterOnEmptyTerm === value)
             return this;
@@ -1163,7 +1216,7 @@ class SelectBox {
      * @param {DropList.Options} listOptions
      * @returns {SelectBox}
      */
-    setListOptions(listOptions) {
+    setListOptions(listOptions: DropListOptions): this {
         const p = this._p;
         p.listOptions = listOptions;
         this._setupDropdownMenu();
@@ -1175,7 +1228,7 @@ class SelectBox {
      * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
      * @returns {SelectBox})|null
      */
-    setRenderSingleItem(render, unrender) {
+    setRenderSingleItem(render: SelectBoxOptions['renderSingleItem'], unrender: SelectBoxOptions['unrenderSingleItem']): this {
         const p = this._p;
         p.renderSingleItem = render;
         p.unrenderSingleItem = unrender;
@@ -1187,7 +1240,7 @@ class SelectBox {
      * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
      * @returns {SelectBox}
      */
-    setRenderMultiItem(render, unrender) {
+    setRenderMultiItem(render: SelectBoxOptions['renderMultiItem'], unrender: SelectBoxOptions['unrenderMultiItem']): this {
         const p = this._p;
         p.renderMultiItem = render;
         p.unrenderMultiItem = unrender;
@@ -1199,7 +1252,7 @@ class SelectBox {
      * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
      * @returns {SelectBox}
      */
-    setRenderRestMultiItem(render, unrender) {
+    setRenderRestMultiItem(render: SelectBoxOptions['renderRestMultiItem'], unrender: SelectBoxOptions['unrenderRestMultiItem']): this {
         const p = this._p;
         p.renderRestMultiItem = render;
         p.unrenderRestMultiItem = unrender;
@@ -1210,7 +1263,7 @@ class SelectBox {
      * @param {string} prop
      * @returns {SelectBox}
      */
-    setLabelProp(prop) {
+    setLabelProp(prop: string): this {
         const p = this._p;
         p.labelProp = prop;
 
@@ -1224,7 +1277,7 @@ class SelectBox {
      * @param {string} prop
      * @returns {SelectBox}
      */
-    setValueProp(prop) {
+    setValueProp(prop: string): this {
         const p = this._p;
 
         if (p.valueProp === prop)
@@ -1244,7 +1297,7 @@ class SelectBox {
      * @param {string} prop
      * @returns {SelectBox}
      */
-    setMultiItemLabelProp(prop) {
+    setMultiItemLabelProp(prop: string): this {
         const p = this._p;
         p.multiItemLabelProp = prop;
         this._scheduleSync('render_items');
@@ -1255,7 +1308,7 @@ class SelectBox {
      * @param {'before'|'after'|'none'} position
      * @returns {SelectBox}
      */
-    setMultiItemRemovePosition(position) {
+    setMultiItemRemovePosition(position: 'after' | 'before' | 'none'): this {
         const p = this._p;
         p.multiItemRemovePosition = position;
         this._scheduleSync('render_items');
@@ -1266,7 +1319,7 @@ class SelectBox {
      * @param {number|null|undefined} value
      * @returns {SelectBox}
      */
-    setMaxMultiItems(value) {
+    setMaxMultiItems(value: number | null | undefined): this {
         const p = this._p;
         p.maxMultiItems = value;
         return this;
@@ -1276,7 +1329,7 @@ class SelectBox {
      * @param {function(count: number, items: DropList.ItemBase[]):string|null|undefined} value
      * @returns {SelectBox}
      */
-    setMultiItemsRestLabelProvider(value) {
+    setMultiItemsRestLabelProvider(value: SelectBoxOptions['multiItemsRestLabelProvider']): this {
         const p = this._p;
         p.multiItemsRestLabelProvider = value;
         return this;
@@ -1286,7 +1339,7 @@ class SelectBox {
      * @param {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} fn
      * @returns {SelectBox}
      */
-    setFilterFn(fn) {
+    setFilterFn(fn: SelectBoxOptions['filterFn']): this {
         const p = this._p;
         if (p.filterFn === fn)
             return this;
@@ -1379,7 +1432,7 @@ class SelectBox {
      * @param {*|*[]} value - if `multi`, then an array of values to select, otherwise - a single value to select
      * @returns {SelectBox}
      */
-    setValue(value) {
+    setValue(value: any): this {
         const p = this._p;
         if (p.multi)
             return this.setSelectedValues(Array.isArray(value) ? value : value !== undefined ? [value] : []);
@@ -1403,7 +1456,7 @@ class SelectBox {
      * @param {*[]} values - an array of *values* to select
      * @returns {SelectBox}
      */
-    setSelectedValues(values) {
+    setSelectedValues(values: any[]): this {
         const p = this._p, valueProp = p.valueProp;
 
         if (!p.multi) {
@@ -1467,7 +1520,7 @@ class SelectBox {
      * @param {DropList.ItemBase[]} items - an array of *items* to select (not values)
      * @returns {SelectBox}
      */
-    setSelectedItems(items) {
+    setSelectedItems(items: ItemBase[]): this {
         this._setSelectedItems(items);
         return this;
     }
@@ -1490,7 +1543,7 @@ class SelectBox {
             p.lastActiveElement = document.activeElement === document.body ? null : getFocusState(document.activeElement);
 
         // Propagate direction to droplist
-        p.dropList.setDirection(getComputedStyle(p.el).direction);
+        p.dropList.setDirection(getComputedStyle(p.el).direction as 'ltr' | 'rtl');
 
         p.dropList.show();
         this._repositionDropList();
@@ -1536,7 +1589,7 @@ class SelectBox {
      * @param {boolean} [open]
      * @returns {SelectBox}
      */
-    toggleList(open) {
+    toggleList(open?: boolean): this {
         const p = this._p;
 
         let shouldOpen = open === undefined ? !p.dropList.isVisible() : !!open;
@@ -1557,7 +1610,7 @@ class SelectBox {
      * @param {boolean} [on]
      * @returns {SelectBox}
      */
-    toggleLoading(on) {
+    toggleLoading(on?: boolean): this {
         return this.setIsLoadingMode(on === undefined ? !this.getIsLoadingMode() : !!on);
     }
 
@@ -1565,7 +1618,7 @@ class SelectBox {
      * @param {boolean} isLoadingMode
      * @returns {SelectBox}
      */
-    setIsLoadingMode(isLoadingMode) {
+    setIsLoadingMode(isLoadingMode?: boolean): this {
         const p = this._p;
 
         isLoadingMode = isLoadingMode === undefined ? true : !!isLoadingMode;
@@ -1599,7 +1652,7 @@ class SelectBox {
      * @param {boolean} closeListWhenLoading
      * @returns {SelectBox}
      */
-    setCloseListWhenLoading(closeListWhenLoading) {
+    setCloseListWhenLoading(closeListWhenLoading: boolean): this {
         this._p.closeListWhenLoading = closeListWhenLoading;
         return this;
     }
@@ -1616,7 +1669,7 @@ class SelectBox {
      * @param {string[]} clearInputWhen
      * @returns {SelectBox}
      */
-    setClearInputWhen(clearInputWhen) {
+    setClearInputWhen(clearInputWhen: string[]): this {
         this._p.clearInputWhen = Array.isArray(clearInputWhen) ? clearInputWhen.slice(0) : [];
         return this;
     }
@@ -1634,7 +1687,7 @@ class SelectBox {
      * @param {'ltr'|'rtl'|'auto'} direction
      * @return {SelectBox}
      */
-    setDirection(direction) {
+    setDirection(direction: 'ltr' | 'rtl' | 'auto'): this {
         const p = this._p;
         p.direction = direction === 'ltr' ? 'ltr' : direction === 'rtl' ? 'rtl' : 'auto';
         this._syncBaseClasses();
@@ -1665,7 +1718,7 @@ class SelectBox {
      * @param {function(any)} handler
      * @returns {SelectBox}
      */
-    on(/**string|'*'*/event, /**Function?*/handler) {
+    on(event: string | '*', handler: (value: any) => void): this {
         this._p.mitt.on(event, handler);
         return this;
     }
@@ -1676,8 +1729,8 @@ class SelectBox {
      * @param {function(any)} handler
      * @returns {SelectBox}
      */
-    once(/**string|'*'*/event, /**Function?*/handler) {
-        let wrapped = (value) => {
+    once(event: string | '*', handler: (value: any) => void): this {
+        let wrapped = (value: any) => {
             this._p.mitt.off(event, wrapped);
             handler(value);
         };
@@ -1691,7 +1744,7 @@ class SelectBox {
      * @param {function(any)} handler
      * @returns {SelectBox}
      */
-    off(/**(string|'*')?*/event, /**Function?*/handler) {
+    off(event?: string | '*', handler?: (value: any) => void): this {
         if (!event && !event) {
             this._p.mitt.all.clear();
         } else {
@@ -1706,7 +1759,7 @@ class SelectBox {
      * @param {any} value
      * @returns {SelectBox}
      */
-    emit(/**string|'*'*/event, /**any?*/value) {
+    emit(event: string, value?: any): this {
         this._p.mitt.emit(event, value);
         return this;
     }
@@ -1733,7 +1786,7 @@ class SelectBox {
      * @returns {DropList.ItemBase|undefined}
      * @private
      */
-    _getItemByValue(value) {
+    _getItemByValue(value: any): ItemBase | undefined {
         const p = this._p;
         let item = p.itemByValueMap.get(value);
         if (item !== undefined)
@@ -1758,7 +1811,7 @@ class SelectBox {
      * @param {string} valueProp
      * @private
      */
-    _addSubitemsToValueMap(items, itemByValueMap, valueProp) {
+    _addSubitemsToValueMap(items: ItemBase[], itemByValueMap: Map<any, ItemBase>, valueProp: string) {
         for (let item of items) {
             if (!item._subitems?.length)
                 continue;
@@ -1832,7 +1885,7 @@ class SelectBox {
 
                 // Hook clear and remove
                 p.sink
-                    .add(p.list, 'click', (evt) => {
+                    .add(p.list, 'click', (evt: any) => {
                         if (!closestUntil(evt.target, `.${p.baseClassName}__item_remove`, evt.currentTarget))
                             return;
 
@@ -1843,7 +1896,7 @@ class SelectBox {
                             closestUntil(evt.target, `.${p.baseClassName}__item`, evt.currentTarget),
                             evt);
                     })
-                    .add(p.list, 'keydown', (/**KeyboardEvent*/evt) => {
+                    .add(p.list, 'keydown', (/**KeyboardEvent*/evt: any) => {
                         if (!closestUntil(evt.target, `.${p.baseClassName}__item`, evt.currentTarget))
                             return;
 
@@ -1969,7 +2022,7 @@ class SelectBox {
             p.resortBySelectionNeeded = true;
         }
 
-        const preventDropListMouseDownBlur = (event) => {
+        const preventDropListMouseDownBlur = (event: any) => {
             const li = closestUntil(event.target, 'li', event.currentTarget);
             if (!li) return;
 
@@ -1997,7 +2050,7 @@ class SelectBox {
 
             positionOptionsProvider: () => this._getDropListPositionOptions(),
 
-            on: (name, event) => {
+            on: (name: any, event: any) => {
                 switch (name) {
                     case 'show:before': {
                         p.dropListVisible = true;
@@ -2015,7 +2068,7 @@ class SelectBox {
 
                         p.sink.add(window, 'resize.trackposition', () => this._repositionDropList());
 
-                        let parent = p.el.parentNode;
+                        let parent: any = p.el.parentNode;
                         while (parent) {
                             if (parent.scrollHeight > parent.offsetHeight ||
                                 parent.scrollWidth > parent.offsetWidth) {
@@ -2247,12 +2300,12 @@ class SelectBox {
         if (!dropList) return;
 
         let avoidToggleFromClick = false,
-            currentTouchId = null;
+            currentTouchId: any = null;
 
         const keyEventsTarget = p.multi || p.searchable ? p.input : p.el;
 
         p.sink
-            .add(keyEventsTarget, 'keydown.dropdown', evt => {
+            .add(keyEventsTarget, 'keydown.dropdown', (evt: any) => {
                 if ((/**@type HTMLInputElement*/evt.currentTarget).readOnly)
                     return;
 
@@ -2418,7 +2471,7 @@ class SelectBox {
                 }
                 avoidToggleFromClick = false;
             })
-            .add(p.el, 'touchstart.dropdown', evt => {
+            .add(p.el, 'touchstart.dropdown', (evt: any) => {
                 if (currentTouchId) return;
                 currentTouchId = evt.changedTouches[0].identifier;
 
@@ -2436,7 +2489,7 @@ class SelectBox {
                 (p.input || p.el).focus();
 
                 p.sink
-                    .add(p.el, 'touchend.dropdown_touchextra', (tevt) => {
+                    .add(p.el, 'touchend.dropdown_touchextra', (tevt: any) => {
                         let touch = Array.prototype.find.call(evt.changedTouches,
                             touch => touch.identifier === currentTouchId);
                         if (!touch) return onTouchCancel();
@@ -2444,14 +2497,14 @@ class SelectBox {
                         tevt.preventDefault();
                         onTouchCancel();
                     })
-                    .add(p.el, 'touchmove.dropdown_touchextra', (tevt) => {
+                    .add(p.el, 'touchmove.dropdown_touchextra', (tevt: any) => {
                         tevt.preventDefault();
                     })
                     .add(p.el, 'touchcancel.dropdown_touchextra', onTouchCancel);
             });
     }
 
-    _performSelectWithEvent(item, value) {
+    _performSelectWithEvent(item: any, value: any): boolean {
         let cancellable = { value: value, item: item, cancel: false };
         this._trigger('select:before', cancellable);
 
@@ -2466,7 +2519,7 @@ class SelectBox {
         return true;
     }
 
-    _performClearWithEvent(clearInput = false) {
+    _performClearWithEvent(clearInput = false): boolean {
         let cancellable = { cancel: false };
         this._trigger('clear:before', cancellable);
 
@@ -2586,7 +2639,7 @@ class SelectBox {
     }
 
     /** @private */
-    _setSelectedItems(items) {
+    _setSelectedItems(items: ItemBase[]) {
         const p = this._p, valueProp = p.valueProp;
 
         if (p.multi) {
@@ -2605,7 +2658,7 @@ class SelectBox {
     }
 
     /** @private */
-    _scheduleSync(mode, data) {
+    _scheduleSync(mode: string, data?: any) {
         const p = this._p;
 
         if (!p.syncQueue)
@@ -2630,7 +2683,7 @@ class SelectBox {
     }
 
     /** @private */
-    _performSync(queue) {
+    _performSync(queue: any[]) {
         const p = this._p;
 
         if (this[DestroyedSymbol])
@@ -2675,7 +2728,7 @@ class SelectBox {
                         const item = op.data,
                             value = item[valueProp];
 
-                        let idx = p.multiItemEls.findIndex(x => x[ItemSymbol][valueProp] === value);
+                        let idx = p.multiItemEls.findIndex(x => (x as any)[ItemSymbol][valueProp] === value);
                         if (idx !== -1) {
                             this._removeMultiItemElementByIndex(idx);
                         }
@@ -2706,7 +2759,7 @@ class SelectBox {
                         this._syncPlaceholder();
                     } else {
                         let itemEl = p.multiItemEls[p.multiItemEls.length - 1];
-                        if (itemEl?.[ItemSymbol]?.[p.valueProp] === RestMultiItemsSymbol) {
+                        if ((itemEl as any)?.[ItemSymbol]?.[p.valueProp] === RestMultiItemsSymbol) {
                             this._removeMultiItemElementByIndex(p.multiItemEls.length - 1);
                         }
                     }
@@ -2729,13 +2782,13 @@ class SelectBox {
 
         if (p.unrenderSingleItem && p.singleWrapper.childNodes.length > 0) {
             try {
-                p.unrenderSingleItem(p.singleWrapper[ItemSymbol], p.singleWrapper);
+                p.unrenderSingleItem((p.singleWrapper as any)[ItemSymbol], p.singleWrapper);
             } catch (err) {
                 console.error(err); // eslint-disable-line no-console
             }
         }
 
-        delete p.singleWrapper[ItemSymbol];
+        delete (p.singleWrapper as any)[ItemSymbol];
         p.singleWrapper.innerHTML = '';
     }
 
@@ -2743,12 +2796,12 @@ class SelectBox {
      * @param {number} index
      * @private
      */
-    _removeMultiItemElementByIndex(index) {
+    _removeMultiItemElementByIndex(index: number) {
         const p = this._p, multiItemEls = p.multiItemEls;
 
         if (multiItemEls.length > index) {
             const itemEl = multiItemEls[index];
-            const item = itemEl[ItemSymbol];
+            const item = (itemEl as any)[ItemSymbol];
 
             let unrender = item?.[p.valueProp] === RestMultiItemsSymbol
                 ? p.unrenderRestMultiItem ?? p.unrenderMultiItem
@@ -2773,7 +2826,7 @@ class SelectBox {
      * @param {DropList.ItemBase} item
      * @private
      */
-    _renderSingleItemContent(item) {
+    _renderSingleItemContent(item: any) {
         const p = this._p;
 
         if (!p.renderSingleItem || p.renderSingleItem(item, p.singleWrapper) === false) {
@@ -2793,7 +2846,7 @@ class SelectBox {
      * @param {Element} itemEl
      * @private
      */
-    _renderMultiItemContent(item, itemEl) {
+    _renderMultiItemContent(item: any, itemEl: HTMLElement) {
         const p = this._p;
 
         let render = item[p.valueProp] === RestMultiItemsSymbol
@@ -2815,7 +2868,7 @@ class SelectBox {
      * @returns {boolean} true if rendered, false if not
      * @private
      */
-    _addMultiItemElement(item) {
+    _addMultiItemElement(item: any): boolean {
         const p = this._p;
         const itemEl = this._renderMultiItem(item);
         if (!itemEl) return false;
@@ -2921,7 +2974,7 @@ class SelectBox {
 
         if (items.length > 0) {
             this._renderSingleItemContent(items[0]);
-            p.singleWrapper[ItemSymbol] = items[0];
+            (p.singleWrapper as any)[ItemSymbol] = items[0];
         }
     }
 
@@ -2931,7 +2984,7 @@ class SelectBox {
      * @param {boolean=false} updateListItems Should call updateListItems?
      * @returns {SelectBox}
      */
-    _syncFull(fullItemsRender, updateListItems) {
+    _syncFull(fullItemsRender: boolean, updateListItems: boolean) {
         const p = this._p,
             multiItemLabelProp = p.multiItemLabelProp;
 
@@ -3036,7 +3089,7 @@ class SelectBox {
      * @param {*} [data]
      * @private
      */
-    _trigger(event, data) {
+    _trigger(event: string, data?: any) {
         const p = this._p;
         if (p === undefined)
             return;
@@ -3051,7 +3104,7 @@ class SelectBox {
      * @returns {Element|null}
      * @private
      */
-    _renderMultiItem(item) {
+    _renderMultiItem(item: any): HTMLElement | null {
         const p = this._p;
 
         const labelProp = p.labelProp,
@@ -3083,7 +3136,7 @@ class SelectBox {
             itemEl.appendChild(elRemove);
         }
 
-        itemEl[ItemSymbol] = item;
+        (itemEl as any)[ItemSymbol] = item;
 
         return itemEl;
     }
@@ -3095,7 +3148,7 @@ class SelectBox {
      * @returns {SelectBox}
      * @private
      */
-    _removeMultiItemFromEvent(itemEl, originatingEvent) {
+    _removeMultiItemFromEvent(itemEl: any, originatingEvent: any): this {
         const p = this._p;
 
         let nextFocus;
@@ -3110,7 +3163,7 @@ class SelectBox {
             nextFocus = next(itemEl, `.${p.baseClassName}__item,.${p.baseClassName}__search_wrapper`);
         }
 
-        const item = itemEl[ItemSymbol], value = item[p.valueProp];
+        const item = (itemEl as any)[ItemSymbol], value = item[p.valueProp];
 
         if (item !== undefined) {
             if (value === RestMultiItemsSymbol) {
@@ -3182,7 +3235,7 @@ class SelectBox {
      * @param {boolean} [populate]
      * @private
      */
-    _removeMultiItem(item, populate = false) {
+    _removeMultiItem(item: any, populate = false) {
         const p = this._p;
         const valueProp = p.valueProp,
             labelProp = p.labelProp;
@@ -3200,9 +3253,9 @@ class SelectBox {
         }
 
         // sync multi item element
-        idx = p.multiItemEls.findIndex(x => x[ItemSymbol] === item);
+        idx = p.multiItemEls.findIndex(x => (x as any)[ItemSymbol] === item);
         if (idx === -1)
-            idx = p.multiItemEls.findIndex(x => x[ItemSymbol][valueProp] === value);
+            idx = p.multiItemEls.findIndex(x => (x as any)[ItemSymbol][valueProp] === value);
         if (idx !== -1) {
             this._removeMultiItemElementByIndex(idx);
         }
@@ -3224,7 +3277,7 @@ class SelectBox {
      * @param {*} value
      * @private
      */
-    _setInputText(value) {
+    _setInputText(value: any) {
         const p = this._p;
 
         p.input.value = value == null ? '' : String(value);
@@ -3290,7 +3343,7 @@ class SelectBox {
             // Measure these
             const computedStyle = getComputedStyle(input);
             const paddingTotal = (parseFloat(computedStyle.paddingLeft) || 0) + (parseFloat(computedStyle.paddingRight) || 0);
-            const minWidth = (parseFloat(computedStyle['font-size']) || 0) * 0.75 + paddingTotal;
+            const minWidth = (parseFloat((computedStyle as any)['font-size']) || 0) * 0.75 + paddingTotal;
             const backBufferWidth = getElementWidth(backBufferEl, true, true);
             const currentWidth = getElementWidth(input, true, true);
             let newWidth = Math.max(backBufferWidth, minWidth);
@@ -3363,7 +3416,7 @@ class SelectBox {
      * @param {KeyboardEvent} event
      * @private
      */
-    _handleInputKeydown(event) {
+    _handleInputKeydown(event: any) {
         const p = this._p;
 
         const target = (/**@type HTMLInputElement*/event.target);
@@ -3377,7 +3430,7 @@ class SelectBox {
             if (!itemEl)
                 return;
 
-            const item = itemEl[ItemSymbol], value = item[p.valueProp];
+            const item = (itemEl as any)[ItemSymbol], value = item[p.valueProp];
             if (value === undefined)
                 return;
 
@@ -3399,7 +3452,7 @@ class SelectBox {
      * @param {KeyboardEvent} event
      * @private
      */
-    _handleMultiKeydown(event) {
+    _handleMultiKeydown(event: any) {
         const p = this._p;
 
         if (p.disabled || p.readOnly) return;
@@ -3490,7 +3543,7 @@ class SelectBox {
      * @param {boolean=false} splitCheckedGroups
      * @returns {DropList.ItemBase[]}
      */
-    _sortItems(items, sort, sortCheckedFirst, splitCheckedGroups) {
+    _sortItems(items: ItemBase[], sort: boolean, sortCheckedFirst: boolean, splitCheckedGroups: boolean): ItemBase[] {
         const p = this._p;
 
         if (!sort && !sortCheckedFirst)
@@ -3517,7 +3570,7 @@ class SelectBox {
                 return 0;
             });
 
-        let group = [], stickyGroup = null;
+        let group: any[] = [], stickyGroup: any = null;
         let groups = [group];
         let inGroup = false;
         const selectedValuesSet = new Set(p.selectedValues);
@@ -3556,7 +3609,7 @@ class SelectBox {
 
         if (sort) {
             // Sort the groups
-            groups.sort((a, b) => {
+            groups.sort((a: any, b: any) => {
                 a = a[0];
                 b = b[0];
 

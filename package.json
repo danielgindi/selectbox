@@ -3,7 +3,8 @@
   "version": "2.0.57",
   "description": "A collection of dom utilities. So you can work natively with the dom without dom frameworks.",
   "main": "dist/lib.cjs.min.js",
-  "module": "lib/index.js",
+  "module": "dist/lib.es6.js",
+  "types": "dist/types/index.d.ts",
   "broswer": "dist/lib.umd.min.js",
   "author": {
     "name": "Daniel Cohen Gindi",
@@ -19,7 +20,9 @@
   },
   "scripts": {
     "benchmark": "node ./benchmarks/selectbox-value-lookup.mjs",
-    "build": "npm run lint && node ./scripts/build.js",
+    "build": "npm run lint && npm run typecheck && node ./scripts/build.js && npm run build:types",
+    "build:types": "tsc",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint -f codeframe ./",
     "lint-fix": "eslint -f codeframe --fix ./",
     "prepublishOnly": "npm run build",
@@ -45,7 +48,9 @@
     "terser": "^5.49.0",
     "vite": "^8.1.5",
     "vue": "^3.5.40",
-    "vue-eslint-parser": "^10.4.1"
+    "vue-eslint-parser": "^10.4.1",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@danielgindi/dom-utils": "^1.0.11",

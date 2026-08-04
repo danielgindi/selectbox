@@ -2,11 +2,12 @@
   <span v-show="false" />
 </template>
 
-<script>
+<script lang="ts">
 import DropList, { DefaultOptions } from '../lib/DropList';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
-import { version } from 'vue';
+import { defineComponent, version, type PropType } from 'vue';
+import type { DropListOptions, ItemBase, PositionOptions } from '../lib/types.js';
 
 const isVue3 = version > '3.';
 
@@ -24,11 +25,11 @@ export const PropTypes = {
         type: String,
     },
     additionalClasses: {
-        type: [Object, Array, String],
+        type: [Object, Array, String] as unknown as PropType<any>,
     },
     direction: {
         type: String,
-        default: undefined,
+        default: undefined as string | undefined,
     },
     autoFocus: {
         type: Boolean,
@@ -87,15 +88,15 @@ export const PropTypes = {
         default: false,
     },
     filterFn: {
-        type: Function,
-        default: undefined,
+        type: Function as PropType<DropListOptions['filterFn']>,
+        default: undefined as any,
     },
     filterDependencies: {
-        type: [Array, String, Number, Boolean, Object],
-        default: undefined,
+        type: [Array, String, Number, Boolean, Object] as unknown as PropType<any>,
+        default: undefined as any,
     },
     keyDownHandler: {
-        type: Function,
+        type: Function as PropType<DropListOptions['keyDownHandler']>,
     },
     autoCheckGroupChildren: {
         type: Boolean,
@@ -134,20 +135,20 @@ export const PropTypes = {
         default: 'value',
     },
     items: {
-        type: Array,
-        default: () => [],
+        type: Array as PropType<ItemBase[]>,
+        default: (): ItemBase[] => [],
     },
     [isVue3 ? 'modelValue' : 'value']: { // Vue 2
-        type: [Number, String, Object, Array],
+        type: [Number, String, Object, Array] as unknown as PropType<any>,
     },
     renderItem: {
-        type: Function,
+        type: Function as PropType<DropListOptions['renderItem']>,
     },
     unrenderItem: {
-        type: Function,
+        type: Function as PropType<DropListOptions['unrenderItem']>,
     },
     positionOptions: {
-        type: Object,
+        type: Object as PropType<PositionOptions>,
     },
     autoRelayoutOnItemsChange: {
         type: Boolean,
@@ -155,7 +156,7 @@ export const PropTypes = {
     },
 };
 
-export default {
+export default defineComponent({
     inheritAttrs: false,
 
     props: PropTypes,
@@ -187,18 +188,18 @@ export default {
 
     data() {
         return {
-            el: undefined,
+            el: undefined as HTMLElement | undefined,
 
             nonReactive: Object.seal({
-                instance: undefined,
+                instance: undefined as DropList | undefined,
                 sink: new DomEventsSink(),
             }),
         };
     },
 
     computed: {
-        computedOptions() {
-            let opts = {
+        computedOptions(): DropListOptions {
+            let opts: DropListOptions & { [key: string]: any } = {
                 on: this._handleListEvents.bind(this),
                 positionOptionsProvider: () => this.positionOptions,
             };
@@ -221,20 +222,20 @@ export default {
                 'isHeaderVisible', 'isFooterVisible',
                 'searchable', 'filterOnEmptyTerm',
                 'filterGroups', 'filterEmptyGroups']) {
-                if (typeof this[key] === 'boolean') {
-                    opts[key] = this[key];
+                if (typeof (this as any)[key] === 'boolean') {
+                    opts[key] = (this as any)[key];
                 }
             }
 
             for (let key of ['autoItemBlurDelay', 'estimatedItemHeight', 'virtualMinItems']) {
-                if (typeof this[key] === 'number') {
-                    opts[key] = this[key];
+                if (typeof (this as any)[key] === 'number') {
+                    opts[key] = (this as any)[key];
                 }
             }
 
             for (let key of ['labelProp', 'valueProp']) {
-                if (typeof this[key] === 'string') {
-                    opts[key] = this[key];
+                if (typeof (this as any)[key] === 'string') {
+                    opts[key] = (this as any)[key];
                 }
             }
 
@@ -250,7 +251,7 @@ export default {
             if (!opts.unrenderItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'item');
                 if (fn) {
-                    opts.unrenderItem = (item, el) => fn(el);
+                    opts.unrenderItem = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -261,7 +262,7 @@ export default {
             if (!opts.unrenderNoResultsItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'no-results-item');
                 if (fn) {
-                    opts.unrenderNoResultsItem = (item, el) => fn(el);
+                    opts.unrenderNoResultsItem = (item: any, el: any) => fn(el);
                 }
             }
 
@@ -287,9 +288,9 @@ export default {
             }
         },
 
-        [isVue3 ? 'modelValue' : 'value'](value, old) {
+        [isVue3 ? 'modelValue' : 'value'](value: any, old: any) {
             if (Array.isArray(value) && Array.isArray(old) &&
-                value.length === old && value.every((v, i) => old[i] === v))
+                (value.length as any) === old && value.every((v: any, i: number) => old[i] === v))
                 return;
 
             if (this.nonReactive.instance) {
@@ -388,10 +389,10 @@ export default {
         },
 
         ...(isVue3 ? {} : {
-            $scopedSlots() { // Vue 2
+            $scopedSlots(this: any) { // Vue 2
                 this._recreateList();
             },
-        }),
+        } as Record<string, any>),
 
         $slots() {
             this._recreateList();
@@ -407,11 +408,11 @@ export default {
     },
 
     methods: {
-        _handleListEvents(event, data) {
+        _handleListEvents(event: string, data?: any) {
             if ((event === 'select' && !this.multi) ||
-                event === 'check' && !event.isCheckingGroup ||
+                event === 'check' && !(event as any).isCheckingGroup ||
                 event === 'groupcheck') {
-                this.$emit(isVue3 ? 'update:modelValue' : 'input',
+                (this.$emit as any)(isVue3 ? 'update:modelValue' : 'input',
                     event === 'select'
                         ? data.value
                         : this.nonReactive.instance.getCheckedValues(false));
@@ -444,7 +445,7 @@ export default {
                 case 'hide_subitems':
                 case 'subitems:select':
                 case 'subitems:blur':
-                    this.$emit(event, ...(data === undefined ? [] : [data]));
+                    (this.$emit as any)(event, ...(data === undefined ? [] : [data]));
                     break;
             }
         },
@@ -459,7 +460,7 @@ export default {
             this.el = list.el;
             this.nonReactive.instance = list;
 
-            this.nonReactive.sink.add(this.nonReactive.instance.el, 'keydown.vue', evt => {
+            this.nonReactive.sink.add(this.nonReactive.instance.el, 'keydown.vue', (evt: any) => {
                 this.$emit('keydown', evt);
             }, true);
 
@@ -506,12 +507,12 @@ export default {
             this._createList();
         },
 
-        _concatClassesObject(classes) {
+        _concatClassesObject(classes: any) {
             if (Array.isArray(classes)) {
                 return classes.join(' ');
             }
             else if (classes && typeof classes === 'object') {
-                let arr = [];
+                let arr: string[] = [];
                 for (let [key, value] of Object.entries(classes)) {
                     if (value)
                         arr.push(key);
@@ -534,7 +535,7 @@ export default {
 
             this.nonReactive.sink.add(window, 'resize.trackposition', () => this.relayout());
 
-            let parent = this.nonReactive.instance.el.parentNode;
+            let parent: any = this.nonReactive.instance.el.parentNode;
             while (parent) {
                 if (parent.scrollHeight > parent.offsetHeight ||
                     parent.scrollWidth > parent.offsetWidth) {
@@ -562,9 +563,9 @@ export default {
                 return this.nonReactive.instance.getFooterElement();
         },
 
-        elContains(other, considerSublists = true) {
+        elContains(other: any, considerSublists = true) {
             return !!this.listRef?.elContains(other, considerSublists);
         },
     },
-};
+});
 </script>
