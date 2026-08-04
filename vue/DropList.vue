@@ -62,6 +62,10 @@ export const PropTypes = {
         type: Boolean,
         default: false,
     },
+    searchPlaceholder: {
+        type: String,
+        required: false,
+    },
     noResultsText: {
         type: String,
         required: false,
@@ -238,6 +242,8 @@ export default {
                 opts.keyDownHandler = this.keyDownHandler;
             }
 
+            opts.searchPlaceholder = this.searchPlaceholder;
+
             opts.renderItem = this.renderItem ?? createSlotBasedRenderFunc(this, 'item');
 
             opts.unrenderItem = this.unrenderItem;
@@ -355,6 +361,11 @@ export default {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setSearchable(v);
             this.relayout();
+        },
+
+        searchPlaceholder(value) {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setSearchPlaceholder(value ?? DefaultOptions.searchPlaceholder);
         },
 
         isHeaderVisible(v) {
