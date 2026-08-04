@@ -43,6 +43,7 @@ const hasOwnProperty = Object.prototype.hasOwnProperty;
 /**
  * The internal representation of an item, as kept in `_p.items` / `_p.filteredItems`.
  * Wraps the original consumer-supplied item (stored under `[ItemSymbol]`).
+ * @internal
  */
 interface InternalItem {
     value?: any;
@@ -57,6 +58,7 @@ interface InternalItem {
     [ItemSymbol]: any;
 }
 
+/** @internal */
 interface SubDropListState {
     item: InternalItem;
     itemElement: HTMLElement | null;
@@ -66,6 +68,7 @@ interface SubDropListState {
 
 /**
  * The shape of `DropList#_p`, the internal state bag.
+ * @internal
  */
 interface DropListState {
     ownsEl?: boolean;
@@ -218,9 +221,13 @@ Emits the following events:
 
 // noinspection JSUnusedGlobalSymbols
 class DropList {
+    /** @internal */
     _p: DropListState | null;
+    /** @internal */
     [DestroyedSymbol]?: boolean;
+    /** @internal */
     _mouseHandled?: boolean;
+    /** @internal */
     silenceEvents?: boolean;
 
     /**
@@ -607,6 +614,7 @@ class DropList {
 
     /**
      * @private
+     * @internal
      */
     _setupUnrenderFunction() {
         const p = this._p;
@@ -656,6 +664,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _syncBaseClasses() {
         const p = this._p, el = p.el;
 
@@ -1233,6 +1242,7 @@ class DropList {
     }
 
     /** @private */
+    /** @internal */
     _refilterItems() {
         const p = this._p;
 
@@ -2242,6 +2252,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _showSublist(item: InternalItem, itemElement: HTMLElement) {
         if (!item._subitems?.length) return;
 
@@ -2329,6 +2340,7 @@ class DropList {
         droplist.el.focus();
     }
 
+    /** @internal */
     _hideSublist() {
         const p = this._p;
 
@@ -2480,6 +2492,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _scrollItemIndexIntoView(itemIndex: number) {
         const p = this._p;
 
@@ -2565,6 +2578,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _getItemIndex(item: any): number {
         const p = this._p;
 
@@ -2583,6 +2597,7 @@ class DropList {
         return itemIndex;
     }
 
+    /** @internal */
     _setSingleSelectedItemEl(itemEl: HTMLElement | null, value: any): this {
         const p = this._p;
 
@@ -2605,6 +2620,7 @@ class DropList {
      * @param {string} event
      * @param {*} [data]
      * @private
+     * @internal
      */
     _trigger(event: string, data?: any) {
         const p = this._p;
@@ -2613,6 +2629,7 @@ class DropList {
         p.mitt.emit(event, data);
     }
 
+    /** @internal */
     _itemUpAction(event: any, itemEl: HTMLElement) {
         if (closestUntil(event.target, '.requires-pointer-events,button', itemEl)) return;
 
@@ -2636,6 +2653,7 @@ class DropList {
         }
     }
 
+    /** @internal */
     _hookMouseEvents() {
         const p = this._p;
 
@@ -2656,10 +2674,12 @@ class DropList {
             });
     }
 
+    /** @internal */
     _handleMouseOver(event: any, itemEl: HTMLElement) {
         this._focus(event, itemEl, null, true);
     }
 
+    /** @internal */
     _hookTouchEvents() {
         const p = this._p;
 
@@ -2715,6 +2735,7 @@ class DropList {
         });
     }
 
+    /** @internal */
     _hookFocusEvents() {
         const p = this._p;
 
@@ -2752,12 +2773,14 @@ class DropList {
             }, true);
     }
 
+    /** @internal */
     _hookKeyEvents() {
         const p = this._p;
 
         p.sink.add(p.el, 'keydown', (evt: any) => this._keydown(evt));
     }
 
+    /** @internal */
     _hookSearchEvents() {
         const p = this._p;
 
@@ -2773,6 +2796,7 @@ class DropList {
         });
     }
 
+    /** @internal */
     _keydown(event: any) {
         const p = this._p;
 
@@ -2870,6 +2894,7 @@ class DropList {
         }
     }
 
+    /** @internal */
     _keydownFreeType(evt: any, autoSelect?: boolean) {
         const p = this._p;
 
@@ -2946,6 +2971,7 @@ class DropList {
         }
     }
 
+    /** @internal */
     _focus(event: any, itemEl: HTMLElement | null, itemIndex: number | undefined, openSubitems: boolean) {
         const p = this._p;
 
@@ -3001,6 +3027,7 @@ class DropList {
             this._showSublist(item, focusItemEl);
     }
 
+    /** @internal */
     _delayBlurItemOnBlur() {
         if (this[DestroyedSymbol])
             return;
@@ -3018,6 +3045,7 @@ class DropList {
         }, p.autoItemBlurDelay);
     }
 
+    /** @internal */
     _move(direction: string, event: Event): void {
         const p = this._p;
 
@@ -3150,12 +3178,14 @@ class DropList {
         }
     }
 
+    /** @internal */
     _hasScroll() {
         const p = this._p;
         const menuEl = p.menuEl;
         return menuEl.clientHeight < menuEl.scrollHeight;
     }
 
+    /** @internal */
     _updateGroupStateForItem(item: InternalItem) {
         const p = this._p;
 
@@ -3233,6 +3263,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _updateGroupCheckedState(groupIndex: number, fireEvents: boolean) {
         const p = this._p;
 
@@ -3297,6 +3328,7 @@ class DropList {
     /**
      * @private
      * @returns {DropList} self
+     * @internal
      */
     _measureItem() {
         const p = this._p;
@@ -3364,6 +3396,7 @@ class DropList {
      * @param {number?} targetItemCount - item count we are expecting. Defaults to current item count
      * @returns {DropList}
      * @private
+     * @internal
      */
     _determineVirtualMode(targetItemCount?: number) {
         const p = this._p;
@@ -3382,6 +3415,7 @@ class DropList {
         return this;
     }
 
+    /** @internal */
     _renderItemContent(item: InternalItem, itemEl: HTMLElement) {
         const p = this._p;
 
@@ -3424,6 +3458,7 @@ class DropList {
      * @param {DropList.PositionOptions} [positionOptions=undefined]
      * @returns {number} new outer width
      * @private
+     * @internal
      */
     _updateWidth(positionOptions?: PositionOptions): number {
         const p = this._p, el = p.el;

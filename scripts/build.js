@@ -5,6 +5,152 @@ const Path = require('path');
 
 const MagicString = require('magic-string').MagicString;
 const Sass = require('sass');
+const Ts = require('typescript');
+
+// --- Compat build: publishes plain JS/SFC files at the *historical* `lib/` and
+// `vue/` paths (e.g. `@danielgindi/selectbox/vue/DropList.vue`,
+// `@danielgindi/selectbox/lib/DropList`), now that the real source lives in
+// src/lib and src/vue (TypeScript). Before the TS migration those paths were
+// plain JS/SFC source, consumed directly by downstream bundlers with no
+// TS-aware tooling required - this keeps that contract intact.
+//
+// `lib/*` is just re-export shims onto `dist/lib.es6.js` (see libReexportShims
+// below) rather than a second compiled copy of the classes - see the comment
+// above libReexportShims. `vue/*` is a real per-file type-strip of the SFCs
+// (not a bundle), so relative imports between them keep resolving exactly like
+// they did pre-migration.
+
+const compatCompilerOptions = {
+    target: Ts.ScriptTarget.ES2020,
+    module: Ts.ModuleKind.ESNext,
+    esModuleInterop: true,
+};
+
+const stripTypes = (source, fileName) => Ts.transpileModule(source, {
+    compilerOptions: compatCompilerOptions,
+    fileName,
+    reportDiagnostics: false,
+}).outputText;
+
+const walk = (dir) => {
+    let out = [];
+    for (let entry of Fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = Path.join(dir, entry.name);
+        if (entry.isDirectory()) out = out.concat(walk(full));
+        else out.push(full);
+    }
+    return out;
+};
+
+const ensureDirFor = (filePath) => Fs.mkdirSync(Path.dirname(filePath), { recursive: true });
+
+// Compiles a `.vue` SFC's `<script lang="ts">` block to plain `<script>`,
+// leaving `<template>` (and any other blocks) untouched.
+const compileVueFile = (srcFile, destFile) => {
+    const source = Fs.readFileSync(srcFile, 'utf8');
+
+    const scriptMatch = source.match(/<script[^>]*\blang=["']ts["'][^>]*>([\s\S]*?)<\/script>/);
+    if (!scriptMatch) {
+        throw new Error(`Could not find a <script lang="ts"> block in ${srcFile}`);
+    }
+
+    const compiled = stripTypes(scriptMatch[1], srcFile).trimEnd();
+    const output = source.slice(0, scriptMatch.index) +
+        `<script>\n${compiled}\n</script>` +
+        source.slice(scriptMatch.index + scriptMatch[0].length);
+
+    ensureDirFor(destFile);
+    Fs.writeFileSync(destFile, output);
+};
+
+const compileVueDir = (srcDir, destDir) => {
+    for (let file of walk(srcDir)) {
+        const destFile = Path.join(destDir, Path.relative(srcDir, file));
+
+        if (file.endsWith('.vue')) {
+            compileVueFile(file, destFile);
+        } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+            const jsDestFile = destFile.replace(/\.ts$/, '.js');
+            ensureDirFor(jsDestFile);
+            Fs.writeFileSync(jsDestFile, stripTypes(Fs.readFileSync(file, 'utf8'), file));
+        }
+    }
+};
+
+// Hand-authored Vue component types (there's no vue-tsc in this toolchain to derive
+// them from the SFCs) - see src/vue/component-types.d.ts for the real source. Published
+// as: `vue/component-types.d.ts` itself (for consumers who want the named types
+// directly), plus a `<Component>.vue.d.ts` sibling next to each compiled SFC so that
+// `import DropList from '.../vue/DropList.vue'` is typed with no consumer setup -
+// TS resolves a relative `./DropList.vue` specifier to a `./DropList.vue.d.ts` sibling
+// declaration file automatically under `moduleResolution: "bundler"`/`"node16"`.
+const vueComponentDts = {
+    'DropList.vue.d.ts': [
+        "import type { DropListVueComponent } from './component-types.js';",
+        '',
+        'declare const DropList: DropListVueComponent;',
+        'export default DropList;',
+        '',
+    ].join('\n'),
+    'SelectBox.vue.d.ts': [
+        "import type { SelectBoxVueComponent } from './component-types.js';",
+        '',
+        'declare const SelectBox: SelectBoxVueComponent;',
+        'export default SelectBox;',
+        '',
+    ].join('\n'),
+    'index.d.ts': [
+        "import DropList from './DropList.vue';",
+        "import SelectBox from './SelectBox.vue';",
+        '',
+        'export { DropList, SelectBox };',
+        '',
+    ].join('\n'),
+};
+
+const writeVueComponentDts = (srcDir, destDir) => {
+    // src/vue/component-types.d.ts imports its lib types via '../lib/...', which
+    // resolves (within the source tree) to src/lib. Published from vue/, that same
+    // relative path would resolve to the *shim* lib/ directory, which has no .d.ts
+    // of its own - point it at the real, already-built type declarations instead.
+    const componentTypesSrc = Fs.readFileSync(Path.join(srcDir, 'component-types.d.ts'), 'utf8')
+        .replace(/(['"])\.\.\/lib\//g, '$1../dist/types/');
+    Fs.writeFileSync(Path.join(destDir, 'component-types.d.ts'), componentTypesSrc);
+
+    for (let [name, content] of Object.entries(vueComponentDts)) {
+        Fs.writeFileSync(Path.join(destDir, name), content);
+    }
+};
+
+// `lib/` publishes nothing but re-exports of the already-built `dist/lib.es6.js`
+// bundle - there's no reason to also ship (and instantiate) a second,
+// independently-compiled copy of the classes or their internal utils. This keeps
+// `instanceof` checks and Symbol identities (ItemSymbol etc.) consistent whether
+// a consumer imports from the package root, a `lib/*` deep import, or -
+// transitively, since it imports via `../lib/...` too - the `vue/*` wrapper
+// components.
+const libReexportShims = {
+    'DropList.js': "export { DropList as default, DropListDefaultOptions as DefaultOptions, ItemSymbol } from '../dist/lib.es6.js';\n",
+    'SelectBox.js': "export { SelectBox as default, SelectBoxDefaultOptions as DefaultOptions } from '../dist/lib.es6.js';\n",
+    'index.js': "export { DropList, SelectBox, DropListDefaultOptions, SelectBoxDefaultOptions, ItemSymbol } from '../dist/lib.es6.js';\n",
+};
+
+const buildCompat = () => {
+    const repoRoot = Path.resolve(__dirname, '..');
+    const destLib = Path.join(repoRoot, 'lib');
+    const destVue = Path.join(repoRoot, 'vue');
+
+    Fs.rmSync(destLib, { recursive: true, force: true });
+    Fs.rmSync(destVue, { recursive: true, force: true });
+    Fs.mkdirSync(destLib, { recursive: true });
+
+    for (let [name, content] of Object.entries(libReexportShims)) {
+        Fs.writeFileSync(Path.join(destLib, name), content);
+    }
+
+    compileVueDir(Path.join(repoRoot, 'src/vue'), destVue);
+    writeVueComponentDts(Path.join(repoRoot, 'src/vue'), destVue);
+};
 
 (async () => {
 
@@ -116,7 +262,7 @@ const Sass = require('sass');
             build: {
                 emptyOutDir: false,
                 lib: {
-                    entry: Path.resolve(process.cwd(), 'lib/index.ts'),
+                    entry: Path.resolve(process.cwd(), 'src/lib/index.ts'),
                     name: task.outputName,
                     formats: [task.outputFormat],
                     fileName: () => Path.basename(task.dest),
@@ -143,6 +289,9 @@ const Sass = require('sass');
             },
         });
     }
+
+    console.info('Generating compat lib/ and vue/ output (re-exports dist/lib.es6.js so class identities stay unified)...');
+    buildCompat();
 
     console.info('Generating css files....');
 

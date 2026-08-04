@@ -41,6 +41,7 @@ const RestMultiItemsSymbol = Symbol('rest_multi_items');
 
 /**
  * The shape of `SelectBox#_p`, the internal state bag.
+ * @internal
  */
 interface SelectBoxState {
     ownsEl?: boolean;
@@ -290,8 +291,11 @@ Emits the following events:
 
 // noinspection JSUnusedGlobalSymbols
 class SelectBox {
+    /** @internal */
     _p: SelectBoxState | null;
+    /** @internal */
     [DestroyedSymbol]?: boolean;
+    /** @internal */
     silenceEvents?: boolean;
 
     /**
@@ -1768,6 +1772,7 @@ class SelectBox {
      * Prepare the mapping between values and items.
      * This reduces search time greatly (i.e when checking items), especially when Vue proxies are in place.
      * @private
+     * @internal
      */
     _refreshItemByValueMap() {
         const p = this._p;
@@ -1785,6 +1790,7 @@ class SelectBox {
      * @param {*} value
      * @returns {DropList.ItemBase|undefined}
      * @private
+     * @internal
      */
     _getItemByValue(value: any): ItemBase | undefined {
         const p = this._p;
@@ -1799,6 +1805,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _refreshSubitemByValueMap() {
         const p = this._p;
         const subitemByValueMap = p.subitemByValueMap = new Map();
@@ -1810,6 +1817,7 @@ class SelectBox {
      * @param {Map<*, DropList.ItemBase>} itemByValueMap
      * @param {string} valueProp
      * @private
+     * @internal
      */
     _addSubitemsToValueMap(items: ItemBase[], itemByValueMap: Map<any, ItemBase>, valueProp: string) {
         for (let item of items) {
@@ -1826,6 +1834,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _renderBase() {
         const p = this._p;
 
@@ -1965,6 +1974,7 @@ class SelectBox {
 
     /**
      * @private
+     * @internal
      */
     _syncBaseClasses() {
         const p = this._p, el = p.el;
@@ -2011,6 +2021,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _setupDropdownMenu() {
         const p = this._p, valueProp = p.valueProp;
 
@@ -2264,6 +2275,7 @@ class SelectBox {
         this._registerDropdownEvents();
     }
 
+    /** @internal */
     _handleOnBlur() {
         const p = this._p;
 
@@ -2285,12 +2297,14 @@ class SelectBox {
         });
     }
 
+    /** @internal */
     _unregisterDropdownEvents() {
         const p = this._p;
 
         p.sink.remove(null, '.dropdown');
     }
 
+    /** @internal */
     _registerDropdownEvents() {
         const p = this._p;
 
@@ -2504,6 +2518,7 @@ class SelectBox {
             });
     }
 
+    /** @internal */
     _performSelectWithEvent(item: any, value: any): boolean {
         let cancellable = { value: value, item: item, cancel: false };
         this._trigger('select:before', cancellable);
@@ -2519,6 +2534,7 @@ class SelectBox {
         return true;
     }
 
+    /** @internal */
     _performClearWithEvent(clearInput = false): boolean {
         let cancellable = { cancel: false };
         this._trigger('clear:before', cancellable);
@@ -2538,6 +2554,7 @@ class SelectBox {
         return true;
     }
 
+    /** @internal */
     _movePrev() {
         const p = this._p;
 
@@ -2562,6 +2579,7 @@ class SelectBox {
         }
     }
 
+    /** @internal */
     _moveNext() {
         const p = this._p;
 
@@ -2587,6 +2605,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _updateListItems() {
         const p = this._p;
 
@@ -2639,6 +2658,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _setSelectedItems(items: ItemBase[]) {
         const p = this._p, valueProp = p.valueProp;
 
@@ -2658,6 +2678,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _scheduleSync(mode: string, data?: any) {
         const p = this._p;
 
@@ -2683,6 +2704,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _performSync(queue: any[]) {
         const p = this._p;
 
@@ -2775,6 +2797,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _cleanupSingleWrapper() {
         const p = this._p;
 
@@ -2795,6 +2818,7 @@ class SelectBox {
     /**
      * @param {number} index
      * @private
+     * @internal
      */
     _removeMultiItemElementByIndex(index: number) {
         const p = this._p, multiItemEls = p.multiItemEls;
@@ -2825,6 +2849,7 @@ class SelectBox {
     /**
      * @param {DropList.ItemBase} item
      * @private
+     * @internal
      */
     _renderSingleItemContent(item: any) {
         const p = this._p;
@@ -2845,6 +2870,7 @@ class SelectBox {
      * @param {DropList.ItemBase} item
      * @param {Element} itemEl
      * @private
+     * @internal
      */
     _renderMultiItemContent(item: any, itemEl: HTMLElement) {
         const p = this._p;
@@ -2867,6 +2893,7 @@ class SelectBox {
      * @param {DropList.ItemBase} item
      * @returns {boolean} true if rendered, false if not
      * @private
+     * @internal
      */
     _addMultiItemElement(item: any): boolean {
         const p = this._p;
@@ -2880,6 +2907,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _addMultiItemRestElement() {
         const p = this._p;
 
@@ -2897,6 +2925,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _syncClearButton() {
         const p = this._p,
             multiItemLabelProp = p.multiItemLabelProp;
@@ -2933,6 +2962,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _syncPlaceholder() {
         const p = this._p,
             multiItemLabelProp = p.multiItemLabelProp;
@@ -2964,6 +2994,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _syncSingleItem() {
         const p = this._p;
 
@@ -2983,6 +3014,7 @@ class SelectBox {
      * @param {boolean=false} fullItemsRender Should re-render all items?
      * @param {boolean=false} updateListItems Should call updateListItems?
      * @returns {SelectBox}
+     * @internal
      */
     _syncFull(fullItemsRender: boolean, updateListItems: boolean) {
         const p = this._p,
@@ -3088,6 +3120,7 @@ class SelectBox {
      * @param {string} event
      * @param {*} [data]
      * @private
+     * @internal
      */
     _trigger(event: string, data?: any) {
         const p = this._p;
@@ -3103,6 +3136,7 @@ class SelectBox {
      * @param {Object} item
      * @returns {Element|null}
      * @private
+     * @internal
      */
     _renderMultiItem(item: any): HTMLElement | null {
         const p = this._p;
@@ -3147,6 +3181,7 @@ class SelectBox {
      * @param {Event} originatingEvent
      * @returns {SelectBox}
      * @private
+     * @internal
      */
     _removeMultiItemFromEvent(itemEl: any, originatingEvent: any): this {
         const p = this._p;
@@ -3234,6 +3269,7 @@ class SelectBox {
      * @param {DropList.ItemBase} item
      * @param {boolean} [populate]
      * @private
+     * @internal
      */
     _removeMultiItem(item: any, populate = false) {
         const p = this._p;
@@ -3276,6 +3312,7 @@ class SelectBox {
     /**
      * @param {*} value
      * @private
+     * @internal
      */
     _setInputText(value: any) {
         const p = this._p;
@@ -3291,6 +3328,7 @@ class SelectBox {
      * Update input size to current state
      * @returns {SelectBox}
      * @private
+     * @internal
      */
     _resizeInput() {
         const p = this._p, el = p.el;
@@ -3394,6 +3432,7 @@ class SelectBox {
      * Update autocomplete position if needed
      * @returns {SelectBox}
      * @private
+     * @internal
      */
     _repositionDropList() {
         const p = this._p, el = p.el;
@@ -3415,6 +3454,7 @@ class SelectBox {
     /**
      * @param {KeyboardEvent} event
      * @private
+     * @internal
      */
     _handleInputKeydown(event: any) {
         const p = this._p;
@@ -3451,6 +3491,7 @@ class SelectBox {
     /**
      * @param {KeyboardEvent} event
      * @private
+     * @internal
      */
     _handleMultiKeydown(event: any) {
         const p = this._p;
@@ -3499,6 +3540,7 @@ class SelectBox {
     /**
      * @returns {DropList.PositionOptions}
      * @private
+     * @internal
      */
     _getDropListPositionOptions() {
         const p = this._p;
@@ -3513,6 +3555,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _startTrackingPresence() {
         const p = this._p;
 
@@ -3525,6 +3568,7 @@ class SelectBox {
     }
 
     /** @private */
+    /** @internal */
     _stopTrackingPresence() {
         const p = this._p;
 
@@ -3542,6 +3586,7 @@ class SelectBox {
      * @param {boolean=false} sortCheckedFirst
      * @param {boolean=false} splitCheckedGroups
      * @returns {DropList.ItemBase[]}
+     * @internal
      */
     _sortItems(items: ItemBase[], sort: boolean, sortCheckedFirst: boolean, splitCheckedGroups: boolean): ItemBase[] {
         const p = this._p;

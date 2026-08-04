@@ -25,10 +25,14 @@ export default [
             "!test/**/*_helpers.js",
             "dist/**/*",
             "example/**/*",
+            // `lib/` and `vue/` are generated (type-stripped) build output, compiled
+            // from `src/lib` and `src/vue` - see scripts/build-compat.js. Lint the source.
+            "lib/**/*",
+            "vue/**/*",
             // TODO: wire up typescript-eslint and re-enable linting for these
             // once the TS migration's follow-up typing pass lands.
             "**/*.ts",
-            "vue/**/*.vue",
+            "src/vue/**/*.vue",
         ],
     },
     ...compat.extends("eslint:recommended", "plugin:vue/recommended"),

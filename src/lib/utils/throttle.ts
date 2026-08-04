@@ -1,14 +1,17 @@
+/** @internal */
 interface ThrottleOptions {
     leading?: boolean;
     trailing?: boolean;
 }
 
+/** @internal */
 interface Throttled<T extends (...args: any[]) => any> {
     (...args: Parameters<T>): ReturnType<T> | undefined;
     cancel: () => void;
     isScheduled: () => boolean;
 }
 
+/** @internal */
 const throttle = <T extends (...args: any[]) => any>(func: T, wait: number, options?: ThrottleOptions | boolean): Throttled<T> => {
     let timeout: ReturnType<typeof setTimeout> | null | undefined;
     let context: any;

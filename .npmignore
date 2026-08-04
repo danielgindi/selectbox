@@ -8,3 +8,6 @@ tests/
 .npmignore
 .husky/
 example/
+# TypeScript source - published lib/ and vue/ are the compiled, type-stripped
+# output (see scripts/build-compat.js); TS consumers get types from dist/types.
+src/

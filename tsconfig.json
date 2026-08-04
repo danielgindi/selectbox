@@ -26,9 +26,10 @@
     "declarationMap": true,
     "sourceMap": true,
     "emitDeclarationOnly": true,
+    "stripInternal": true,
     "outDir": "./dist/types",
-    "rootDir": "./lib"
+    "rootDir": "./src/lib"
   },
-  "include": ["lib/**/*.ts"],
+  "include": ["src/lib/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

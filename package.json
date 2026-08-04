@@ -21,7 +21,7 @@
   "scripts": {
     "benchmark": "node ./benchmarks/selectbox-value-lookup.mjs",
     "build": "npm run lint && npm run typecheck && node ./scripts/build.js && npm run build:types",
-    "build:types": "tsc",
+    "build:types": "tsc && node ./scripts/clean-private-types.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint -f codeframe ./",
     "lint-fix": "eslint -f codeframe --fix ./",
