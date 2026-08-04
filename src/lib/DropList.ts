@@ -931,7 +931,7 @@ class DropList {
             item._nointeraction = !!newItem._nointeraction;
 
         if (hasOwnProperty.call(newItem, '_subitems'))
-            item._subitems = !!newItem._subitems;
+            item._subitems = newItem._subitems;
 
         if (p.multi) {
             if (hasOwnProperty.call(newItem, '_checked'))
@@ -944,12 +944,12 @@ class DropList {
                     p.groupCount--;
                 else p.groupCount++;
 
-                newItem._group = !!item._group;
+                item._group = !!newItem._group;
             }
         }
 
         if (hasOwnProperty.call(newItem, '_level')) {
-            newItem._level = item._level;
+            item._level = newItem._level;
         }
 
         if (hasOwnProperty.call(newItem, '_child'))
@@ -3453,13 +3453,7 @@ class DropList {
         }
     }
 
-    /**
-     *
-     * @param {DropList.PositionOptions} [positionOptions=undefined]
-     * @returns {number} new outer width
-     * @private
-     * @internal
-     */
+    /** @internal */
     _updateWidth(positionOptions?: PositionOptions): number {
         const p = this._p, el = p.el;
 
@@ -3471,7 +3465,7 @@ class DropList {
                 targetWidth = positionOptions.updateWidth;
             } else if (positionOptions.targetWidth != null) {
                 // Set from simulated target width
-                targetWidth = positionOptions.updateWidth as unknown as number;
+                targetWidth = positionOptions.targetWidth;
             } else {
                 // Measure target
                 targetWidth = getElementWidth(positionOptions.target, true, true);

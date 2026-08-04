@@ -3207,7 +3207,7 @@ class SelectBox {
                 let itemsToRemove = [];
 
                 for (let item of items) {
-                    let removeselEvt = { value: value, item: item, cancel: false };
+                    let removeselEvt = { value: item[p.valueProp], item: item, cancel: false };
                     this._trigger('removesel:before', removeselEvt);
                     if (!removeselEvt.cancel)
                         itemsToRemove.push(item);
@@ -3221,7 +3221,7 @@ class SelectBox {
                         // sync selection
                         let idx = p.selectedItems.indexOf(item);
                         if (idx === -1)
-                            idx = p.selectedValues.indexOf(value[p.valueProp]);
+                            idx = p.selectedValues.indexOf(item[p.valueProp]);
                         if (idx !== -1) {
                             p.selectedItems.splice(idx, 1);
                             p.selectedValues.splice(idx, 1);

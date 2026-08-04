@@ -359,18 +359,8 @@ export default defineComponent({
                 }
             }
 
-            opts.renderNoResultsItem = this.renderNoResultsItem;
-            if (!opts.renderNoResultsItem) {
-                opts.renderNoResultsItem = createSlotBasedRenderFunc(this, 'rest-multi-item');
-            }
-
-            opts.unrenderNoResultsItem = this.unrenderNoResultsItem;
-            if (!opts.unrenderNoResultsItem) {
-                let fn = createSlotBasedUnrenderFunc(this, 'rest-multi-item');
-                if (fn) {
-                    opts.unrenderNoResultsItem = (item: any, el: any) => fn(el);
-                }
-            }
+            opts.renderNoResultsItem = this.computedRenderNoResultsItem;
+            opts.unrenderNoResultsItem = this.computedUnrenderNoResultsItem;
 
             return opts;
         },
