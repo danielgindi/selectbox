@@ -5,7 +5,7 @@ const Path = require('path');
 
 const MagicString = require('magic-string').MagicString;
 const Sass = require('sass');
-const Ts = require('typescript');
+const { stripTypeScriptTypes } = require('node:module');
 
 // --- Compat build: publishes plain JS/SFC files at the *historical* `lib/` and
 // `vue/` paths (e.g. `@danielgindi/selectbox/vue/DropList.vue`,
@@ -19,18 +19,17 @@ const Ts = require('typescript');
 // above libReexportShims. `vue/*` is a real per-file type-strip of the SFCs
 // (not a bundle), so relative imports between them keep resolving exactly like
 // they did pre-migration.
-
-const compatCompilerOptions = {
-    target: Ts.ScriptTarget.ES2020,
-    module: Ts.ModuleKind.ESNext,
-    esModuleInterop: true,
-};
-
-const stripTypes = (source, fileName) => Ts.transpileModule(source, {
-    compilerOptions: compatCompilerOptions,
-    fileName,
-    reportDiagnostics: false,
-}).outputText;
+//
+// Uses Node's built-in `stripTypeScriptTypes` (not the `typescript` package's
+// `transpileModule`) so this keeps working regardless of the installed
+// `typescript` version - as of TypeScript 7, `require('typescript')` no longer
+// exposes a callable compiler API at all (it's a native Go binary now; a JS API
+// is expected back in 7.1, but there's no need to depend on it for a plain
+// type-erasure step like this one). `mode: 'transform'` (rather than 'strip')
+// matches the old transpileModule behaviour, also downleveling enums/namespaces/
+// parameter properties if any creep into these files, not just erasing type
+// annotations in place.
+const stripTypes = (source) => stripTypeScriptTypes(source, { mode: 'transform' });
 
 const walk = (dir) => {
     let out = [];
@@ -54,7 +53,7 @@ const compileVueFile = (srcFile, destFile) => {
         throw new Error(`Could not find a <script lang="ts"> block in ${srcFile}`);
     }
 
-    const compiled = stripTypes(scriptMatch[1], srcFile).trimEnd();
+    const compiled = stripTypes(scriptMatch[1]).trimEnd();
     const output = source.slice(0, scriptMatch.index) +
         `<script>\n${compiled}\n</script>` +
         source.slice(scriptMatch.index + scriptMatch[0].length);
@@ -72,7 +71,7 @@ const compileVueDir = (srcDir, destDir) => {
         } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
             const jsDestFile = destFile.replace(/\.ts$/, '.js');
             ensureDirFor(jsDestFile);
-            Fs.writeFileSync(jsDestFile, stripTypes(Fs.readFileSync(file, 'utf8'), file));
+            Fs.writeFileSync(jsDestFile, stripTypes(Fs.readFileSync(file, 'utf8')));
         }
     }
 };
