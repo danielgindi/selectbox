@@ -545,12 +545,10 @@ class DropList {
 
     /**
      * Returns true if other is an inclusive descendant of node, and false otherwise.
-     * @param {Node} other
-     * @param {boolean} [considerSubmenus=true]
-     * @returns {boolean}
+     * Accepts `EventTarget` (not just `Node`) since callers pass `event.target`/`event.relatedTarget` directly.
      */
-    elContains(other: any, considerSubmenus = true): boolean {
-        if (this.el.contains(other))
+    elContains(other: EventTarget | Node | null, considerSubmenus = true): boolean {
+        if (this.el.contains(other as Node | null))
             return true;
 
         if (considerSubmenus && this._p.currentSubDropList?.droplist?.elContains(other))
@@ -559,10 +557,6 @@ class DropList {
         return false;
     }
 
-    /**
-     * @param {string|string[]} classes
-     * @returns {DropList}
-     */
     setAdditionalClasses(classes: string | string[]): this {
         const p = this._p;
         p.additionalClasses = classes;
@@ -572,8 +566,6 @@ class DropList {
 
     /**
      * Sets the appropriate direction for the droplist
-     * @param {'ltr'|'rtl'|'auto'} direction
-     * @return {DropList}
      */
     setDirection(direction: 'ltr' | 'rtl' | 'auto'): this {
         const p = this._p;
@@ -584,39 +576,24 @@ class DropList {
 
     /**
      * Gets the supplied direction for the droplist
-     * @return {'ltr'|'rtl'|'auto'}
      */
     getDirection(): 'ltr' | 'rtl' | 'auto' {
         const p = this._p;
         return p.direction;
     }
 
-    /**
-     * @param {string} prop
-     * @returns {DropList}
-     */
     setLabelProp(prop: string): this {
         const p = this._p;
         p.labelProp = prop;
         return this;
     }
 
-    /**
-     *
-     * @property {function(item: DropList.ItemBase, itemEl: Element):(*|false)} [fn] Function to call when rendering an item element
-     * @returns {DropList}
-     */
     setRenderItem(fn: DropListOptions['renderItem']): this {
         const p = this._p;
         p.renderItem = fn;
         return this;
     }
 
-    /**
-     *
-     * @property {function(item: DropList.ItemBase, itemEl: Element)} [fn] Function to call when rendering an item element
-     * @returns {DropList}
-     */
     setUnrenderItem(fn: DropListOptions['unrenderItem']): this {
         const p = this._p;
         p.unrenderItem = fn;
@@ -624,11 +601,6 @@ class DropList {
         return this;
     }
 
-    /**
-     * @param {(function(item: DropList.ItemBase, itemEl: Element):(*|false))|null} render
-     * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
-     * @returns {DropList}
-     */
     setRenderNoResultsItem(render: DropListOptions['renderNoResultsItem'], unrender: DropListOptions['unrenderNoResultsItem']): this {
         const p = this._p;
         p.renderNoResultsItem = render;
@@ -679,10 +651,6 @@ class DropList {
         return this;
     }
 
-    /**
-     * @param {string} prop
-     * @returns {DropList}
-     */
     setValueProp(prop: string): this {
         const p = this._p;
         p.valueProp = prop;
@@ -818,10 +786,8 @@ class DropList {
     }
 
     /**
-     *
-     * @param {DropList.Item} item The item to add. It is copied.
-     * @param {number} [atIndex=-1] The index to insert at (or -1)
-     * @returns {DropList}
+     * @param item The item to add. It is copied.
+     * @param atIndex The index to insert at (or -1)
      */
     addItem(item: ItemBase, atIndex = -1): this {
         return this.addItems([item], atIndex);
@@ -829,9 +795,8 @@ class DropList {
 
     /**
      * Adds items to the menu and renders
-     * @param {DropList.Item[]} itemsToAdd The items to add. These are copied.
-     * @param {number} [atIndex=-1] The index to insert at (or -1)
-     * @returns {DropList}
+     * @param itemsToAdd The items to add. These are copied.
+     * @param atIndex The index to insert at (or -1)
      */
     addItems(itemsToAdd: ItemBase[], atIndex = -1): this {
         const p = this._p, labelProp = p.labelProp, valueProp = p.valueProp;
@@ -914,8 +879,7 @@ class DropList {
 
     /**
      * Replaces all current items with the supplied items
-     * @param {DropList.Item[]} items The items to set. These are copied.
-     * @returns {DropList}
+     * @param items The items to set. These are copied.
      */
     setItems(items: ItemBase[]): this {
         const p = this._p;
@@ -1189,8 +1153,6 @@ class DropList {
     /**
      * Return the item element at the given original index, if it exists.
      * The item may not be currently rendered, and null will be returned
-     * @param index
-     * @returns {HTMLElement|null}
      */
     itemElementAtIndex(index: number): HTMLElement | null {
         const p = this._p;
@@ -1206,8 +1168,6 @@ class DropList {
     /**
      * Return the item element at the given index, if it exists.
      * The item may not be currently rendered, and null will be returned
-     * @param index
-     * @returns {HTMLElement|null}
      */
     filteredElementItemAtIndex(index: number): HTMLElement | null {
         const p = this._p;
@@ -1215,10 +1175,6 @@ class DropList {
         return li ?? null;
     }
 
-    /**
-     * @param {function(dropList: DropList):DropList.PositionOptions} fn
-     * @returns {DropList}
-     */
     setPositionOptionsProvider(fn: DropListOptions['positionOptionsProvider']): this {
         const p = this._p;
         if (p.positionOptionsProvider === fn)
@@ -1228,9 +1184,6 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {function(dropList: DropList):DropList.PositionOptions|null}
-     */
     getPositionOptionsProvider() {
         const p = this._p;
         return p.positionOptionsProvider;
@@ -1239,8 +1192,6 @@ class DropList {
     /**
      * Sets a handler to intercept internal errors/warnings (e.g. from a throwing `renderItem`/`unrenderItem`)
      * instead of the default `console.error`/`console.warn`.
-     * @param {DropList.LibraryErrorHandler|null} [fn]
-     * @returns {DropList}
      */
     setOnError(fn?: DropListOptions['onError'] | null): this {
         const p = this._p;
@@ -1249,16 +1200,15 @@ class DropList {
     }
 
     /**
-     * @returns {DropList.LibraryErrorHandler|undefined}
+     * Gets the current `onError` handler, if any.
      */
     getOnError() {
         return this._p.onError;
     }
 
     /**
-     * @param {string} term
-     * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
-     * @returns {DropList}
+     * @param term the search term to set
+     * @param performSearch should actually perform the search, or just set the input's text?
      */
     setSearchTerm(term: string, performSearch = false): this {
         const p = this._p;
@@ -1428,10 +1378,6 @@ class DropList {
         return 0;
     }
 
-    /**
-     * @param {string} noResultsText
-     * @returns {DropList}
-     */
     setNoResultsText(noResultsText: string): this {
         const p = this._p;
 
@@ -1444,17 +1390,10 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {string}
-     */
     getNoResultsText() {
         return this._p.noResultsText;
     }
 
-    /**
-     * @param {number} window
-     * @returns {DropList}
-     */
     setFilterThrottleWindow(window: number): this {
         const p = this._p;
         p.filterThrottleWindow = window;
@@ -1473,17 +1412,10 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {number}
-     */
     getFilterThrottleWindow() {
         return this._p.filterThrottleWindow;
     }
 
-    /**
-     * @param {boolean} value
-     * @returns {DropList}
-     */
     setFilterOnEmptyTerm(value: boolean): this {
         const p = this._p;
         if (p.filterOnEmptyTerm === value)
@@ -1493,17 +1425,10 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getFilterOnEmptyTerm() {
         return this._p.filterOnEmptyTerm;
     }
 
-    /**
-     * @param {boolean} value
-     * @returns {DropList}
-     */
     setFilterGroups(value: boolean): this {
         const p = this._p;
         if (p.filterGroups === value)
@@ -1513,18 +1438,11 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getFilterGroups() {
         return this._p.filterGroups;
     }
 
-    /**
-     * @param {boolean} value
-     * @returns {DropList}
-     */
-    setFilterEmptyGroups(value: boolean): this {
+    setFilterEmptyGroups(value: boolean = true): this {
         const p = this._p;
         if (p.filterEmptyGroups === value)
             return this;
@@ -1533,19 +1451,15 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getFilterEmptyGroups() {
         return this._p.filterEmptyGroups;
     }
 
-    /**
-     * @param {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} fn
-     * @returns {DropList}
-     */
-    setFilterFn(fn: DropListOptions['filterFn']): this {
+    setFilterFn(fn: DropListOptions['filterFn'] | null): this {
         const p = this._p;
+
+        fn ??= null;
+
         if (p.filterFn === fn)
             return this;
         p.filterFn = fn;
@@ -1553,19 +1467,10 @@ class DropList {
         return this;
     }
 
-    /**
-     * @returns {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)}
-     */
-    getFilterFn() {
+    getFilterFn(): DropListOptions['filterFn'] | null {
         return this._p.filterFn;
     }
 
-    /**
-     *
-     * @param {DropList.PositionOptions} [positionOptions]
-     * @returns {DropList}
-     * @public
-     */
     relayout(positionOptions?: PositionOptions | null): this {
         const p = this._p, el = p.el, menuEl = p.menuEl;
 
@@ -1844,10 +1749,6 @@ class DropList {
 
     /**
      * Set the checked mode of a specific value.
-     * @public
-     * @param {*} value - array of values to check
-     * @param {boolean} checked - will the value be checked?
-     * @returns {DropList} self
      */
     setItemChecked(value: any, checked: boolean): this {
         const p = this._p;
@@ -1877,9 +1778,6 @@ class DropList {
 
     /**
      * Set the checked values. All the other values will be unchecked,
-     * @public
-     * @param {Array<*>} values - array of values to check
-     * @returns {DropList} self
      */
     setCheckedValues(values: any[]): this {
         const p = this._p;
@@ -1921,11 +1819,9 @@ class DropList {
 
     /**
      * Get all checked values. Returns array of item values.
-     * @public
-     * @param {boolean} excludeGroups=false Exclude group items
-     * @returns {Array<*>} self
+     * @param excludeGroups Exclude group items
      */
-    getCheckedValues(excludeGroups?: boolean): any[] {
+    getCheckedValues(excludeGroups: boolean = false): any[] {
         const p = this._p;
 
         excludeGroups = excludeGroups && p.groupCount > 0;
@@ -1944,11 +1840,9 @@ class DropList {
 
     /**
      * Get all checked items. Returns array of actual item data object.
-     * @public
-     * @param {boolean} excludeGroups=false Exclude group items
-     * @returns {DropList.Item[]}
+     * @param excludeGroups Exclude group items
      */
-    getCheckedItems(excludeGroups?: boolean): ItemBase[] {
+    getCheckedItems(excludeGroups: boolean = false): ItemBase[] {
         const p = this._p;
 
         excludeGroups = excludeGroups && p.groupCount > 0;
@@ -1965,12 +1859,6 @@ class DropList {
         return items;
     }
 
-    /**
-     *
-     * @param {DropList.PositionOptions?} [positionOptions]
-     * @returns {DropList}
-     * @public
-     */
     show(positionOptions?: PositionOptions | null): this {
         const p = this._p;
 
@@ -2126,7 +2014,6 @@ class DropList {
     /**
      * Change visibility of the header element
      * You should probably call `relayout()` after this.
-     * @param {boolean} visible
      */
     setHeaderVisible(visible: boolean) {
         let isVisible = this.isHeaderVisible();
@@ -2142,7 +2029,6 @@ class DropList {
 
     /**
      * Is the header element visible?
-     * @returns {boolean}
      */
     isHeaderVisible() {
         return !!this._p.headerEl.parentNode;
@@ -2150,7 +2036,6 @@ class DropList {
 
     /**
      * Get a reference to the header element in order to add custom content.
-     * @returns {Element}
      */
     getHeaderElement() {
         return this._p.headerEl;
@@ -2159,7 +2044,6 @@ class DropList {
     /**
      * Change visibility of the footer element
      * You should probably call `relayout()` after this.
-     * @param {boolean} visible
      */
     setFooterVisible(visible: boolean) {
         let isVisible = this.isFooterVisible();
@@ -2175,7 +2059,6 @@ class DropList {
 
     /**
      * Is the footer element visible?
-     * @returns {boolean}
      */
     isFooterVisible() {
         return !!this._p.footerEl.parentNode;
@@ -2183,7 +2066,6 @@ class DropList {
 
     /**
      * Get a reference to the footer element in order to add custom content.
-     * @returns {Element}
      */
     getFooterElement() {
         return this._p.footerEl;
@@ -2192,7 +2074,6 @@ class DropList {
     /**
      * Set inline search visibility
      * You should probably call `relayout()` after this.
-     * @param {boolean} searchable
      */
     setSearchable(searchable: boolean) {
         const p = this._p;
@@ -2225,7 +2106,6 @@ class DropList {
 
     /**
      * Set the placeholder text of the inline search box
-     * @param {string} placeholder
      */
     setSearchPlaceholder(placeholder: string) {
         const p = this._p;
@@ -2573,9 +2453,6 @@ class DropList {
 
     /**
      * Register an event handler
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {DropList}
      */
     on(event: string | '*', handler: (value: any) => void): this {
         this._p.mitt.on(event, handler);
@@ -2584,9 +2461,6 @@ class DropList {
 
     /**
      * Register a one time event handler
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {DropList}
      */
     once(event: string | '*', handler: (value: any) => void): this {
         let wrapped = (value: any) => {
@@ -2599,9 +2473,6 @@ class DropList {
 
     /**
      * Remove an `handler` for `event`, all events for `event`, or all events completely.
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {DropList}
      */
     off(event?: string | '*', handler?: (value: any) => void): this {
         if (!event && !event) {
@@ -2614,9 +2485,6 @@ class DropList {
 
     /**
      * Emit an event
-     * @param {string} event
-     * @param {any} value
-     * @returns {DropList}
      */
     emit(event: string, value?: any): this {
         this._p.mitt.emit(event, value);
@@ -2662,8 +2530,6 @@ class DropList {
     }
 
     /**
-     * @param {string} event
-     * @param {*} [data]
      * @private
      * @internal
      */
@@ -3372,7 +3238,6 @@ class DropList {
 
     /**
      * @private
-     * @returns {DropList} self
      * @internal
      */
     _measureItem() {
@@ -3438,8 +3303,7 @@ class DropList {
 
     /**
      * Determines whether the list should be in virtual mode, depending on the item count.
-     * @param {number?} targetItemCount - item count we are expecting. Defaults to current item count
-     * @returns {DropList}
+     * @param targetItemCount item count we are expecting. Defaults to current item count
      * @private
      * @internal
      */

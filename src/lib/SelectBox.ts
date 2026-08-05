@@ -168,11 +168,6 @@ const hasTouchCapability = !!('ontouchstart' in window
     || window.navigator.maxTouchPoints
 );
 
-/**
- * @param {Element|EventTarget} el
- * @param {string} className
- * @returns {boolean}
- */
 const hasClass = function (el: any, className: string) {
     if (el instanceof Element) {
         return el.classList.contains(className);
@@ -234,12 +229,6 @@ export const DefaultOptions: SelectBoxOptions = {
     clearInputWhen: ['single_close', 'multi_select_single'],
 };
 
-/**
- *
- * @param {DropList.ItemBase[]} items
- * @param {string} labelProp
- * @returns {string}
- */
 const defaultMultiPlaceholderFormatter = (items: any[], labelProp: string) => {
     if (items.length === 0)
         return '';
@@ -597,9 +586,6 @@ class SelectBox {
 
     /**
      * Returns true if other is an inclusive descendant of droplist node, false otherwise, and undefined if the droplist is not initiated.
-     * @param {Node} other
-     * @param {boolean} [considerSubmenus=true]
-     * @returns {boolean|undefined}
      */
     droplistElContains(other: any, considerSubmenus = true): boolean | undefined {
         return this._p.dropList?.elContains(other, considerSubmenus);
@@ -607,15 +593,10 @@ class SelectBox {
 
     /**
      * Enables the control
-     * @param {boolean=true} enabled Should the control be enabled?
-     * @returns {SelectBox}
      */
-    enable(enabled?: boolean): this {
+    enable(enabled: boolean = true): this {
         const p = this._p;
 
-        if (enabled === undefined) {
-            enabled = true;
-        }
         p.disabled = !enabled;
         p.el.setAttribute('aria-disabled', p.disabled.toString());
         p.input.disabled = !!p.disabled;
@@ -635,7 +616,6 @@ class SelectBox {
 
     /**
      * Is the control enabled?
-     * @returns {boolean}
      */
     isEnabled() {
         return !this._p.disabled;
@@ -643,16 +623,13 @@ class SelectBox {
 
     /**
      * Disables the control
-     * @param {boolean=true} disabled Should the control be disabled?
-     * @returns {SelectBox}
      */
-    disable(disabled?: boolean): this {
-        return this.enable(disabled === undefined ? false : !disabled);
+    disable(disabled: boolean = true): this {
+        return this.enable(!disabled);
     }
 
     /**
      * Is the control disabled?
-     * @returns {boolean}
      */
     isDisabled() {
         return this._p.disabled;
@@ -660,15 +637,10 @@ class SelectBox {
 
     /**
      * Sets read only mode
-     * @param {boolean=true} readOnly Should the control be read only?
-     * @returns {SelectBox}
      */
-    setReadOnly(readOnly?: boolean): this {
+    setReadOnly(readOnly: boolean = true): this {
         const p = this._p;
 
-        if (readOnly === undefined) {
-            readOnly = true;
-        }
         p.readOnly = readOnly;
         p.el.setAttribute('aria-readOnly', p.readOnly.toString());
         p.input.readOnly = !(p.searchable || p.multi) || !!p.readOnly;
@@ -677,17 +649,12 @@ class SelectBox {
     }
 
     /**
-     * Is the control enabled?
-     * @returns {boolean}
+     * Is the control read only?
      */
     isReadOnly() {
         return this._p.readOnly;
     }
 
-    /**
-     * @param {string|string[]} classes
-     * @returns {SelectBox}
-     */
     setAdditionalClasses(classes: string | string[]): this {
         const p = this._p;
         p.additionalClasses = classes;
@@ -696,10 +663,8 @@ class SelectBox {
     }
 
     /**
-     *
-     * @param {DropList.ItemBase[]} [items]
-     * @param {boolean} [resetValues=true] should reset values to current values (essentially refresh the data based on items & values). If set to false, use setValue to set a fresh value
-     * @returns {SelectBox}
+     * @param items the items to set (not values)
+     * @param resetValues should reset values to current values (essentially refresh the data based on items & values). If set to false, use setValue to set a fresh value
      */
     setItems(items?: ItemBase[], resetValues = true): this {
         const p = this._p;
@@ -757,18 +722,11 @@ class SelectBox {
         }
     }
 
-    /**
-     * @returns {DropList.ItemBase[]|*}
-     */
     getItems() {
         const p = this._p;
         return p.items;
     }
 
-    /**
-     * @param {boolean} clearable
-     * @returns {SelectBox}
-     */
     setClearable(clearable: boolean): this {
         clearable = !!clearable;
 
@@ -780,17 +738,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getClearable() {
         return this._p.clearable;
     }
 
-    /**
-     * @param {boolean} enabled
-     * @returns {SelectBox}
-     */
     setHasOpenIndicator(enabled: boolean): this {
         enabled = !!enabled;
 
@@ -802,34 +753,23 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getHasOpenIndicator() {
         return this._p.hasOpenIndicator;
     }
 
-    /**
-     * @param {string} placeholder
-     * @returns {SelectBox}
-     */
     setPlaceholder(placeholder: string): this {
         this._p.placeholder = placeholder == null ? '' : String(placeholder);
         this._scheduleSync('render_base');
         return this;
     }
 
-    /**
-     * @returns {string}
-     */
     getPlaceHolder() {
         return this._p.placeholder;
     }
 
     /**
-     * @param {string} term
-     * @param {boolean} [performSearch=false] should actually perform the search, or just set the input's text?
-     * @returns {SelectBox}
+     * @param term the search term to set
+     * @param performSearch should actually perform the search, or just set the input's text?
      */
     setSearchTerm(term: string, performSearch = false): this {
         const p = this._p;
@@ -849,9 +789,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {string}
-     */
     getSearchTerm() {
         const p = this._p;
         if (p.input)
@@ -865,10 +802,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {boolean} sortSelectedItems
-     * @returns {SelectBox}
-     */
     setSortSelectedItems(sortSelectedItems: boolean): this {
         const p = this._p;
         sortSelectedItems = !!sortSelectedItems;
@@ -880,17 +813,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isSortSelectedItemsEnabled() {
         return this._p.sortSelectedItems;
     }
 
-    /**
-     * @param {boolean} sortListItems
-     * @returns {SelectBox}
-     */
     setSortListItems(sortListItems: boolean): this {
         const p = this._p;
         sortListItems = !!sortListItems;
@@ -903,17 +829,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isSortListItemsEnabled() {
         return this._p.sortListItems;
     }
 
-    /**
-     * @param {boolean} sortListCheckedFirst
-     * @returns {SelectBox}
-     */
     setSortListCheckedFirst(sortListCheckedFirst: boolean): this {
         const p = this._p;
         sortListCheckedFirst = !!sortListCheckedFirst;
@@ -926,17 +845,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isSortListCheckedFirstEnabled() {
         return this._p.sortListCheckedFirst;
     }
 
-    /**
-     * @param {*[]} values
-     * @returns {SelectBox}
-     */
     setStickyValues(values: any[]): this {
         const p = this._p;
 
@@ -946,17 +858,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {*[]}
-     */
     getStickyValues() {
         return this._p.stickyValues ? Array.from(this._p.stickyValues) : null;
     }
 
-    /**
-     * @param {function(a: DropList.ItemBase, b: DropList.ItemBase):number} comparator
-     * @returns {SelectBox}
-     */
     setSortItemComparator(comparator: SelectBoxOptions['sortItemComparator']): this {
         const p = this._p;
         if (p.sortItemComparator === comparator)
@@ -968,17 +873,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {function(a: DropList.ItemBase, b: DropList.ItemBase):number}
-     */
     getSortItemComparator() {
         return this._p.sortItemComparator;
     }
 
-    /**
-     * @param {boolean} treatGroupSelectionAsItems
-     * @returns {SelectBox}
-     */
     setTreatGroupSelectionAsItems(treatGroupSelectionAsItems: boolean): this {
         const p = this._p;
         treatGroupSelectionAsItems = !!treatGroupSelectionAsItems;
@@ -993,17 +891,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isTreatGroupSelectionAsItemsEnabled() {
         return !this._p.treatGroupSelectionAsItems;
     }
 
-    /**
-     * @param {boolean} splitListCheckedGroups
-     * @returns {SelectBox}
-     */
     setSplitListCheckedGroups(splitListCheckedGroups: boolean): this {
         const p = this._p;
         splitListCheckedGroups = !!splitListCheckedGroups;
@@ -1016,17 +907,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isSplitListCheckedGroupsEnabled() {
         return this._p.splitListCheckedGroups;
     }
 
-    /**
-     * @param {boolean} showSelection
-     * @returns {SelectBox}
-     */
     setShowSelection(showSelection: boolean): this {
         const p = this._p;
         showSelection = !!showSelection;
@@ -1038,17 +922,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isShowSelectionEnabled() {
         return this._p.showSelection;
     }
 
-    /**
-     * @param {boolean} showPlaceholderInTooltip
-     * @returns {SelectBox}
-     */
     setShowPlaceholderInTooltip(showPlaceholderInTooltip: boolean): this {
         const p = this._p;
         showPlaceholderInTooltip = !!showPlaceholderInTooltip;
@@ -1060,17 +937,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isShowPlaceholderInTooltipEnabled() {
         return this._p.showPlaceholderInTooltip;
     }
 
-    /**
-     * @param {function(items: DropList.ItemBase[]):string} formatter
-     * @returns {SelectBox}
-     */
     setMultiPlaceholderFormatter(formatter: SelectBoxOptions['multiPlaceholderFormatter']): this {
         const p = this._p;
 
@@ -1082,10 +952,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {boolean|'touch'} value
-     * @returns {SelectBox}
-     */
     setBlurOnSingleSelection(value: boolean | 'touch'): this {
         const p = this._p;
         if (p.blurOnSingleSelection === value)
@@ -1095,17 +961,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean|'touch'}
-     */
     getBlurOnSingleSelection() {
         return this._p.blurOnSingleSelection;
     }
 
-    /**
-     * @param {boolean} multi
-     * @returns {SelectBox}
-     */
     setMulti(multi: boolean): this {
         const p = this._p;
         multi = !!multi;
@@ -1132,17 +991,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isMultiEnabled() {
         return this._p.multi;
     }
 
-    /**
-     * @param {boolean} searchable
-     * @returns {SelectBox}
-     */
     setSearchable(searchable: boolean): this {
         const p = this._p;
         searchable = !!searchable;
@@ -1155,10 +1007,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {boolean} allowTypeToSelect
-     * @returns {SelectBox}
-     */
     setAllowTypeToSelect(allowTypeToSelect: boolean): this {
         const p = this._p;
         allowTypeToSelect = !!allowTypeToSelect;
@@ -1169,49 +1017,28 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     isSearchableEnabled() {
         return this._p.searchable;
     }
 
-    /**
-     * @param {string} noResultsText
-     * @returns {SelectBox}
-     */
     setNoResultsText(noResultsText: string): this {
         this._p.dropList?.setNoResultsText(noResultsText);
         return this;
     }
 
-    /**
-     * @returns {string}
-     */
     getNoResultsText() {
         return this._p.noResultsText;
     }
 
-    /**
-     * @param {boolean} autoSelectTextOnCheck
-     * @returns {SelectBox}
-     */
     setAutoSelectTextOnCheck(autoSelectTextOnCheck: boolean): this {
         this._p.autoSelectTextOnCheck = autoSelectTextOnCheck;
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getAutoSelectTextOnCheck() {
         return this._p.autoSelectTextOnCheck;
     }
 
-    /**
-     * @param {number} window
-     * @returns {SelectBox}
-     */
     setFilterThrottleWindow(window: number): this {
         const p = this._p;
         p.filterThrottleWindow = window;
@@ -1219,17 +1046,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {number}
-     */
     getFilterThrottleWindow() {
         return this._p.filterThrottleWindow;
     }
 
-    /**
-     * @param {boolean} value
-     * @returns {SelectBox}
-     */
     setFilterOnEmptyTerm(value: boolean): this {
         const p = this._p;
         if (p.filterOnEmptyTerm === value)
@@ -1238,17 +1058,10 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getFilterOnEmptyTerm() {
         return this._p.filterOnEmptyTerm;
     }
 
-    /**
-     * @param {DropList.Options} listOptions
-     * @returns {SelectBox}
-     */
     setListOptions(listOptions: DropListOptions): this {
         const p = this._p;
         p.listOptions = listOptions;
@@ -1256,11 +1069,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {(function(item: DropList.ItemBase, itemEl: Element):(*|false))|null} render
-     * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
-     * @returns {SelectBox})|null
-     */
     setRenderSingleItem(render: SelectBoxOptions['renderSingleItem'], unrender: SelectBoxOptions['unrenderSingleItem']): this {
         const p = this._p;
         p.renderSingleItem = render;
@@ -1268,11 +1076,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {(function(item: DropList.ItemBase, itemEl: Element):(*|false))|null} render
-     * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
-     * @returns {SelectBox}
-     */
     setRenderMultiItem(render: SelectBoxOptions['renderMultiItem'], unrender: SelectBoxOptions['unrenderMultiItem']): this {
         const p = this._p;
         p.renderMultiItem = render;
@@ -1280,11 +1083,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {(function(item: DropList.ItemBase, itemEl: Element):(*|false))|null} render
-     * @param {(function(item: DropList.ItemBase, itemEl: Element))|null} unrender
-     * @returns {SelectBox}
-     */
     setRenderRestMultiItem(render: SelectBoxOptions['renderRestMultiItem'], unrender: SelectBoxOptions['unrenderRestMultiItem']): this {
         const p = this._p;
         p.renderRestMultiItem = render;
@@ -1292,10 +1090,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {string} prop
-     * @returns {SelectBox}
-     */
     setLabelProp(prop: string): this {
         const p = this._p;
         p.labelProp = prop;
@@ -1306,10 +1100,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {string} prop
-     * @returns {SelectBox}
-     */
     setValueProp(prop: string): this {
         const p = this._p;
 
@@ -1326,10 +1116,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {string} prop
-     * @returns {SelectBox}
-     */
     setMultiItemLabelProp(prop: string): this {
         const p = this._p;
         p.multiItemLabelProp = prop;
@@ -1337,10 +1123,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {'before'|'after'|'none'} position
-     * @returns {SelectBox}
-     */
     setMultiItemRemovePosition(position: 'after' | 'before' | 'none'): this {
         const p = this._p;
         p.multiItemRemovePosition = position;
@@ -1348,32 +1130,23 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {number|null|undefined} value
-     * @returns {SelectBox}
-     */
     setMaxMultiItems(value: number | null | undefined): this {
         const p = this._p;
         p.maxMultiItems = value;
         return this;
     }
 
-    /**
-     * @param {function(count: number, items: DropList.ItemBase[]):string|null|undefined} value
-     * @returns {SelectBox}
-     */
     setMultiItemsRestLabelProvider(value: SelectBoxOptions['multiItemsRestLabelProvider']): this {
         const p = this._p;
         p.multiItemsRestLabelProvider = value;
         return this;
     }
 
-    /**
-     * @param {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)} fn
-     * @returns {SelectBox}
-     */
-    setFilterFn(fn: SelectBoxOptions['filterFn']): this {
+    setFilterFn(fn: SelectBoxOptions['filterFn'] | null): this {
         const p = this._p;
+
+        fn ??= null;
+
         if (p.filterFn === fn)
             return this;
 
@@ -1399,10 +1172,7 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {function(items: DropList.ItemBase[], term: string):(DropList.ItemBase[]|null)}
-     */
-    getFilterFn() {
+    getFilterFn(): SelectBoxOptions['filterFn'] | null {
         return this._p.filterFn;
     }
 
@@ -1410,8 +1180,6 @@ class SelectBox {
      * Sets a handler to intercept internal errors/warnings (e.g. from a throwing `renderMultiItem`/`unrenderSingleItem`)
      * instead of the default `console.error`/`console.warn`. Also used as the default `onError` for the internal
      * `DropList`, unless `listOptions.onError` is set explicitly.
-     * @param {SelectBox.LibraryErrorHandler|null} [fn]
-     * @returns {SelectBox}
      */
     setOnError(fn?: SelectBoxOptions['onError'] | null): this {
         const p = this._p;
@@ -1421,7 +1189,7 @@ class SelectBox {
     }
 
     /**
-     * @returns {SelectBox.LibraryErrorHandler|undefined}
+     * Gets the current `onError` handler, if any.
      */
     getOnError() {
         return this._p.onError;
@@ -1429,7 +1197,6 @@ class SelectBox {
 
     /**
      * Focus on input element
-     * @returns {SelectBox}
      */
     focusInput() {
         const p = this._p;
@@ -1442,7 +1209,6 @@ class SelectBox {
 
     /**
      * Remvoe focus from the input element
-     * @returns {SelectBox}
      */
     blurInput() {
         const p = this._p;
@@ -1455,7 +1221,6 @@ class SelectBox {
 
     /**
      * Removes all selected items
-     * @returns {SelectBox}
      */
     clear() {
         if (!this._performClearWithEvent(true))
@@ -1468,8 +1233,6 @@ class SelectBox {
 
     /**
      * Returns a single value or an array of selected values - depending on `multi` prop
-     * @public
-     * @returns {*[]}
      */
     getValue() {
         const p = this._p;
@@ -1482,11 +1245,9 @@ class SelectBox {
 
     /**
      * Selects the specified value or multiple values - depending on `multi` prop
-     * @public
-     * @param {*|*[]} value - if `multi`, then an array of values to select, otherwise - a single value to select
-     * @returns {SelectBox}
+     * @param value - if `multi`, then an array of values to select, otherwise - a single value to select
      */
-    setValue(value: any): this {
+    setValue(value: any|any[]): this {
         const p = this._p;
         if (p.multi)
             return this.setSelectedValues(Array.isArray(value) ? value : value !== undefined ? [value] : []);
@@ -1496,8 +1257,6 @@ class SelectBox {
 
     /**
      * Returns an array of selected values
-     * @public
-     * @returns {*[]}
      */
     getSelectedValues() {
         const p = this._p;
@@ -1506,9 +1265,6 @@ class SelectBox {
 
     /**
      * Selects the specified values
-     * @public
-     * @param {*[]} values - an array of *values* to select
-     * @returns {SelectBox}
      */
     setSelectedValues(values: any[]): this {
         const p = this._p, valueProp = p.valueProp;
@@ -1548,8 +1304,6 @@ class SelectBox {
 
     /**
      * Returns the count of selected values
-     * @public
-     * @returns {number}
      */
     getSelectedValueCount() {
         const p = this._p;
@@ -1558,8 +1312,6 @@ class SelectBox {
 
     /**
      * Returns an array of selected items
-     * @public
-     * @returns {Array.<Object>}
      */
     getSelectedItems() {
         const p = this._p;
@@ -1570,18 +1322,12 @@ class SelectBox {
      * Sets the specified items to "checked" mode.
      * An array of items is passed, not values, because we need to keep track if items,
      * and if we already have the array of items then this spares the process of searching for the items by values.
-     * @public
-     * @param {DropList.ItemBase[]} items - an array of *items* to select (not values)
-     * @returns {SelectBox}
      */
     setSelectedItems(items: ItemBase[]): this {
         this._setSelectedItems(items);
         return this;
     }
 
-    /**
-     * @returns {SelectBox}
-     */
     openList() {
         const p = this._p;
 
@@ -1616,9 +1362,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {SelectBox}
-     */
     closeList() {
         const p = this._p;
 
@@ -1639,10 +1382,6 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @param {boolean} [open]
-     * @returns {SelectBox}
-     */
     toggleList(open?: boolean): this {
         const p = this._p;
 
@@ -1653,25 +1392,14 @@ class SelectBox {
         else return this.closeList();
     }
 
-    /**
-     * @returns {boolean}
-     */
     isListOpen() {
         return !!this._p.dropListVisible;
     }
 
-    /**
-     * @param {boolean} [on]
-     * @returns {SelectBox}
-     */
     toggleLoading(on?: boolean): this {
         return this.setIsLoadingMode(on === undefined ? !this.getIsLoadingMode() : !!on);
     }
 
-    /**
-     * @param {boolean} isLoadingMode
-     * @returns {SelectBox}
-     */
     setIsLoadingMode(isLoadingMode?: boolean): this {
         const p = this._p;
 
@@ -1694,34 +1422,24 @@ class SelectBox {
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getIsLoadingMode() {
         return this._p.isLoadingMode;
     }
 
     /**
      * Sets whether to close the list when loading mode is enabled
-     * @param {boolean} closeListWhenLoading
-     * @returns {SelectBox}
      */
     setCloseListWhenLoading(closeListWhenLoading: boolean): this {
         this._p.closeListWhenLoading = closeListWhenLoading;
         return this;
     }
 
-    /**
-     * @returns {boolean}
-     */
     getCloseListWhenLoading() {
         return this._p.closeListWhenLoading;
     }
 
     /**
      * Sets when to clear the input field
-     * @param {string[]} clearInputWhen
-     * @returns {SelectBox}
      */
     setClearInputWhen(clearInputWhen: string[]): this {
         this._p.clearInputWhen = Array.isArray(clearInputWhen) ? clearInputWhen.slice(0) : [];
@@ -1730,7 +1448,6 @@ class SelectBox {
 
     /**
      * Retrieves the settings for when to clear the input field
-     * @returns {string[]}
      */
     getClearInputWhen() {
         return this._p.clearInputWhen;
@@ -1738,8 +1455,6 @@ class SelectBox {
 
     /**
      * Sets the appropriate direction for the selectbox
-     * @param {'ltr'|'rtl'|'auto'} direction
-     * @return {SelectBox}
      */
     setDirection(direction: 'ltr' | 'rtl' | 'auto'): this {
         const p = this._p;
@@ -1750,7 +1465,6 @@ class SelectBox {
 
     /**
      * Gets the supplied direction for the selectbox
-     * @return {'ltr'|'rtl'|'auto'}
      */
     getDirection() {
         const p = this._p;
@@ -1759,7 +1473,6 @@ class SelectBox {
 
     /**
      * Can be called in case that the selectbox was attached to the dom late and has a weird size.
-     * @returns {SelectBox}
      */
     refreshSize() {
         this._resizeInput();
@@ -1768,9 +1481,6 @@ class SelectBox {
 
     /**
      * Register an event handler
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {SelectBox}
      */
     on(event: string | '*', handler: (value: any) => void): this {
         this._p.mitt.on(event, handler);
@@ -1779,9 +1489,6 @@ class SelectBox {
 
     /**
      * Register a one time event handler
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {SelectBox}
      */
     once(event: string | '*', handler: (value: any) => void): this {
         let wrapped = (value: any) => {
@@ -1794,9 +1501,6 @@ class SelectBox {
 
     /**
      * Remove an `handler` for `event`, all events for `event`, or all events completely.
-     * @param {(string|'*')?} event
-     * @param {function(any)} handler
-     * @returns {SelectBox}
      */
     off(event?: string | '*', handler?: (value: any) => void): this {
         if (!event && !event) {
@@ -1809,9 +1513,6 @@ class SelectBox {
 
     /**
      * Emit an event
-     * @param {string} event
-     * @param {any} value
-     * @returns {SelectBox}
      */
     emit(event: string, value?: any): this {
         this._p.mitt.emit(event, value);
@@ -1837,8 +1538,6 @@ class SelectBox {
     }
 
     /**
-     * @param {*} value
-     * @returns {DropList.ItemBase|undefined}
      * @private
      * @internal
      */
@@ -1863,9 +1562,6 @@ class SelectBox {
     }
 
     /**
-     * @param {DropList.ItemBase[]} items
-     * @param {Map<*, DropList.ItemBase>} itemByValueMap
-     * @param {string} valueProp
      * @private
      * @internal
      */
@@ -2869,7 +2565,6 @@ class SelectBox {
     }
 
     /**
-     * @param {number} index
      * @private
      * @internal
      */
@@ -2904,7 +2599,6 @@ class SelectBox {
     }
 
     /**
-     * @param {DropList.ItemBase} item
      * @private
      * @internal
      */
@@ -2924,8 +2618,6 @@ class SelectBox {
     }
 
     /**
-     * @param {DropList.ItemBase} item
-     * @param {Element} itemEl
      * @private
      * @internal
      */
@@ -2947,7 +2639,6 @@ class SelectBox {
     }
 
     /**
-     * @param {DropList.ItemBase} item
      * @returns {boolean} true if rendered, false if not
      * @private
      * @internal
@@ -3068,9 +2759,6 @@ class SelectBox {
 
     /**
      * Syncs render state, selected items, and position
-     * @param {boolean=false} fullItemsRender Should re-render all items?
-     * @param {boolean=false} updateListItems Should call updateListItems?
-     * @returns {SelectBox}
      * @internal
      */
     _syncFull(fullItemsRender: boolean, updateListItems: boolean) {
@@ -3174,8 +2862,6 @@ class SelectBox {
     }
 
     /**
-     * @param {string} event
-     * @param {*} [data]
      * @private
      * @internal
      */
@@ -3190,8 +2876,6 @@ class SelectBox {
 
     /**
      * Render a multi item
-     * @param {Object} item
-     * @returns {Element|null}
      * @private
      * @internal
      */
@@ -3234,9 +2918,6 @@ class SelectBox {
 
     /**
      * Removes a specific multi item by user event
-     * @param {Element} itemEl
-     * @param {Event} originatingEvent
-     * @returns {SelectBox}
      * @private
      * @internal
      */
@@ -3323,8 +3004,6 @@ class SelectBox {
     }
 
     /**
-     * @param {DropList.ItemBase} item
-     * @param {boolean} [populate]
      * @private
      * @internal
      */
@@ -3367,7 +3046,6 @@ class SelectBox {
     }
 
     /**
-     * @param {*} value
      * @private
      * @internal
      */
@@ -3383,7 +3061,6 @@ class SelectBox {
 
     /**
      * Update input size to current state
-     * @returns {SelectBox}
      * @private
      * @internal
      */
@@ -3487,7 +3164,6 @@ class SelectBox {
 
     /**
      * Update autocomplete position if needed
-     * @returns {SelectBox}
      * @private
      * @internal
      */
@@ -3509,7 +3185,6 @@ class SelectBox {
     }
 
     /**
-     * @param {KeyboardEvent} event
      * @private
      * @internal
      */
@@ -3546,7 +3221,6 @@ class SelectBox {
     }
 
     /**
-     * @param {KeyboardEvent} event
      * @private
      * @internal
      */
@@ -3595,7 +3269,6 @@ class SelectBox {
     }
 
     /**
-     * @returns {DropList.PositionOptions}
      * @private
      * @internal
      */
@@ -3638,11 +3311,6 @@ class SelectBox {
     /**
      * Handles sorting, and putting checked items first (according to selectedValues, not item.checked)
      * @private
-     * @param {DropList.ItemBase[]} items
-     * @param {boolean=false} sort
-     * @param {boolean=false} sortCheckedFirst
-     * @param {boolean=false} splitCheckedGroups
-     * @returns {DropList.ItemBase[]}
      * @internal
      */
     _sortItems(items: ItemBase[], sort: boolean, sortCheckedFirst: boolean, splitCheckedGroups: boolean): ItemBase[] {
