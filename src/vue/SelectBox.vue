@@ -131,6 +131,10 @@ export const PropTypes = {
         type: Function as PropType<SelectBoxOptions['filterFn']>,
         default: undefined as any,
     },
+    onError: {
+        type: Function as PropType<SelectBoxOptions['onError']>,
+        default: undefined as any,
+    },
     filterDependencies: {
         type: [Array, String, Number, Boolean, Object] as unknown as PropType<any>,
         default: undefined as any,
@@ -588,6 +592,11 @@ export default defineComponent({
                 this.instance.setFilterFn(this.filterFn);
         },
 
+        onError() {
+            if (this.instance)
+                (this.instance as any).setOnError(this.onError);
+        },
+
         labelProp(value) {
             if (this.instance)
                 this.instance.setLabelProp(value);
@@ -850,6 +859,7 @@ export default defineComponent({
                 renderRestMultiItem: this.computedRenderRestMultiItem,
                 unrenderRestMultiItem: this.computedUnrenderRestMultiItem,
                 filterFn: this.filterFn,
+                onError: this.onError,
                 on: this._handleBoxEvents.bind(this),
                 additionalClasses: this.additionalClassesList,
                 isLoadingMode: this.isLoadingMode,

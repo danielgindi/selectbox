@@ -23,6 +23,7 @@ import {
 
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import DropList, { ItemSymbol } from './DropList';
+import reportError from './utils/reportError';
 import {
     VALUE_BACK_SPACE,
     VALUE_DELETE, VALUE_DOWN, VALUE_END, VALUE_ENTER,
@@ -41,46 +42,56 @@ const RestMultiItemsSymbol = Symbol('rest_multi_items');
 
 /**
  * The shape of `SelectBox#_p`, the internal state bag.
+ *
+ * Fields are required when the constructor guarantees they hold a real
+ * value (possibly `null`) for the entire lifetime of the instance.
+ * Fields stay optional (`?`) when their presence is genuinely conditional
+ * on runtime state (e.g. only exists while a feature is toggled on, has no
+ * default in `DefaultOptions`, or is `delete`d and re-created over the
+ * instance's lifetime).
  * @internal
  */
 interface SelectBoxState {
-    ownsEl?: boolean;
-    baseClassName?: string;
+    ownsEl: boolean;
+    baseClassName: string;
     additionalClasses?: string | string[];
-    direction?: 'ltr' | 'rtl' | 'auto';
+    direction: 'ltr' | 'rtl' | 'auto';
 
+    /** no default in `DefaultOptions` */
     listOptions?: DropListOptions;
 
-    disabled?: boolean;
-    readOnly?: boolean;
-    clearable?: boolean;
-    hasOpenIndicator?: boolean;
-    placeholder?: string;
-    sortSelectedItems?: boolean;
-    sortListItems?: boolean;
-    sortListCheckedFirst?: boolean;
-    stickyValues?: Set<any> | null;
-    sortItemComparator?: SelectBoxOptions['sortItemComparator'];
-    splitListCheckedGroups?: boolean;
-    treatGroupSelectionAsItems?: boolean;
-    blurOnSingleSelection?: boolean | 'touch';
-    multi?: boolean;
-    showSelection?: boolean;
-    showPlaceholderInTooltip?: boolean;
-    multiPlaceholderFormatter?: SelectBoxOptions['multiPlaceholderFormatter'];
-    searchable?: boolean;
+    disabled: boolean;
+    readOnly: boolean;
+    clearable: boolean;
+    hasOpenIndicator: boolean;
+    placeholder: string;
+    sortSelectedItems: boolean;
+    sortListItems: boolean;
+    sortListCheckedFirst: boolean;
+    stickyValues: Set<any> | null;
+    sortItemComparator: SelectBoxOptions['sortItemComparator'] | null;
+    splitListCheckedGroups: boolean;
+    treatGroupSelectionAsItems: boolean;
+    blurOnSingleSelection: boolean | 'touch';
+    multi: boolean;
+    showSelection: boolean;
+    showPlaceholderInTooltip: boolean;
+    multiPlaceholderFormatter: SelectBoxOptions['multiPlaceholderFormatter'] | null;
+    searchable: boolean;
+    /** no default in `DefaultOptions` */
     allowTypeToSelect?: boolean;
-    noResultsText?: string;
-    autoSelectTextOnCheck?: boolean;
+    noResultsText: string;
+    autoSelectTextOnCheck: boolean;
 
-    labelProp?: string;
-    valueProp?: string;
-    multiItemLabelProp?: string;
-    multiItemRemovePosition?: 'after' | 'before' | 'none';
+    labelProp: string;
+    valueProp: string;
+    multiItemLabelProp: string;
+    multiItemRemovePosition: 'after' | 'before' | 'none';
 
-    maxMultiItems?: number | null;
-    multiItemsRestLabelProvider?: SelectBoxOptions['multiItemsRestLabelProvider'];
+    maxMultiItems: number | null;
+    multiItemsRestLabelProvider: SelectBoxOptions['multiItemsRestLabelProvider'] | null;
 
+    /** no default in `DefaultOptions` */
     renderSingleItem?: SelectBoxOptions['renderSingleItem'];
     unrenderSingleItem?: SelectBoxOptions['unrenderSingleItem'];
     renderMultiItem?: SelectBoxOptions['renderMultiItem'];
@@ -88,55 +99,68 @@ interface SelectBoxState {
     renderRestMultiItem?: SelectBoxOptions['renderRestMultiItem'];
     unrenderRestMultiItem?: SelectBoxOptions['unrenderRestMultiItem'];
 
-    on?: SelectBoxOptions['on'] | null;
-    silenceEvents?: boolean;
-    mitt?: Emitter<Record<string, any>>;
+    on: SelectBoxOptions['on'] | null;
+    silenceEvents: boolean;
+    mitt: Emitter<Record<string, any>>;
 
-    isLoadingMode?: boolean;
-    closeListWhenLoading?: boolean;
-    clearInputWhen?: string[];
+    /** no default in `DefaultOptions`; falls back to `console.error`/`console.warn` when unset */
+    onError?: SelectBoxOptions['onError'];
 
-    items?: ItemBase[];
-    itemsChanged?: boolean;
+    isLoadingMode: boolean;
+    closeListWhenLoading: boolean;
+    clearInputWhen: string[];
 
-    sink?: any;
+    items: ItemBase[];
+    itemsChanged: boolean;
 
-    resizeObserver?: any;
+    sink: any;
 
-    selectedItems?: ItemBase[];
-    selectedValues?: any[];
-    selectionChanged?: boolean;
-    resortBySelectionNeeded?: boolean;
+    resizeObserver: any;
 
-    filterThrottleWindow?: number;
-    filterOnEmptyTerm?: boolean;
-    filterFn?: SelectBoxOptions['filterFn'] | null;
-    actualFilterFn?: SelectBoxOptions['filterFn'];
-    filterTerm?: string;
+    selectedItems: ItemBase[];
+    selectedValues: any[];
+    selectionChanged: boolean;
+    resortBySelectionNeeded: boolean;
 
-    el?: HTMLElement;
-    multiItemEls?: HTMLElement[];
-    input?: HTMLInputElement;
-    inputWrapper?: HTMLElement;
-    inputBackBuffer?: HTMLElement;
+    filterThrottleWindow: number;
+    filterOnEmptyTerm: boolean;
+    filterFn: SelectBoxOptions['filterFn'] | null;
+    /** always assigned by the end of the constructor (via `setFilterFn`) */
+    actualFilterFn: SelectBoxOptions['filterFn'];
+    filterTerm: string;
+
+    el: HTMLElement;
+    multiItemEls: HTMLElement[];
+    input: HTMLInputElement;
+    inputWrapper: HTMLElement;
+    inputBackBuffer: HTMLElement;
+    /** only exists in `multi` mode; `delete`d when switching to single mode */
     list?: HTMLElement;
+    /** only exists in single-select mode; `delete`d when switching to multi mode */
     singleWrapper?: HTMLElement;
+    /** `delete`d together with `clearButtonWrapper` */
     clearButton?: HTMLElement;
+    /** `delete`d when the clear button is hidden */
     clearButtonWrapper?: HTMLElement;
+    /** `delete`d when `hasOpenIndicator` is toggled off */
     openIndicator?: HTMLElement;
+    /** `delete`d when `isLoadingMode` is toggled off */
     spinner?: HTMLElement;
 
+    /** `delete`d and re-created whenever the dropdown menu is rebuilt */
     dropList?: DropList & { _lastSerializedBox?: string | null };
-    dropListVisible?: boolean;
-    lastActiveElement?: any;
-    lastKeyAllowsNonTypeKeys?: boolean;
+    dropListVisible: boolean;
+    lastActiveElement: any;
+    lastKeyAllowsNonTypeKeys: boolean;
 
-    itemByValueMap?: Map<any, ItemBase>;
-    subitemByValueMap?: Map<any, ItemBase> | null;
+    itemByValueMap: Map<any, ItemBase>;
+    subitemByValueMap: Map<any, ItemBase> | null;
 
+    /** only exists while a sync is queued; `delete`d once flushed */
     syncQueue?: any[];
+    /** only exists while a sync is queued; `delete`d once flushed */
     syncTimeout?: ReturnType<typeof setTimeout>;
-    presenceInt?: ReturnType<typeof setInterval> | null;
+    presenceInt: ReturnType<typeof setInterval> | null;
 }
 
 const hasTouchCapability = !!('ontouchstart' in window
@@ -358,6 +382,8 @@ class SelectBox {
             silenceEvents: true,
             mitt: mitt<Record<string, any>>(),
 
+            onError: o.onError,
+
             isLoadingMode: !!o.isLoadingMode,
             closeListWhenLoading: !!o.closeListWhenLoading,
             clearInputWhen: Array.isArray(o.clearInputWhen) ? o.clearInputWhen.slice(0) : [],
@@ -379,6 +405,12 @@ class SelectBox {
             filterOnEmptyTerm: o.filterOnEmptyTerm,
             filterFn: null,
             filterTerm: '',
+
+            dropListVisible: false,
+            lastActiveElement: null,
+            lastKeyAllowsNonTypeKeys: false,
+
+            presenceInt: null,
         } as SelectBoxState;
 
         let el: HTMLElement = o.el as HTMLElement;
@@ -1271,8 +1303,8 @@ class SelectBox {
         const p = this._p;
         p.labelProp = prop;
 
-		if (p.dropList)
-			p.dropList.setLabelProp(prop);
+        if (p.dropList)
+            p.dropList.setLabelProp(prop);
 
         return this;
     }
@@ -1289,8 +1321,8 @@ class SelectBox {
 
         p.valueProp = prop;
 
-		if (p.dropList)
-			p.dropList.setValueProp(prop);
+        if (p.dropList)
+            p.dropList.setValueProp(prop);
 
         this._refreshItemByValueMap();
 
@@ -1375,6 +1407,27 @@ class SelectBox {
      */
     getFilterFn() {
         return this._p.filterFn;
+    }
+
+    /**
+     * Sets a handler to intercept internal errors/warnings (e.g. from a throwing `renderMultiItem`/`unrenderSingleItem`)
+     * instead of the default `console.error`/`console.warn`. Also used as the default `onError` for the internal
+     * `DropList`, unless `listOptions.onError` is set explicitly.
+     * @param {SelectBox.LibraryErrorHandler|null} [fn]
+     * @returns {SelectBox}
+     */
+    setOnError(fn?: SelectBoxOptions['onError'] | null): this {
+        const p = this._p;
+        p.onError = fn ?? undefined;
+        p.dropList?.setOnError(p.listOptions?.onError ?? p.onError);
+        return this;
+    }
+
+    /**
+     * @returns {SelectBox.LibraryErrorHandler|undefined}
+     */
+    getOnError() {
+        return this._p.onError;
     }
 
     /**
@@ -2059,6 +2112,9 @@ class SelectBox {
             filterEmptyGroups: !p.treatGroupSelectionAsItems,
             filterFn: p.actualFilterFn,
 
+            // `listOptions.onError`, if explicitly set, takes precedence over the SelectBox-level `onError`.
+            onError: p.listOptions?.onError ?? p.onError,
+
             positionOptionsProvider: () => this._getDropListPositionOptions(),
 
             on: (name: any, event: any) => {
@@ -2240,7 +2296,7 @@ class SelectBox {
                         this.closeList();
 
                         if ((p.blurOnSingleSelection === 'touch' && hasTouchCapability ||
-                            p.blurOnSingleSelection !== 'touch' && p.blurOnSingleSelection) &&
+                                p.blurOnSingleSelection !== 'touch' && p.blurOnSingleSelection) &&
                             p.input && document.activeElement === p.input) {
                             p.input.blur();
                         }
@@ -2807,7 +2863,7 @@ class SelectBox {
             try {
                 p.unrenderSingleItem((p.singleWrapper as any)[ItemSymbol], p.singleWrapper);
             } catch (err) {
-                console.error(err); // eslint-disable-line no-console
+                reportError(p.onError, err, { source: 'unrenderSingleItem', item: (p.singleWrapper as any)[ItemSymbol], el: p.singleWrapper });
             }
         }
 
@@ -2835,7 +2891,11 @@ class SelectBox {
                 try {
                     unrender(item, itemEl);
                 } catch (err) {
-                    console.error(err); // eslint-disable-line no-console
+                    reportError(p.onError, err, {
+                        source: item?.[p.valueProp] === RestMultiItemsSymbol ? 'unrenderRestMultiItem' : 'unrenderMultiItem',
+                        item,
+                        el: itemEl,
+                    });
                 }
             }
             remove(itemEl);

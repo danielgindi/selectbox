@@ -1,4 +1,7 @@
 import type DropList from './DropList.js';
+import type { LibraryErrorHandler } from './utils/reportError.js';
+
+export type { LibraryErrorContext, LibraryErrorHandler } from './utils/reportError.js';
 
 /**
  * Horizontal/vertical anchor specification used for positioning the DropList relative to a target.
@@ -110,6 +113,8 @@ export interface DropListOptions {
     filterEmptyGroups?: boolean;
     filterFn?: (items: ItemBase[], term: string) => (ItemBase[] | null);
     positionOptionsProvider?: (dropList?: DropList) => PositionOptions;
+    /** Intercept internal errors/warnings (e.g. from a throwing `renderItem`/`unrenderItem`) instead of the default `console.error`/`console.warn`. */
+    onError?: LibraryErrorHandler;
 }
 
 export interface SelectBoxOptions {
@@ -197,4 +202,6 @@ export interface SelectBoxOptions {
     closeListWhenLoading?: boolean;
     /** clear input box when closing the droplist or selecting `['single_close', 'multi_close', 'multi_select_single']` (default: ['single_close','multi_select_single']) */
     clearInputWhen?: string[];
+    /** Intercept internal errors/warnings (e.g. from a throwing `renderMultiItem`/`unrenderSingleItem`) instead of the default `console.error`/`console.warn`. Also used as the default `onError` for the internal `DropList`, unless `listOptions.onError` is set explicitly. */
+    onError?: LibraryErrorHandler;
 }

@@ -98,6 +98,10 @@ export const PropTypes = {
     keyDownHandler: {
         type: Function as PropType<DropListOptions['keyDownHandler']>,
     },
+    onError: {
+        type: Function as PropType<DropListOptions['onError']>,
+        default: undefined as any,
+    },
     autoCheckGroupChildren: {
         type: Boolean,
         default: true,
@@ -243,6 +247,10 @@ export default defineComponent({
                 opts.keyDownHandler = this.keyDownHandler;
             }
 
+            if (typeof this.onError === 'function') {
+                opts.onError = this.onError;
+            }
+
             opts.searchPlaceholder = this.searchPlaceholder;
 
             opts.renderItem = this.renderItem ?? createSlotBasedRenderFunc(this, 'item');
@@ -340,6 +348,11 @@ export default defineComponent({
         filterFn() {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setFilterFn(this.filterFn);
+        },
+
+        onError() {
+            if (this.nonReactive.instance)
+                this.nonReactive.instance.setOnError(this.onError);
         },
 
         renderItem() {

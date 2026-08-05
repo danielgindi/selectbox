@@ -31,6 +31,7 @@ import {
 import throttle from './utils/throttle';
 import type { Throttled } from './utils/throttle.js';
 import type { DropListOptions, ItemBase, PositionOptions } from './types.js';
+import reportError from './utils/reportError';
 import mitt, { type Emitter } from 'mitt';
 
 const ItemSymbol = Symbol('item');
@@ -68,100 +69,114 @@ interface SubDropListState {
 
 /**
  * The shape of `DropList#_p`, the internal state bag.
+ *
+ * Fields are required when the constructor guarantees they hold a real
+ * value (possibly `null`) for the entire lifetime of the instance.
+ * Fields stay optional (`?`) when their presence is genuinely conditional
+ * on runtime state (e.g. only exists while a feature is toggled on, or is
+ * `delete`d and re-created over the instance's lifetime).
  * @internal
  */
 interface DropListState {
-    ownsEl?: boolean;
-    elOriginalDisplay?: string;
+    ownsEl: boolean;
+    elOriginalDisplay: string;
 
-    baseClassName?: string;
+    baseClassName: string;
     additionalClasses?: string | string[];
-    direction?: 'ltr' | 'rtl' | 'auto';
+    direction: 'ltr' | 'rtl' | 'auto';
 
-    autoItemBlur?: boolean;
-    autoItemBlurDelay?: number;
-    capturesFocus?: boolean;
-    multi?: boolean;
+    autoItemBlur: boolean;
+    autoItemBlurDelay: number;
+    capturesFocus: boolean;
+    multi: boolean;
     singleSelectedValue?: any;
     keyDownHandler?: DropListOptions['keyDownHandler'];
-    autoCheckGroupChildren?: boolean;
-    useExactTargetWidth?: boolean;
-    constrainToWindow?: boolean;
-    autoFlipDirection?: boolean;
+    autoCheckGroupChildren: boolean;
+    useExactTargetWidth: boolean;
+    constrainToWindow: boolean;
+    autoFlipDirection: boolean;
     estimatedItemHeight?: number;
-    estimateWidth?: boolean;
-    virtualMinItems?: number;
-    labelProp?: string;
-    valueProp?: string;
+    estimateWidth: boolean;
+    virtualMinItems: number;
+    labelProp: string;
+    valueProp: string;
     renderItem?: DropListOptions['renderItem'];
     unrenderItem?: DropListOptions['unrenderItem'];
     renderNoResultsItem?: DropListOptions['renderNoResultsItem'];
     unrenderNoResultsItem?: DropListOptions['unrenderNoResultsItem'];
-    on?: DropListOptions['on'] | null;
-    positionOptionsProvider?: DropListOptions['positionOptionsProvider'] | null;
+    on: DropListOptions['on'] | null;
+    positionOptionsProvider: DropListOptions['positionOptionsProvider'] | null;
+    /** no default in `DefaultOptions`; falls back to `console.error`/`console.warn` when unset */
+    onError?: DropListOptions['onError'];
 
-    searchable?: boolean;
-    searchPlaceholder?: string;
-    isHeaderVisible?: boolean;
-    isFooterVisible?: boolean;
+    searchable: boolean;
+    searchPlaceholder: string;
+    isHeaderVisible: boolean;
+    isFooterVisible: boolean;
 
-    silenceEvents?: boolean;
-    mitt?: Emitter<Record<string, any>>;
+    silenceEvents: boolean;
+    mitt: Emitter<Record<string, any>>;
 
-    filterThrottleWindow?: number;
-    filterOnEmptyTerm?: boolean;
-    filterGroups?: boolean;
-    filterEmptyGroups?: boolean;
+    filterThrottleWindow: number;
+    filterOnEmptyTerm: boolean;
+    filterGroups: boolean;
+    filterEmptyGroups: boolean;
     filterFn?: DropListOptions['filterFn'];
-    filteredItems?: InternalItem[] | null;
-    filterTerm?: string;
-    needsRefilter?: boolean;
-    throttledRefilterItems?: Throttled<() => void> | null;
+    filteredItems: InternalItem[] | null;
+    filterTerm: string;
+    needsRefilter: boolean;
+    /** always assigned by the end of the constructor (via `setFilterThrottleWindow`) */
+    throttledRefilterItems: Throttled<() => void> | null;
 
-    focusItemIndex?: number;
-    focusItemEl?: HTMLElement | null;
+    focusItemIndex: number;
+    focusItemEl: HTMLElement | null;
 
-    sink?: any;
+    sink: any;
 
-    el?: HTMLElement;
-    menuEl?: HTMLElement;
-    headerEl?: HTMLElement;
-    footerEl?: HTMLElement;
+    el: HTMLElement;
+    menuEl: HTMLElement;
+    headerEl: HTMLElement;
+    footerEl: HTMLElement;
+    /** only exists once `setSearchable(true)` has been called */
     searchInput?: HTMLInputElement | null;
 
-    items?: InternalItem[];
-    groupCount?: number;
-    mouseHandled?: boolean;
+    items: InternalItem[];
+    groupCount: number;
+    mouseHandled: boolean;
 
-    virtualListHelper?: any;
+    virtualListHelper: any;
 
-    hasNoResultsItem?: boolean;
-    noResultsText?: string;
+    hasNoResultsItem: boolean;
+    noResultsText: string;
 
+    /** unset until the first `relayout()` */
     currentDirection?: string;
+    /** `delete`d on hide, so must stay optional */
     lastPositionOptions?: PositionOptions | null;
+    /** `delete`d on hide, so must stay optional */
     lastPositionTarget?: Element;
 
-    visible?: boolean;
-    hiding?: boolean;
+    visible: boolean;
+    hiding: boolean;
 
-    singleSelectedItemEl?: HTMLElement | null;
+    singleSelectedItemEl: HTMLElement | null;
 
-    onDocumentMouseDown?: ((event: MouseEvent) => void) | null;
+    onDocumentMouseDown: ((event: MouseEvent) => void) | null;
 
     blurTimer?: ReturnType<typeof setTimeout>;
     filterTimer?: ReturnType<typeof setTimeout>;
+    /** `delete`d once the freetype buffer expires, so must stay optional */
     previousFilter?: string;
-    lastKeyWasChar?: boolean;
+    lastKeyWasChar: boolean;
 
-    currentSubDropList?: SubDropListState | null;
+    currentSubDropList: SubDropListState | null;
 
     lastMeasureItemCount?: number;
     lastMeasureItemWidth?: number;
     lastMeasureLongestLabel?: number;
     lastMeasureLongestLabelText?: string;
 
-    _isFocusingItem?: boolean;
+    _isFocusingItem: boolean;
 }
 
 export const DefaultOptions: DropListOptions = {
@@ -269,6 +284,7 @@ class DropList {
             unrenderNoResultsItem: o.unrenderNoResultsItem,
             on: o.on || null,
             positionOptionsProvider: o.positionOptionsProvider ?? null,
+            onError: o.onError,
 
             searchable: o.searchable,
             searchPlaceholder: o.searchPlaceholder,
@@ -292,6 +308,18 @@ class DropList {
             focusItemEl: null,
 
             sink: new DomEventsSink(),
+
+            visible: false,
+            hiding: false,
+
+            singleSelectedItemEl: null,
+            onDocumentMouseDown: null,
+
+            lastKeyWasChar: false,
+
+            currentSubDropList: null,
+
+            _isFocusingItem: false,
         } as DropListState;
 
         const baseClass = p.baseClassName + '_wrapper';
@@ -395,8 +423,8 @@ class DropList {
                 }
 
                 if (!item) {
-                    // eslint-disable-next-line no-console
-                    console.warn('onItemRender called for (' + index + ') which has no item');
+                    reportError(p.onError, `onItemRender called for (${index}) which has no item`,
+                        { source: 'renderItem', level: 'warn', index });
                 }
 
                 itemEl.className = `${p.baseClassName}__item`;
@@ -628,13 +656,13 @@ class DropList {
                     try {
                         fnNoResults(item, el);
                     } catch (err) {
-                        console.error(err); // eslint-disable-line no-console
+                        reportError(p.onError, err, { source: 'unrenderNoResultsItem', item, el });
                     }
                 } else {
                     try {
                         fn(item[ItemSymbol], el);
                     } catch (err) {
-                        console.error(err); // eslint-disable-line no-console
+                        reportError(p.onError, err, { source: 'unrenderItem', item: item[ItemSymbol], el });
                     }
                 }
                 delete el[ItemSymbol];
@@ -1209,6 +1237,25 @@ class DropList {
     getPositionOptionsProvider() {
         const p = this._p;
         return p.positionOptionsProvider;
+    }
+
+    /**
+     * Sets a handler to intercept internal errors/warnings (e.g. from a throwing `renderItem`/`unrenderItem`)
+     * instead of the default `console.error`/`console.warn`.
+     * @param {DropList.LibraryErrorHandler|null} [fn]
+     * @returns {DropList}
+     */
+    setOnError(fn?: DropListOptions['onError'] | null): this {
+        const p = this._p;
+        p.onError = fn ?? undefined;
+        return this;
+    }
+
+    /**
+     * @returns {DropList.LibraryErrorHandler|undefined}
+     */
+    getOnError() {
+        return this._p.onError;
     }
 
     /**
