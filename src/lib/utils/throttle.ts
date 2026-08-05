@@ -12,16 +12,15 @@ interface Throttled<T extends (...args: any[]) => any> {
 }
 
 /** @internal */
-const throttle = <T extends (...args: any[]) => any>(func: T, wait: number, options?: ThrottleOptions | boolean): Throttled<T> => {
+const throttle = <T extends (...args: any[]) => any>(func: T, wait: number, options: ThrottleOptions = {}): Throttled<T> => {
     let timeout: ReturnType<typeof setTimeout> | null | undefined;
     let context: any;
     let args: IArguments | null | undefined;
     let result: ReturnType<T> | undefined;
     let previous = 0;
-    if (!options) options = {};
 
     const later = () => {
-        previous = (options as ThrottleOptions).leading === false ? 0 : Date.now();
+        previous = options.leading === false ? 0 : Date.now();
         timeout = null;
         result = func.apply(context, args as any);
         if (!timeout) context = args = null;
@@ -29,7 +28,7 @@ const throttle = <T extends (...args: any[]) => any>(func: T, wait: number, opti
 
     const throttled = function (this: any) {
         const now = Date.now();
-        if (!previous && (options as ThrottleOptions).leading === false)
+        if (!previous && options.leading === false)
             previous = now;
 
         const remaining = wait - (now - previous);
@@ -43,7 +42,7 @@ const throttle = <T extends (...args: any[]) => any>(func: T, wait: number, opti
             previous = now;
             result = func.apply(context, args as any);
             if (!timeout) context = args = null;
-        } else if (!timeout && (options as ThrottleOptions).trailing !== false) {
+        } else if (!timeout && options.trailing !== false) {
             timeout = setTimeout(later, remaining);
         }
         return result;

@@ -1467,7 +1467,8 @@ class DropList {
         if (p.throttledRefilterItems)
             p.throttledRefilterItems.cancel();
 
-        p.throttledRefilterItems = throttle(() => this._refilterItems(), p.filterThrottleWindow, true);
+        // Leading-edge call (filter immediately on the first keystroke), trailing calls throttled to the window.
+        p.throttledRefilterItems = throttle(() => this._refilterItems(), p.filterThrottleWindow);
 
         if (isScheduled)
             p.throttledRefilterItems();
