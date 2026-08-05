@@ -322,9 +322,6 @@ class SelectBox {
     /** @internal */
     silenceEvents?: boolean;
 
-    /**
-     * @param {SelectBox.Options} options
-     */
     constructor(options: SelectBoxOptions) {
         const o = { ...DefaultOptions };
 

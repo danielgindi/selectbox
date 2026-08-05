@@ -245,9 +245,6 @@ class DropList {
     /** @internal */
     silenceEvents?: boolean;
 
-    /**
-     * @param {DropList.Options} options
-     */
     constructor(options: DropListOptions) {
         const o = { ...DefaultOptions };
 

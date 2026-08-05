@@ -1,21 +1,4 @@
-/**
- * Context describing where a library-internal error/warning originated.
- * `source` identifies the callback or code path (e.g. `'unrenderItem'`),
- * `level` distinguishes a genuine thrown error from a soft internal warning.
- * Additional free-form fields may be attached for debugging (e.g. `index`, `item`).
- */
-export interface LibraryErrorContext {
-    source: string;
-    level?: 'warn' | 'error';
-    [key: string]: any;
-}
-
-/**
- * Optional hook so consumers can intercept/redirect errors and warnings
- * that would otherwise go straight to `console.error`/`console.warn`
- * (e.g. exceptions thrown from a user-supplied `renderItem`/`unrenderItem`).
- */
-export type LibraryErrorHandler = (error: any, context: LibraryErrorContext) => void;
+import type { LibraryErrorContext, LibraryErrorHandler } from '../types.js';
 
 /**
  * Routes an error/warning to `handler` if supplied, falling back to the
