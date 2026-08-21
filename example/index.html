@@ -8,9 +8,14 @@
         .sample_droplist_header { font-weight: 600; }
         .sample_droplist_footer { display: flex; justify-content: space-between; align-items: center; gap: 1em; border-top: 1px solid #ddd; }
         .sample_droplist_footer button { cursor: pointer; }
+
+        .app_wrapper {
+            width: 110%;
+        }
     </style>
 </head>
 <body>
+<div class="app_wrapper">
 <h1>selectbox — Example</h1>
 
 TODO: Samples for split groups, customizations, search in drop list, droplist from button, etc.
@@ -29,6 +34,10 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
 
 <h3>DropList header and footer</h3>
 <button id="example4Button" type="button" aria-haspopup="menu" aria-expanded="false">Open menu</button>
+</div>
+</body>
+</html>
+
 
 <script type="module">
     import SelectBox from '../src/lib/Selectbox.ts';
@@ -366,5 +375,3 @@ TODO: Samples for split groups, customizations, search in drop list, droplist fr
             example4.show();
     });
 </script>
-</body>
-</html>

@@ -1673,10 +1673,6 @@ class DropList {
             'top': targetBox.top + (invertYPos ? (anchor.bottom - position.bottom) : (anchor.top - position.top)),
         };
 
-        if (isRtlDocument) {
-            viewCss.left -= document.documentElement.clientWidth - document.documentElement.scrollWidth;
-        }
-
         viewCss.left += anchor.left - position.left;
 
         if (positionOptions.offset) {
