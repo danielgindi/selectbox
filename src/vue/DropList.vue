@@ -3,22 +3,22 @@
 </template>
 
 <script lang="ts">
-import DropList, { DefaultOptions } from '../lib/DropList';
+import { DropList, DropListDefaultOptions as DefaultOptions } from '@danielgindi/selectbox';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
 import { defineComponent, version, type PropType } from 'vue';
-import type { DropListOptions, ItemBase, PositionOptions } from '../lib/types.js';
+import type { DropListOptions, ItemBase, PositionOptions } from '@danielgindi/selectbox';
 
 const isVue3 = version > '3.';
 
-const AllListEvents = [
+/*const AllListEvents = [
     'itemfocus', 'itemblur', 'select',
     'show:before', 'show',
     'hide:before', 'hide', 'hide:after',
     'check', 'groupcheck', 'blur',
     'show_subitems', 'hide_subitems',
     'subitems:select', 'subitems:blur',
-];
+];*/
 
 export const PropTypes = {
     baseClassName: {

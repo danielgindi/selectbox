@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent, markRaw, version, type PropType } from 'vue';
-import SelectBox, { DefaultOptions } from '../lib/SelectBox';
+import { SelectBox, SelectBoxDefaultOptions as DefaultOptions } from '@danielgindi/selectbox';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 import deepEqual from 'fast-deep-equal';
-import type { SelectBoxOptions, DropListOptions, ItemBase } from '../lib/types.js';
+import type { SelectBoxOptions, DropListOptions, ItemBase } from '@danielgindi/selectbox';
 
 const isVue3 = version > '3.';
 

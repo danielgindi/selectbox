@@ -5,7 +5,24 @@
   "main": "dist/lib.cjs.min.js",
   "module": "dist/lib.es6.js",
   "types": "dist/types/index.d.ts",
-  "broswer": "dist/lib.umd.min.js",
+  "browser": "dist/lib.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/lib.es6.js",
+      "require": "./dist/lib.cjs.js",
+      "default": "./dist/lib.es6.js"
+    },
+    "./vue": {
+      "types": "./vue/index.d.ts",
+      "import": "./vue/index.js",
+      "default": "./vue/index.js"
+    },
+    "./scss/*": "./scss/*.scss",
+    "./css/*": "./css/*.css",
+    "./lib/*": "./lib/*.js",
+    "./package.json": "./package.json"
+  },
   "author": {
     "name": "Daniel Cohen Gindi",
     "email": "danielgindi@gmail.com"
