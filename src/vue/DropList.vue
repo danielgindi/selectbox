@@ -251,6 +251,10 @@ export default defineComponent({
                 opts.onError = this.onError;
             }
 
+            if (typeof this.filterFn === 'function') {
+                opts.filterFn = this.filterFn;
+            }
+
             opts.searchPlaceholder = this.searchPlaceholder;
 
             opts.renderItem = this.renderItem ?? createSlotBasedRenderFunc(this, 'item');
