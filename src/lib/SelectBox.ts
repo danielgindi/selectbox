@@ -26,13 +26,9 @@ import DropList, { ItemSymbol } from './DropList';
 import reportError from './utils/reportError';
 import {
     VALUE_BACK_SPACE,
-    VALUE_DELETE, VALUE_DOWN, VALUE_END, VALUE_ENTER,
-    VALUE_ESCAPE, VALUE_HOME,
-    VALUE_LEFT, VALUE_PAGE_DOWN,
-    VALUE_PAGE_UP,
-    VALUE_RIGHT, VALUE_SPACE,
-    VALUE_TAB,
-    VALUE_UP,
+    VALUE_DELETE,
+    VALUE_LEFT,
+    VALUE_RIGHT,
 } from 'keycode-js';
 import mitt, { type Emitter } from 'mitt';
 import type { SelectBoxOptions, ItemBase, DropListOptions, PositionOptions } from './types.js';
@@ -151,7 +147,6 @@ interface SelectBoxState {
     dropList?: DropList & { _lastSerializedBox?: string | null };
     dropListVisible: boolean;
     lastActiveElement: any;
-    lastKeyAllowsNonTypeKeys: boolean;
 
     itemByValueMap: Map<any, ItemBase>;
     subitemByValueMap: Map<any, ItemBase> | null;
@@ -394,7 +389,6 @@ class SelectBox {
 
             dropListVisible: false,
             lastActiveElement: null,
-            lastKeyAllowsNonTypeKeys: false,
 
             presenceInt: null,
         } as SelectBoxState;
@@ -2069,130 +2063,16 @@ class SelectBox {
 
         p.sink
             .add(keyEventsTarget, 'keydown.dropdown', (evt: any) => {
-                if ((/**@type HTMLInputElement*/evt.currentTarget).readOnly)
-                    return;
-
-                let suppressEnterSpaceToggle = false;
-                let lastKeyAllowsNonTypeKeys = p.lastKeyAllowsNonTypeKeys;
-                p.lastKeyAllowsNonTypeKeys = false;
-                let hasInputText = p.input && p.input.value.length > 0;
-
-                switch (evt.key) {
-                    case VALUE_PAGE_UP:
-                    case VALUE_PAGE_DOWN:
-                    case VALUE_UP:
-                    case VALUE_DOWN:
-                    case VALUE_HOME:
-                    case VALUE_END:
-                        if ((evt.key === VALUE_HOME || evt.key === VALUE_END) &&
-                            hasInputText && !lastKeyAllowsNonTypeKeys) {
-                            // Allow using HOME/END button within the textbox
-                            dropList._keydownFreeType(evt);
-                            break;
-                        }
-
-                        p.lastKeyAllowsNonTypeKeys = true;
-                        evt.preventDefault();
-
-                        switch (evt.key) {
-                            case VALUE_PAGE_UP:
-                                if (dropList.isVisible())
-                                    dropList.previousPage(evt);
-                                break;
-                            case VALUE_PAGE_DOWN:
-                                if (dropList.isVisible())
-                                    dropList.nextPage(evt);
-                                break;
-                            case VALUE_UP:
-                                if (dropList.isVisible()) {
-                                    dropList.previous(evt);
-                                } else {
-                                    this._movePrev();
-                                }
-                                break;
-                            case VALUE_DOWN:
-                                if (dropList.isVisible()) {
-                                    dropList.next(evt);
-                                } else {
-                                    this._moveNext();
-                                }
-                                break;
-
-                            case VALUE_HOME:
-                                dropList.goToFirst(evt);
-                                break;
-
-                            case VALUE_END:
-                                dropList.goToLast(evt);
-                                break;
-                        }
-                        break;
-
-                    case VALUE_SPACE:
-                        if (lastKeyAllowsNonTypeKeys) {
-                            p.lastKeyAllowsNonTypeKeys = true;
-
-                            if (dropList.isVisible() && dropList.hasFocusedItem()) {
-                                suppressEnterSpaceToggle = true;
-                                if (p.multi)
-                                    dropList.toggleFocusedItem(evt);
-                                else dropList.triggerItemSelection(null, evt);
-                                evt.preventDefault();
-                            }
-                        }
-                        break;
-
-                    case VALUE_ENTER:
-                        if (dropList.isVisible() && dropList.hasFocusedItem()) {
-                            suppressEnterSpaceToggle = true;
-                            evt.preventDefault();
-                            dropList.triggerItemSelection(null, evt);
-                        }
-
-                        break;
-
-                    case VALUE_TAB:
-                        if (dropList.isVisible() && dropList.hasFocusedItem()) {
-                            dropList.triggerItemSelection(null, evt);
-                        }
-                        break;
-
-                    case VALUE_ESCAPE:
-                        if (dropList.isVisible()) {
-                            dropList.hide(evt);
-                            evt.preventDefault();
-                        }
-                        break;
-
-                    default:
-                        if (dropList.isVisible()) {
-                            dropList._keydownFreeType(evt, false);
-                        } else if (p.allowTypeToSelect) {
-                            dropList._keydownFreeType(evt, true);
-                        } else {
-                            this.openList();
-                            setTimeout(() => {
-                                if (this[DestroyedSymbol]) return; // destroyed by event handler
-                                dropList._keydownFreeType(evt, false);
-                            });
-                        }
-                        break;
-                }
-
-                if (!suppressEnterSpaceToggle) {
-                    if (evt.key === VALUE_ENTER || (
-                        evt.key === VALUE_SPACE &&
-                        p.lastKeyAllowsNonTypeKeys &&
-                        !p.multi &&
-                        !dropList.hasFocusedItem() &&
-                        !p.disabled &&
-                        !p.readOnly
-                    )) {
-                        this.toggleList();
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                    }
-                }
+                dropList.handleInputKeydown(evt, {
+                    allowTypeToSelect: p.allowTypeToSelect,
+                    disabled: p.disabled,
+                    readOnly: p.readOnly,
+                    hasInputText: p.input?.value.length > 0,
+                    movePrevious: () => this._movePrev(),
+                    moveNext: () => this._moveNext(),
+                    open: () => this.openList(),
+                    toggle: () => this.toggleList(),
+                });
             });
 
         if (p.input) {

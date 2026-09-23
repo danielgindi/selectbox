@@ -7,7 +7,13 @@
 import type { ComponentOptionsMixin, DefineComponent } from 'vue';
 import type DropList from '../lib/DropList.js';
 import type SelectBox from '../lib/SelectBox.js';
-import type { DropListOptions, ItemBase, PositionOptions, SelectBoxOptions } from '../lib/types.js';
+import type {
+    DropListInputKeydownOptions,
+    DropListOptions,
+    ItemBase,
+    PositionOptions,
+    SelectBoxOptions,
+} from '../lib/types.js';
 
 export interface DropListVueProps {
     baseClassName?: string;
@@ -81,6 +87,7 @@ export type DropListVueMethods = {
     getHeaderElement(): HTMLElement | undefined;
     getFooterElement(): HTMLElement | undefined;
     elContains(other: any, considerSublists?: boolean): boolean;
+    handleInputKeydown(event: KeyboardEvent, options?: DropListInputKeydownOptions): void;
 };
 
 export type DropListVueComponent = DefineComponent<

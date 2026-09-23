@@ -64,6 +64,30 @@ export interface Item extends ItemBase {
     _checked?: boolean;
 }
 
+/**
+ * Integrates an external input's keydown events with a DropList.
+ * The callbacks let a containing control supply behavior that it owns, such as
+ * changing a closed selection or keeping its own open state in sync.
+ */
+export interface DropListInputKeydownOptions {
+    /** Select by typed characters without opening a hidden DropList. */
+    allowTypeToSelect?: boolean;
+    /** Prevent Enter/Space from opening or closing the DropList. */
+    disabled?: boolean;
+    /** Prevent Enter/Space from opening or closing the DropList. */
+    readOnly?: boolean;
+    /** Override input text detection when the event target is not the actual input. */
+    hasInputText?: boolean;
+    /** Handle ArrowUp while the DropList is hidden. */
+    movePrevious?: (event: KeyboardEvent) => void;
+    /** Handle ArrowDown while the DropList is hidden. */
+    moveNext?: (event: KeyboardEvent) => void;
+    /** Open the DropList. Defaults to `DropList.show()`. */
+    open?: (event: KeyboardEvent) => void;
+    /** Toggle the DropList. Defaults to `DropList.show()`/`DropList.hide()`. */
+    toggle?: (event: KeyboardEvent) => void;
+}
+
 export interface DropListOptions {
     /** An element to attach to, instead of creating a new one */
     el?: HTMLElement;

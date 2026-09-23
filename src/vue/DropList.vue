@@ -7,7 +7,12 @@ import { DropList, DropListDefaultOptions as DefaultOptions } from '@danielgindi
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
 import { defineComponent, version, type PropType } from 'vue';
-import type { DropListOptions, ItemBase, PositionOptions } from '@danielgindi/selectbox';
+import type {
+    DropListInputKeydownOptions,
+    DropListOptions,
+    ItemBase,
+    PositionOptions,
+} from '@danielgindi/selectbox';
 
 const isVue3 = version > '3.';
 
@@ -582,6 +587,10 @@ export default defineComponent({
 
         elContains(other: any, considerSublists = true) {
             return !!this.listRef?.elContains(other, considerSublists);
+        },
+
+        handleInputKeydown(event: KeyboardEvent, options?: DropListInputKeydownOptions) {
+            this.listRef?.handleInputKeydown(event, options);
         },
     },
 });

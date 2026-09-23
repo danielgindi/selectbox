@@ -26,11 +26,12 @@ import {
     VALUE_PAGE_DOWN,
     VALUE_PAGE_UP, VALUE_RIGHT,
     VALUE_SPACE,
+    VALUE_TAB,
     VALUE_UP,
 } from 'keycode-js';
 import throttle from './utils/throttle';
 import type { Throttled } from './utils/throttle.js';
-import type { DropListOptions, ItemBase, PositionOptions } from './types.js';
+import type { DropListInputKeydownOptions, DropListOptions, ItemBase, PositionOptions } from './types.js';
 import reportError from './utils/reportError';
 import mitt, { type Emitter } from 'mitt';
 
@@ -168,6 +169,7 @@ interface DropListState {
     /** `delete`d once the freetype buffer expires, so must stay optional */
     previousFilter?: string;
     lastKeyWasChar: boolean;
+    lastInputKeyAllowsNonTypeKeys: boolean;
 
     currentSubDropList: SubDropListState | null;
 
@@ -313,6 +315,7 @@ class DropList {
             onDocumentMouseDown: null,
 
             lastKeyWasChar: false,
+            lastInputKeyAllowsNonTypeKeys: false,
 
             currentSubDropList: null,
 
@@ -2798,6 +2801,147 @@ class DropList {
 
                 preventDefault = false;
             }
+        }
+    }
+
+    /**
+     * Handles a keydown event from an external input using the same navigation,
+     * selection, and visibility behavior used by SelectBox.
+     */
+    handleInputKeydown(event: KeyboardEvent, options: DropListInputKeydownOptions = {}): void {
+        const p = this._p;
+        const currentTarget = event.currentTarget as HTMLInputElement | HTMLTextAreaElement | null;
+
+        if (currentTarget?.readOnly)
+            return;
+
+        let suppressEnterSpaceToggle = false;
+        const lastKeyAllowsNonTypeKeys = p.lastInputKeyAllowsNonTypeKeys;
+        p.lastInputKeyAllowsNonTypeKeys = false;
+
+        const target = event.target as HTMLInputElement | HTMLTextAreaElement | null;
+        const input = currentTarget?.value !== undefined ? currentTarget : target;
+        const hasInputText = options.hasInputText ?? !!input?.value?.length;
+
+        switch (event.key) {
+            case VALUE_PAGE_UP:
+            case VALUE_PAGE_DOWN:
+            case VALUE_UP:
+            case VALUE_DOWN:
+            case VALUE_HOME:
+            case VALUE_END:
+                if ((event.key === VALUE_HOME || event.key === VALUE_END) &&
+                    hasInputText && !lastKeyAllowsNonTypeKeys) {
+                    // Allow using Home/End within the input.
+                    this._keydownFreeType(event);
+                    break;
+                }
+
+                p.lastInputKeyAllowsNonTypeKeys = true;
+                event.preventDefault();
+
+                switch (event.key) {
+                    case VALUE_PAGE_UP:
+                        if (this.isVisible())
+                            this.previousPage(event);
+                        break;
+                    case VALUE_PAGE_DOWN:
+                        if (this.isVisible())
+                            this.nextPage(event);
+                        break;
+                    case VALUE_UP:
+                        if (this.isVisible())
+                            this.previous(event);
+                        else
+                            options.movePrevious?.(event);
+                        break;
+                    case VALUE_DOWN:
+                        if (this.isVisible())
+                            this.next(event);
+                        else
+                            options.moveNext?.(event);
+                        break;
+                    case VALUE_HOME:
+                        this.goToFirst(event);
+                        break;
+                    case VALUE_END:
+                        this.goToLast(event);
+                        break;
+                }
+                break;
+
+            case VALUE_SPACE:
+                if (lastKeyAllowsNonTypeKeys) {
+                    p.lastInputKeyAllowsNonTypeKeys = true;
+
+                    if (this.isVisible() && this.hasFocusedItem()) {
+                        suppressEnterSpaceToggle = true;
+                        if (p.multi)
+                            this.toggleFocusedItem(event);
+                        else
+                            this.triggerItemSelection(null, event);
+                        event.preventDefault();
+                    }
+                }
+                break;
+
+            case VALUE_ENTER:
+                if (this.isVisible() && this.hasFocusedItem()) {
+                    suppressEnterSpaceToggle = true;
+                    event.preventDefault();
+                    this.triggerItemSelection(null, event);
+                }
+                break;
+
+            case VALUE_TAB:
+                if (this.isVisible() && this.hasFocusedItem())
+                    this.triggerItemSelection(null, event);
+                break;
+
+            case VALUE_ESCAPE:
+                if (this.isVisible()) {
+                    this.hide(event);
+                    event.preventDefault();
+                }
+                break;
+
+            default:
+                if (this.isVisible()) {
+                    this._keydownFreeType(event, false);
+                } else if (options.allowTypeToSelect) {
+                    this._keydownFreeType(event, true);
+                } else {
+                    if (options.open)
+                        options.open(event);
+                    else
+                        this.show();
+
+                    setTimeout(() => {
+                        if (this[DestroyedSymbol])
+                            return;
+                        this._keydownFreeType(event, false);
+                    });
+                }
+                break;
+        }
+
+        if (!suppressEnterSpaceToggle &&
+            (event.key === VALUE_ENTER ||
+                event.key === VALUE_SPACE &&
+                p.lastInputKeyAllowsNonTypeKeys &&
+                !p.multi &&
+                !this.hasFocusedItem() &&
+                !options.disabled &&
+                !options.readOnly)) {
+            if (options.toggle)
+                options.toggle(event);
+            else if (this.isVisible())
+                this.hide(event);
+            else
+                this.show();
+
+            event.preventDefault();
+            event.stopPropagation();
         }
     }
 
