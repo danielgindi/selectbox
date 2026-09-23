@@ -2194,7 +2194,7 @@ class SelectBox {
 
         if ((finalItemCount + (p.clearable ? 1 : 0)) > 1) {
             let nextIndex = selectedItems.length > 0
-                ? p.dropList.filteredItemIndexByItem(selectedItems[0]) - 1
+                ? p.dropList.filteredItemIndexByValue(selectedItems[0][p.valueProp]) - 1
                 : (finalItemCount - 1);
             if (nextIndex === -1 && !p.clearable)
                 nextIndex = finalItemCount - 1;
@@ -2219,7 +2219,7 @@ class SelectBox {
 
         if ((finalItemCount + (p.clearable ? 1 : 0)) > 1) {
             let nextIndex = selectedItems.length > 0
-                ? p.dropList.filteredItemIndexByItem(selectedItems[0]) + 1
+                ? p.dropList.filteredItemIndexByValue(selectedItems[0][p.valueProp]) + 1
                 : 0;
             if (nextIndex === finalItemCount)
                 nextIndex = p.clearable ? -1 : 0;
