@@ -818,8 +818,8 @@ export default defineComponent({
             if (event === 'select' ||
                 event === 'clear' ||
                 event === 'groupcheck' ||
-                (event === 'addsel' && !(event as any).isCheckingGroup) ||
-                (event === 'removesel' && !(event as any).isCheckingGroup)) {
+                (event === 'addsel' && !data?.isCheckingGroup) ||
+                (event === 'removesel' && !data?.isCheckingGroup)) {
                 let value = event === 'select' ? data.value : this.instance.getValue();
                 if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                     value = null;

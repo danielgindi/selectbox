@@ -447,7 +447,8 @@ export default defineComponent({
     methods: {
         _handleListEvents(event: string, data?: any) {
             if ((event === 'select' && !this.multi) ||
-                event === 'check' && !(event as any).isCheckingGroup ||
+                // Checking a group is followed by 'groupcheck', which emits once for the whole group
+                event === 'check' && !data?.isCheckingGroup && !data?.isGroup ||
                 event === 'groupcheck') {
                 (this.$emit as any)(isVue3 ? 'update:modelValue' : 'input',
                     event === 'select'
