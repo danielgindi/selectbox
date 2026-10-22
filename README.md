@@ -39,9 +39,29 @@ I really hope to get this documented so everyone can enjoy it.
   @import '@danielgindi/selectbox/css/selectbox'; /* depends on droplist css */
   ```
 
-## Example
+## Docs & examples
 
-You are welcome to open a PR and add examples, docs, and demo pages :-)
+The docs page (`example/`) demonstrates every feature, section by section, each with its source code:
+
+```bash
+npm run example        # serve it locally
+npm run example:build  # build a static copy into dist-docs/
+```
+
+Every demo lives in `example/demos/` as a plain module; the page runs it and shows that same file as the source.
+
+## Development
+
+```bash
+npm test               # unit tests (Node) + integration tests (real Chromium, via Vitest browser mode)
+npm run test:watch
+npm run test:coverage
+npm run lint && npm run typecheck
+```
+
+The integration tests drive the real components in a browser - clicking, typing and pressing keys like a user -
+because the widgets depend on layout (measuring, positioning, virtualization).
+Run `npx playwright install chromium` once before the first run.
 
 ## Api
 

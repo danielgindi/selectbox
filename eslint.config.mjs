@@ -24,6 +24,8 @@ export default [
             "!tests/**/*_helpers.js",
             "!test/**/*_helpers.js",
             "dist/**/*",
+            "dist-docs/**/*",
+            "coverage/**/*",
             "example/**/*",
             // `lib/` and `vue/` are generated (type-stripped) build output, compiled
             // from `src/lib` and `src/vue` - see scripts/build-compat.js. Lint the source.
