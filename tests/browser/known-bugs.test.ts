@@ -10,17 +10,6 @@ import { fruits, listLabels, mountSelectBox, nextTick, option } from './helpers'
 describe('known bugs', () => {
     enableAutoUnmount(afterEach);
 
-    it.fails('3. setItems(items, false) refreshes an open list', async () => {
-        const { selectBox, input } = mountSelectBox({ items: fruits });
-        await userEvent.click(input);
-        expect(listLabels()).toEqual(['Banana', 'Apple', 'Cherry', 'Date']);
-
-        selectBox.setItems([{ label: 'Kiwi', value: 'kiwi' }], false);
-        await nextTick();
-
-        expect(listLabels()).toEqual(['Kiwi']);
-    });
-
     it.fails('4. Vue emits a single update:modelValue when a group is checked', async () => {
         const items = [
             { label: 'Fruits', value: 'fruits', _group: true },

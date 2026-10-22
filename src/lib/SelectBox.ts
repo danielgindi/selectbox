@@ -676,6 +676,9 @@ class SelectBox {
 
         if (resetValues) {
             this.setSelectedValues(this.getSelectedValues());
+        } else {
+            // Without a selection reset nothing else refreshes an open list
+            this._scheduleSync('render_list');
         }
 
         this._trigger('itemschanged', { term: null, mutated: true, count: this.getFilteredItemCount() });

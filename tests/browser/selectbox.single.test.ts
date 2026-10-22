@@ -217,6 +217,15 @@ describe('SelectBox — single selection', () => {
         await expect.element(el.querySelector<HTMLElement>('.selectbox__single_wrapper')).toHaveTextContent('Green apple');
     });
 
+    it.each([true, false])('refreshes an open list on setItems(items, resetValues: %s)', async (resetValues) => {
+        const { selectBox, input } = mountSelectBox({ items: fruits });
+        await userEvent.click(input);
+
+        selectBox.setItems([{ label: 'Kiwi', value: 'kiwi' }], resetValues);
+
+        await expect.poll(listLabels).toEqual(['Kiwi']);
+    });
+
     it('renders the selection with renderSingleItem, falling back to the label when it returns false', async () => {
         const renderSingleItem = (item: ItemBase, itemEl: Element) => {
             if (item.value !== 'apple') return false;

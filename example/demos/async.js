@@ -34,11 +34,9 @@ export default function (stage) {
         // Ignore stale responses
         if (term !== lastTerm) return;
 
-        // Replace the items, but keep the selected item (and its label) even if
-        // it is not part of these results. Re-setting the selection refreshes the open list.
+        // `false`: keep the selected item (and its label) even if it is not part of these results
         selectBox
             .setItems(results, false)
-            .setSelectedItems(selectBox.getSelectedItems())
             .setIsLoadingMode(false);
     });
 
