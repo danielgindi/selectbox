@@ -10,16 +10,6 @@ import { fruits, listLabels, mountSelectBox, nextTick, option } from './helpers'
 describe('known bugs', () => {
     enableAutoUnmount(afterEach);
 
-    it.fails('1. keeps the classes of a provided element', () => {
-        const host = document.createElement('div');
-        host.className = 'host';
-        document.body.append(host);
-
-        mountSelectBox({ el: host, items: fruits });
-
-        expect(host).toHaveClass('host');
-    });
-
     it.fails('2. leaves a provided element empty after destroy()', () => {
         const host = document.createElement('div');
         document.body.append(host);

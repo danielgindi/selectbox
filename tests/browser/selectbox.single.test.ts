@@ -249,6 +249,19 @@ describe('SelectBox — single selection', () => {
         });
     });
 
+    it('keeps the existing classes of a provided element, replacing only its own', () => {
+        const host = document.createElement('div');
+        host.className = 'host';
+        document.body.append(host);
+
+        const { selectBox } = mountSelectBox({ el: host, items: fruits, additionalClasses: 'extra' });
+        expect(host).toHaveClass('host', 'selectbox', 'extra');
+
+        selectBox.setAdditionalClasses(['other']);
+        expect(host).toHaveClass('host', 'selectbox', 'other');
+        expect(host).not.toHaveClass('extra');
+    });
+
     it('detaches from a provided element on destroy', () => {
         const host = document.createElement('div');
         document.body.append(host);
