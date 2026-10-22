@@ -10,16 +10,6 @@ import { fruits, listLabels, mountSelectBox, nextTick, option } from './helpers'
 describe('known bugs', () => {
     enableAutoUnmount(afterEach);
 
-    it.fails('2. leaves a provided element empty after destroy()', () => {
-        const host = document.createElement('div');
-        document.body.append(host);
-
-        const { selectBox } = mountSelectBox({ el: host, items: fruits });
-        selectBox.destroy();
-
-        expect(host.innerHTML).toBe('');
-    });
-
     it.fails('3. setItems(items, false) refreshes an open list', async () => {
         const { selectBox, input } = mountSelectBox({ items: fruits });
         await userEvent.click(input);

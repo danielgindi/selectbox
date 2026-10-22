@@ -552,6 +552,7 @@ class SelectBox {
         remove(p.list);
         remove(p.singleWrapper);
         remove(p.input);
+        remove(p.inputWrapper);
         remove(p.inputBackBuffer);
         remove(p.clearButtonWrapper);
         remove(p.openIndicator);

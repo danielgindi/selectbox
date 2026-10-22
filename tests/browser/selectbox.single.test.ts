@@ -274,6 +274,6 @@ describe('SelectBox — single selection', () => {
         expect(host.className).toBe('');
         expect(host).not.toHaveAttribute('role');
         expect(host).not.toHaveAttribute('aria-expanded');
-        expect(host.querySelector<HTMLElement>('input')).toBeNull();
+        expect(host.innerHTML).toBe('');
     });
 });
