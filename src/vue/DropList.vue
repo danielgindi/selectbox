@@ -157,6 +157,12 @@ export const PropTypes = {
     unrenderItem: {
         type: Function as PropType<DropListOptions['unrenderItem']>,
     },
+    renderNoResultsItem: {
+        type: Function as PropType<DropListOptions['renderNoResultsItem']>,
+    },
+    unrenderNoResultsItem: {
+        type: Function as PropType<DropListOptions['unrenderNoResultsItem']>,
+    },
     positionOptions: {
         type: Object as PropType<PositionOptions>,
     },
@@ -282,9 +288,9 @@ export default defineComponent({
                 }
             }
 
-            opts.renderNoResultsItem = this.computedRenderNoResultsItem ?? createSlotBasedRenderFunc(this, 'no-results-item');
+            opts.renderNoResultsItem = this.renderNoResultsItem ?? createSlotBasedRenderFunc(this, 'no-results-item');
 
-            opts.unrenderNoResultsItem = this.computedUnrenderNoResultsItem;
+            opts.unrenderNoResultsItem = this.unrenderNoResultsItem;
 
             if (!opts.unrenderNoResultsItem) {
                 let fn = createSlotBasedUnrenderFunc(this, 'no-results-item');

@@ -691,12 +691,12 @@ export default defineComponent({
 
         renderNoResultsItem() {
             if (this.instance)
-                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         unrenderNoResultsItem() {
             if (this.instance)
-                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         renderListItem() {
@@ -785,8 +785,10 @@ export default defineComponent({
         }
     },
 
-    unmounted() {
+    // Destroy here: the `el` watcher can't, as a component's watchers stop before its refs are cleared
+    [isVue3 ? 'unmounted' : 'destroyed']() {
         this.isMounted = false;
+        this._destroyBox();
     },
 
     methods: {
