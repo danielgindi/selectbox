@@ -133,7 +133,7 @@ describe('Vue slots', () => {
             expectNoLeakedSlots();
         });
 
-        it.fails('no-results-item: uses a renderNoResultsItem prop changed after mount', async () => {
+        it('no-results-item: uses a renderNoResultsItem prop changed after mount', async () => {
             const errorHandler = vi.fn();
             const wrapper = mount(SelectBox, {
                 attachTo: document.body,

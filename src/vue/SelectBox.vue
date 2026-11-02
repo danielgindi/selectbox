@@ -691,12 +691,12 @@ export default defineComponent({
 
         renderNoResultsItem() {
             if (this.instance)
-                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         unrenderNoResultsItem() {
             if (this.instance)
-                (this.instance as any).setRenderNoResultsItem(this.computedRenderNoResultsItem, this.computedUnrenderNoResultsItem);
+                this.instance.setListOptions(this.computedListOptions);
         },
 
         renderListItem() {
