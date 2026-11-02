@@ -3,7 +3,7 @@ import { userEvent } from 'vitest/browser';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { h } from 'vue';
 import { DropList, SelectBox } from '../../src/vue/index';
-import { chipLabels, createAnchor, fruits, nextTick, option } from './helpers';
+import { chipLabels, createAnchor, fruits, listLabels, nextTick, option } from './helpers';
 
 const groupedItems = [
     { label: 'Fruits', value: 'fruits', _group: true },
@@ -78,6 +78,24 @@ describe('Vue bindings', () => {
             });
 
             await expect.poll(() => singleWrapper(wrapper.element)?.innerHTML).toBe('<em>🍒 Cherry</em>');
+        });
+
+        // https://github.com/danielgindi/selectbox/issues/6
+        it('renders the no-results row through the no-results-item slot', async () => {
+            const wrapper = mount(SelectBox, {
+                attachTo: document.body,
+                props: { items: fruits, noResultsText: 'Nothing found', filterThrottleWindow: 0 },
+                slots: {
+                    'no-results-item': (item: { label: string }) => h('strong', `Custom: ${item.label}`),
+                },
+            });
+            const input = (wrapper.element as HTMLElement).querySelector('input');
+
+            await userEvent.click(input);
+            await userEvent.type(input, 'xyz');
+
+            await expect.poll(listLabels).toEqual(['Custom: Nothing found']);
+            expect(document.querySelector('.droplist__item strong')).not.toBeNull();
         });
     });
 
