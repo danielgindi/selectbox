@@ -50,6 +50,8 @@ export interface DropListVueProps {
     modelValue?: any;
     renderItem?: DropListOptions['renderItem'];
     unrenderItem?: DropListOptions['unrenderItem'];
+    renderNoResultsItem?: DropListOptions['renderNoResultsItem'];
+    unrenderNoResultsItem?: DropListOptions['unrenderNoResultsItem'];
     positionOptions?: PositionOptions;
     /** z-index for the drop list (see `DropListOptions.zIndex`). `undefined` uses `DropListDefaultOptions.zIndex`. */
     zIndex?: DropListOptions['zIndex'];

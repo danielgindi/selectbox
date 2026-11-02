@@ -37,9 +37,6 @@ describe('Vue slots', () => {
     enableAutoUnmount(afterEach);
     beforeEach(() => mounted = 0);
 
-    // Known bugs: each test asserts the correct behavior and is marked `it.fails`
-    // until fixed. Once a bug is fixed its test starts failing - then change it to `it`.
-
     describe('SelectBox', () => {
         it('destroys its SelectBox (list, listeners, slots) when unmounted', async () => {
             const destroy = vi.spyOn(SelectBoxClass.prototype, 'destroy');
@@ -198,8 +195,8 @@ describe('Vue slots', () => {
             expect(document.querySelector('.droplist_footer')).toHaveTextContent('2 items');
         });
 
-        it.fails('no-results-item: uses the renderNoResultsItem prop', async () => {
-            mount(DropList, {
+        it('no-results-item: uses the renderNoResultsItem prop, also when it changes', async () => {
+            const wrapper = mount(DropList, {
                 attachTo: document.body,
                 props: {
                     items: [],
@@ -210,6 +207,11 @@ describe('Vue slots', () => {
             await nextTick();
 
             expect(listLabels()).toEqual(['Nothing here']);
+
+            await wrapper.setProps({
+                renderNoResultsItem: (_item: ItemBase, el: Element) => { el.textContent = 'Still nothing'; },
+            });
+            await expect.poll(listLabels).toEqual(['Still nothing']);
         });
 
         it('no-results-item: renders the slot', async () => {
