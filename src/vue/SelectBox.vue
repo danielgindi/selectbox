@@ -785,8 +785,10 @@ export default defineComponent({
         }
     },
 
-    unmounted() {
+    // Destroy here: the `el` watcher can't, as a component's watchers stop before its refs are cleared
+    [isVue3 ? 'unmounted' : 'destroyed']() {
         this.isMounted = false;
+        this._destroyBox();
     },
 
     methods: {

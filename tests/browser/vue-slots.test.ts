@@ -3,7 +3,7 @@ import { userEvent } from 'vitest/browser';
 import { enableAutoUnmount, mount } from '@vue/test-utils';
 import { defineComponent, h, onMounted, onUnmounted } from 'vue';
 import { DropList, SelectBox } from '../../src/vue/index';
-import { SelectBox as SelectBoxClass } from '../../src/lib/index';
+import { DropList as DropListClass, SelectBox as SelectBoxClass } from '../../src/lib/index';
 import type { ItemBase } from '../../src/lib/index';
 import { chipLabels, createAnchor, fruits, listItemEls, listLabels, nextTick } from './helpers';
 
@@ -41,7 +41,7 @@ describe('Vue slots', () => {
     // until fixed. Once a bug is fixed its test starts failing - then change it to `it`.
 
     describe('SelectBox', () => {
-        it.fails('destroys its SelectBox (list, listeners, slots) when unmounted', async () => {
+        it('destroys its SelectBox (list, listeners, slots) when unmounted', async () => {
             const destroy = vi.spyOn(SelectBoxClass.prototype, 'destroy');
             const wrapper = mount(SelectBox, {
                 attachTo: document.body,
@@ -56,7 +56,7 @@ describe('Vue slots', () => {
             }
         });
 
-        it.fails('unmounts its slot components when unmounted', async () => {
+        it('unmounts its slot components when unmounted', async () => {
             const wrapper = mount(SelectBox, {
                 attachTo: document.body,
                 props: { items: fruits, multi: true, modelValue: ['apple', 'cherry'] },
@@ -66,7 +66,8 @@ describe('Vue slots', () => {
 
             wrapper.unmount();
 
-            expect(mounted).toBe(0);
+            // Vue runs the slots' unmount hooks after the current flush
+            await expect.poll(() => mounted).toBe(0);
         });
 
         it('single-item: replaces the rendered selection and unmounts the previous one', async () => {
@@ -156,6 +157,25 @@ describe('Vue slots', () => {
     });
 
     describe('DropList', () => {
+        it('destroys its DropList and unmounts its slot components when unmounted', async () => {
+            const destroy = vi.spyOn(DropListClass.prototype, 'destroy');
+            const wrapper = mount(DropList, {
+                attachTo: document.body,
+                props: { items: fruits.slice(0, 2), positionOptions: listPosition(createAnchor()) },
+                slots: { item: (item: ItemBase) => tracked(`→ ${item.label}`) },
+            });
+            await nextTick();
+            expect(mounted).toBe(2);
+
+            try {
+                wrapper.unmount();
+                expect(destroy).toHaveBeenCalledOnce();
+                await expect.poll(() => mounted).toBe(0);
+            } finally {
+                destroy.mockRestore();
+            }
+        });
+
         it('renders items, header and footer through slots', async () => {
             mount(DropList, {
                 attachTo: document.body,
