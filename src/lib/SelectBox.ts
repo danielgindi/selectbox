@@ -51,6 +51,8 @@ interface SelectBoxState {
     ownsEl: boolean;
     baseClassName: string;
     additionalClasses?: string | string[];
+    /** the classes `_syncBaseClasses` last set on `el`, so it can replace them without touching others */
+    appliedClasses?: string[];
     direction: 'ltr' | 'rtl' | 'auto';
 
     /** no default in `DefaultOptions` */
@@ -550,6 +552,7 @@ class SelectBox {
         remove(p.list);
         remove(p.singleWrapper);
         remove(p.input);
+        remove(p.inputWrapper);
         remove(p.inputBackBuffer);
         remove(p.clearButtonWrapper);
         remove(p.openIndicator);
@@ -673,6 +676,9 @@ class SelectBox {
 
         if (resetValues) {
             this.setSelectedValues(this.getSelectedValues());
+        } else {
+            // Without a selection reset nothing else refreshes an open list
+            this._scheduleSync('render_list');
         }
 
         this._trigger('itemschanged', { term: null, mutated: true, count: this.getFilteredItemCount() });
@@ -1772,7 +1778,15 @@ class SelectBox {
             classes = classes.concat(p.additionalClasses);
         }
 
-        el.className = classes.join(' ');
+        classes = classes.join(' ').split(/\s+/).filter(Boolean);
+
+        // Replace only our own classes, keeping any others (e.g. those of a provided `el`)
+        const previousClasses = p.appliedClasses ?? [];
+        const otherClasses = Array.from(el.classList)
+            .filter(name => !name.startsWith(p.baseClassName) && !previousClasses.includes(name));
+
+        el.className = otherClasses.concat(classes).join(' ');
+        p.appliedClasses = classes;
     }
 
     /** @private */

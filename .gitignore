@@ -6,3 +6,9 @@ css/
 # by scripts/build-compat.js. See src/lib and src/vue for the real source.
 /lib/
 /vue/
+
+# Test coverage reports
+coverage/
+
+# Built docs/demo page
+dist-docs/
