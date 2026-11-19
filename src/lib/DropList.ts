@@ -925,7 +925,8 @@ class DropList {
         let itemIndex = this.itemIndexByValue(value);
         if (itemIndex === -1) return this;
 
-        let item = this.itemAtIndex(itemIndex);
+        // The internal item (`itemAtIndex()` returns the consumer's original item)
+        let item = p.items[itemIndex];
         item[ItemSymbol] = newItem;
 
         if (hasOwnProperty.call(newItem, p.labelProp))
@@ -968,9 +969,6 @@ class DropList {
         let virtualItemIndex = itemIndex;
         if (p.filteredItems) {
             virtualItemIndex = p.filteredItems.indexOf(item);
-            if (virtualItemIndex !== -1) {
-                p.filteredItems.splice(virtualItemIndex, 1);
-            }
         }
 
         if (virtualItemIndex !== -1 &&
