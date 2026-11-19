@@ -578,9 +578,54 @@ kbd {
     background: var(--demo-hover);
 }
 
+.demo-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
 .demo-note {
     align-self: center;
+    margin: 0;
     color: var(--demo-muted);
+}
+
+.demo-input {
+    width: 280px;
+    max-width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--demo-border);
+    border-radius: 4px;
+    background: var(--demo-surface);
+    color: var(--demo-text);
+    font: inherit;
+}
+
+.demo-area {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 140px;
+    border: 2px dashed var(--demo-border);
+    border-radius: 10px;
+    color: var(--demo-muted);
+    user-select: none;
+}
+
+/* Used by the "Existing elements" demo */
+.selectbox.demo-rounded {
+    --selectbox-border-radius: 1em;
+    --selectbox-horz-padding: 0.8em;
+}
+
+.demo-stage > [hidden] {
+    display: none;
+}
+
+.droplist_footer .demo-button {
+    margin-inline-end: 4px;
+    padding: 2px 10px;
 }
 
 .event-log {

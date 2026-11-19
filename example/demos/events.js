@@ -20,7 +20,7 @@ export default function (stage) {
     log.className = 'event-log';
 
     // '*' receives every event, with its name
-    selectBox.on('*', (name, data) => {
+    const logEvent = (name, data) => {
         let text = name;
         if (data?.value !== undefined) text += ` → ${JSON.stringify(data.value)}`;
         if (data?.cancel) text += ' (cancelled)';
@@ -29,9 +29,25 @@ export default function (stage) {
         entry.textContent = text;
         log.append(entry);
         log.scrollTop = log.scrollHeight;
+    };
+
+    selectBox.on('*', logEvent);
+
+    // `off()` removes a handler (or all handlers of an event, or all of them)
+    const pause = document.createElement('input');
+    pause.type = 'checkbox';
+    pause.addEventListener('change', () => {
+        if (pause.checked)
+            selectBox.off('*', logEvent);
+        else
+            selectBox.on('*', logEvent);
     });
 
-    stage.append(selectBox.el, log);
+    const pauseLabel = document.createElement('label');
+    pauseLabel.className = 'demo-note';
+    pauseLabel.append(pause, ' Pause logging');
+
+    stage.append(selectBox.el, pauseLabel, log);
 
     return selectBox;
 }

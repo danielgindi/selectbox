@@ -30,9 +30,27 @@ export default function (stage) {
     const multi = new SelectBox({
         multi: true,
         items: colors,
-        value: ['crimson', 'gold', 'royalblue'],
+        value: ['crimson', 'gold', 'royalblue', 'seagreen'],
         renderMultiItem: renderSwatch,
-        listOptions: { renderItem: renderSwatch },
+        // The chip standing for the rest of the selection gets `items`: the whole selection
+        maxMultiItems: 2,
+        renderRestMultiItem: (item, itemEl) => {
+            const rest = item.items.slice(2);
+            itemEl.title = rest.map(color => color.label).join(', ');
+            itemEl.append(`+${rest.length} `, ...rest.map(color => {
+                const dot = document.createElement('span');
+                dot.style.cssText = `display: inline-block; width: .6em; height: .6em; border-radius: 50%;
+                    margin-inline-start: .15em; background: ${color.hex}`;
+                return dot;
+            }));
+        },
+        listOptions: {
+            renderItem: renderSwatch,
+            // Type something that matches no color
+            renderNoResultsItem: (item, itemEl) => {
+                itemEl.textContent = `No color named "${multi.getSearchTerm()}"`;
+            },
+        },
     });
 
     stage.append(single.el, multi.el);

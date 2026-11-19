@@ -14,8 +14,10 @@ export default function (stage) {
             { label: 'Japan', value: 'jp' },
             { label: 'Brazil', value: 'br' },
             { label: 'Israel', value: 'il' },
+            // `short_label: false`: can be selected, but never shows a chip
+            { label: 'Somewhere else', short_label: false, value: 'other' },
         ],
-        value: ['us', 'fr', 'jp'],
+        value: ['us', 'fr', 'jp', 'other'],
     });
 
     stage.append(selectBox.el);

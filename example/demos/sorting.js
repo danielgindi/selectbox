@@ -10,7 +10,7 @@ const currencies = [
 ];
 
 export default function (stage) {
-    const selectBox = new SelectBox({
+    const byLabel = new SelectBox({
         multi: true,
         items: currencies,
         value: ['GBP', 'AUD'],
@@ -20,11 +20,22 @@ export default function (stage) {
         sortListCheckedFirst: true,
         // …and "sticky" values always on top, in the list and in the chips.
         stickyValues: ['USD'],
-        // Chips are sorted too (on by default); provide your own comparator if needed:
-        // sortItemComparator: (a, b) => a.value.localeCompare(b.value),
+        // Chips are sorted too (`sortSelectedItems`, on by default)
     });
 
-    stage.append(selectBox.el);
+    const byCode = new SelectBox({
+        multi: true,
+        items: currencies,
+        value: ['GBP', 'AUD'],
+        sortListItems: true,
+        // Your own order, for the list and the chips: here, by currency code.
+        // It replaces the default comparator, including its handling of `stickyValues`.
+        sortItemComparator: (a, b) => a.value.localeCompare(b.value),
+        // Chips stay in the order they were picked
+        sortSelectedItems: false,
+    });
 
-    return selectBox;
+    stage.append(byLabel.el, byCode.el);
+
+    return byCode;
 }
