@@ -83,8 +83,8 @@
 			margin: 0;
 			padding-top: var(--droplist-item-top-padding);
 			padding-bottom: var(--droplist-item-bottom-padding);
-			padding-left: var(--droplist-item-start-padding);
-			padding-right: var(--droplist-item-end-padding);
+			padding-inline-start: var(--droplist-item-start-padding);
+			padding-inline-end: var(--droplist-item-end-padding);
 			height: var(--droplist-item-height);
 			color: #3e3f48;
 			white-space: nowrap;
@@ -113,7 +113,7 @@
 				position: absolute;
 				top: 50%;
 				transform: translateY(-50%);
-				left: var(--droplist-checkbox-start);
+				inset-inline-start: var(--droplist-checkbox-start);
 				display: block;
 				width: 16px;
 				height: 16px;
@@ -158,13 +158,13 @@
 		li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
 			padding-top: var(--droplist-item-multi-top-padding);
 			padding-bottom: var(--droplist-item-multi-bottom-padding);
-			padding-left: var(--droplist-item-multi-start-padding);
-			padding-right: var(--droplist-item-multi-end-padding);
+			padding-inline-start: var(--droplist-item-multi-start-padding);
+			padding-inline-end: var(--droplist-item-multi-end-padding);
 
 			.droplist__item_label {
 				display: block;
 				margin-top: var(--droplist-item-multi-label-top-padding);
-				margin-left: var(--droplist-item-multi-label-start-padding);
+				margin-inline-start: var(--droplist-item-multi-label-start-padding);
 			}
 		}
 
@@ -173,12 +173,12 @@
 		}
 
 		li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
-			padding-left: var(--droplist-item-multi-child-start-padding);
+			padding-inline-start: var(--droplist-item-multi-child-start-padding);
 		}
 
 		li.droplist__item_child.droplist__item_single,
 		li.droplist__item_child.droplist__item_multi_nocheck {
-			padding-left: var(--droplist-item-child-start-padding);
+			padding-inline-start: var(--droplist-item-child-start-padding);
 		}
 
 		li.droplist__item_nointeraction {
@@ -218,45 +218,22 @@
 		}
 	}
 
-	&.droplist__rtl,
-	[dir=rtl] &:not(.droplist__ltr) {
+	// Layout mirrors automatically through logical properties, which follow the computed `direction`:
+	// set by the `direction` option (`.droplist__rtl` / `.droplist__ltr`), or inherited from the document.
+	&.droplist__rtl {
 		direction: rtl;
 	}
 
-	&.droplist__rtl ul,
-	[dir=rtl] &:not(.droplist__ltr) ul {
-		li {
-			.checkbox {
-				left: auto;
-				right: var(--droplist-checkbox-start);
-			}
-		}
+	&.droplist__ltr {
+		direction: ltr;
+	}
 
-		li.droplist__item_multi:not(.droplist__item_multi_nocheck) {
-			padding-left: var(--droplist-item-multi-end-padding);
-			padding-right: var(--droplist-item-multi-start-padding);
-
-			.droplist__item_label {
-				margin-left: 0;
-				margin-right: var(--droplist-item-multi-label-start-padding);
-			}
-		}
-
-		li.droplist__item_child.droplist__item_multi:not(.droplist__item_multi_nocheck) {
-			padding-left: var(--droplist-item-multi-end-padding);
-			padding-right: var(--droplist-item-multi-child-start-padding);
-		}
-
-		li.droplist__item_child.droplist__item_single,
-		li.droplist__item_child.droplist__item_multi_nocheck {
-			padding-left: var(--droplist-item-end-padding);
-			padding-right: var(--droplist-item-child-start-padding);
-		}
-
-		li .remove {
-			right: auto;
-			left: var(--droplist-item-remove-spacing);
-		}
+	// `.remove` forces `direction: ltr` on itself, which would make logical insets resolve as LTR,
+	// so it is positioned physically. `:dir()` follows the nearest `dir` attribute; `:where()` keeps
+	// the specificity low, and its forgiving parsing just skips `:dir()` where it isn't supported.
+	&:where(.droplist__rtl, :dir(rtl):not(.droplist__ltr)) ul li .remove {
+		right: auto;
+		left: var(--droplist-item-remove-spacing);
 	}
 }
 

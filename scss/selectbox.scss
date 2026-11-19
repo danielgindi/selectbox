@@ -1,14 +1,26 @@
 ﻿$spinner-transition-timing-function: cubic-bezier(1.0, 0.5, 0.8, 1.0);
 $spinner-transition-duration: .15s;
 
+// Layout mirrors automatically through logical properties (`*-inline-start` / `*-inline-end`),
+// which follow the element's computed `direction`. That comes from the `direction` option
+// (`.selectbox__rtl` / `.selectbox__ltr`), or is inherited from the document.
+//
+// These mixins are only for the few things that have no logical equivalent (e.g. transforms).
+// `:dir()` follows the nearest `dir` attribute; `:where()` keeps the specificity low, and its
+// forgiving parsing just skips the `:dir()` branch in browsers that don't support it.
+$selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr))';
+
+/// Applies to the `.selectbox` element itself, when it is RTL.
 @mixin currentIsRtl {
-    &.selectbox__rtl, [dir=rtl] &:not(.selectbox__ltr) {
+    &#{$selectbox-rtl-condition} {
         @content;
     }
 }
 
-@mixin insideRtlSelectBox {
-    .selectbox__rtl &, [dir=rtl] .selectbox:not(.selectbox__ltr) & {
+/// Applies to an element inside an RTL `.selectbox`.
+/// @param {String} $modifiers - extra classes the `.selectbox` must have, e.g. `'.selectbox__open_list'`
+@mixin insideRtlSelectBox($modifiers: '') {
+    .selectbox#{$modifiers}#{$selectbox-rtl-condition} & {
         @content;
     }
 }
@@ -56,6 +68,10 @@ $spinner-transition-duration: .15s;
         direction: rtl;
     }
 
+    &.selectbox__ltr {
+        direction: ltr;
+    }
+
     &.selectbox__searchable {
         cursor: text;
     }
@@ -89,66 +105,31 @@ $spinner-transition-duration: .15s;
 	}
 
     &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
-        padding-right: var(--selectbox-open-indicator-width);
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: var(--selectbox-open-indicator-width);
-        }
+        padding-inline-end: var(--selectbox-open-indicator-width);
     }
 
     &.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__has_spinner) {
-        padding-right: var(--selectbox-clear-width);
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: var(--selectbox-clear-width);
-        }
+        padding-inline-end: var(--selectbox-clear-width);
     }
 
     &.selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) {
-        padding-right: var(--selectbox-spinner-width);
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: var(--selectbox-clear-width);
-        }
+        padding-inline-end: var(--selectbox-spinner-width);
     }
 
     &.selectbox__has_open_indicator.selectbox__has_spinner:not(.selectbox__has_clear) {
-        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
-        }
+        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
     }
 
     &.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) {
-        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
-        }
+        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
     }
 
     &.selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) {
-        padding-right: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-        }
+        padding-inline-end: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
     }
 
     &.selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner {
-        padding-right: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-
-        @include currentIsRtl {
-            padding-right: 0;
-            padding-left: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-        }
+        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
     }
 
     &.selectbox__multi {
@@ -176,17 +157,11 @@ $spinner-transition-duration: .15s;
 
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    @include insideRtlSelectBox {
-        &::before {
-            float: left;
-        }
-    }
 }
 
 .selectbox__open_indicator {
     position: absolute;
-    right: var(--selectbox-open-indicator-spacing);
+    inset-inline-end: var(--selectbox-open-indicator-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
@@ -194,7 +169,6 @@ $spinner-transition-duration: .15s;
     width: 1em;
     height: 0.5em;
     overflow: hidden;
-    direction: ltr;
     text-align: left;
     cursor: pointer;
 
@@ -208,7 +182,9 @@ $spinner-transition-duration: .15s;
         left: 0.2em;
         position: relative;
         top: -0.18em;
-        transform: rotate(135deg);
+        // Keep the same transform functions in every state: then the angles interpolate as written,
+        // instead of through a matrix (where the browser picks the turn direction itself).
+        transform: translateY(0) rotate(135deg);
         vertical-align: top;
         width: 0.45em;
         transition: transform 150ms cubic-bezier(1, -0.115, 0.975, 0.855);
@@ -218,16 +194,8 @@ $spinner-transition-duration: .15s;
         transform: translateY(50%) rotate(-45deg);
     }
 
-    .selectbox__rtl &, [dir=rtl] .selectbox:not(.selectbox__ltr) & {
-        right: auto;
-        left: var(--selectbox-open-indicator-spacing);
-
-        &::before {
-            transform: rotate(-225deg);
-        }
-    }
-
-    .selectbox__rtl.selectbox__open_list &, [dir=rtl] .selectbox.selectbox__open_list:not(.selectbox__ltr) & {
+    // Same end pose as LTR (315deg = -45deg), reached by turning the mirrored way: 135deg -> 315deg
+    @include insideRtlSelectBox('.selectbox__open_list') {
         &::before {
             transform: translateY(50%) rotate(315deg);
         }
@@ -236,7 +204,7 @@ $spinner-transition-duration: .15s;
 
 .selectbox__clear {
     position: absolute;
-    right: var(--selectbox-clear-spacing);
+    inset-inline-end: var(--selectbox-clear-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
@@ -265,19 +233,8 @@ $spinner-transition-duration: .15s;
         }
     }
 
-    @include insideRtlSelectBox {
-        right: auto;
-        left: var(--selectbox-clear-spacing);
-    }
-
     .selectbox__has_open_indicator.selectbox__has_clear & {
-        right: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
-    }
-
-    .selectbox__has_open_indicator.selectbox__has_clear.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__ltr) & {
-        right: auto;
-        left: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
+        inset-inline-end: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
     }
 
     .selectbox[aria-disabled=true] > &, .selectbox[aria-readonly=true] > & {
@@ -287,7 +244,7 @@ $spinner-transition-duration: .15s;
 
 .selectbox__spinner {
     position: absolute;
-    right: var(--selectbox-spinner-spacing);
+    inset-inline-end: var(--selectbox-spinner-spacing);
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
@@ -310,53 +267,30 @@ $spinner-transition-duration: .15s;
         transition: opacity .1s;
     }
 
-    @include insideRtlSelectBox {
-        right: auto;
-        left: var(--selectbox-spinner-spacing);
-    }
-
     .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear) & {
-        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
+        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
     }
 
     .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator) & {
-        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
+        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
     }
 
     .selectbox__has_spinner.selectbox__has_open_indicator.selectbox__has_clear & {
-        right: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
-    }
-
-    .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear).selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__ltr) & {
-        right: auto;
-        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
-    }
-
-    .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator).selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__ltr) & {
-        right: auto;
-        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
-    }
-
-    .selectbox__has_spinner.selectbox__has_clear.selectbox__has_open_indicator.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__has_spinner.selectbox__has_clearselectbox__has_open_indicator:not(.selectbox__ltr) & {
-        right: auto;
-        left: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width));
+        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width));
     }
 }
 
 .selectbox__item {
     box-sizing: border-box;
-    float: left;
+    float: inline-start;
     cursor: default;
 
     background-color: #e4e4e4;
     border: var(--selectbox-multi-item-border-width) solid #aaa;
     border-radius: var(--selectbox-multi-item-border-radius);
 
-    margin-left: 0;
-    margin-right: var(--selectbox-multi-item-horz-spacing);
+    margin-inline-start: 0;
+    margin-inline-end: var(--selectbox-multi-item-horz-spacing);
     margin-top: var(--selectbox-multi-item-vert-spacing);
     padding: var(--selectbox-multi-item-top-padding) var(--selectbox-multi-item-horz-padding) var(--selectbox-multi-item-bottom-padding);
     line-height: inherit;
@@ -369,12 +303,6 @@ $spinner-transition-duration: .15s;
 		background-color: #ccc;
 		outline: 0;
 	}
-
-    @include insideRtlSelectBox {
-        float: right;
-        margin-left: var(--selectbox-multi-item-horz-spacing);
-        margin-right: 0;
-    }
 }
 
 .selectbox__item_remove {
@@ -390,23 +318,11 @@ $spinner-transition-duration: .15s;
 	}
 
     &:first-child {
-        margin-right: var(--selectbox-multi-item-remove-spacing);
+        margin-inline-end: var(--selectbox-multi-item-remove-spacing);
     }
 
     &:last-child {
-        margin-left: var(--selectbox-multi-item-remove-spacing);
-    }
-
-    @include insideRtlSelectBox {
-        &:first-child {
-            margin-left: var(--selectbox-multi-item-remove-spacing);
-            margin-right: 0;
-        }
-
-        &:last-child {
-            margin-right: var(--selectbox-multi-item-remove-spacing);
-            margin-left: 0;
-        }
+        margin-inline-start: var(--selectbox-multi-item-remove-spacing);
     }
 }
 
@@ -438,7 +354,7 @@ $spinner-transition-duration: .15s;
 	max-width: 100%;
 
     .selectbox__multi & {
-        float: left;
+        float: inline-start;
         margin-top: calc(var(--selectbox-multi-item-vert-spacing) +
         var(--selectbox-multi-item-border-width) +
         var(--selectbox-multi-item-top-padding) +
@@ -448,19 +364,8 @@ $spinner-transition-duration: .15s;
     .selectbox__single & {
         position: absolute;
         z-index: 1;
-        left: 0;
+        inset-inline-start: 0;
         top: var(--selectbox-single-top-padding);
-    }
-
-    .selectbox__multi.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__multi:not(.selectbox__ltr) & {
-        float: right;
-    }
-
-    .selectbox__single.selectbox__rtl &,
-    [dir=rtl] .selectbox.selectbox__single:not(.selectbox__ltr) & {
-        right: 0;
-        left: auto;
     }
 }
 
