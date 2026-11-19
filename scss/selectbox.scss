@@ -49,6 +49,23 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     --selectbox-multi-item-bottom-padding: 0.2em;
     --selectbox-multi-search-top-offset: 0px;
 
+    --selectbox-text-color: #000;
+    --selectbox-background-color: #fff;
+    --selectbox-border-color: #aaa;
+    --selectbox-disabled-background-color: #eee;
+    --selectbox-disabled-border-color: #aaa;
+    --selectbox-focus-border-color: #66afe9;
+    --selectbox-focus-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+    --selectbox-open-indicator-color: #9d9d9d;
+    --selectbox-clear-color: buttontext;
+    --selectbox-clear-focus-color: red;
+    --selectbox-spinner-color: rgba(60, 60, 60, 0.45);
+    --selectbox-spinner-track-color: rgba(100, 100, 100, 0.1);
+    --selectbox-multi-item-background-color: #e4e4e4;
+    --selectbox-multi-item-border-color: #aaa;
+    --selectbox-multi-item-focus-background-color: #ccc;
+    --selectbox-multi-item-remove-color: #999;
+
     position: relative;
     box-sizing: border-box;
     display: inline-block;
@@ -59,10 +76,10 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     user-select: none;
     -webkit-user-select: none;
 
-    color: #000;
-    background-color: #fff;
+    color: var(--selectbox-text-color);
+    background-color: var(--selectbox-background-color);
     border-radius: var(--selectbox-border-radius);
-    border: solid #aaa 1px;
+    border: solid var(--selectbox-border-color) 1px;
 
     &.selectbox__rtl {
         direction: rtl;
@@ -77,8 +94,8 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     }
 
 	&[aria-disabled=true] {
-		border: solid #aaa 1px;
-		background-color: #eee;
+		border: solid var(--selectbox-disabled-border-color) 1px;
+		background-color: var(--selectbox-disabled-background-color);
 		cursor: default;
 
 		* {
@@ -139,10 +156,9 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 }
 
 .selectbox__focus {
-    border-color: #66afe9;
+    border-color: var(--selectbox-focus-border-color);
     outline: 0;
-	$shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
-    box-shadow: $shadow;
+    box-shadow: var(--selectbox-focus-shadow);
 }
 
 .selectbox__list {
@@ -174,7 +190,7 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 
     &::before {
         border-style: solid;
-        border-color: #9d9d9d;
+        border-color: var(--selectbox-open-indicator-color);
         border-width: 1.5px 1.5px 0 0;
         content: '';
         display: inline-block;
@@ -222,6 +238,7 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
         padding: 0;
         border: 0;
         background: none;
+        color: var(--selectbox-clear-color);
 
         &:before {
             content: '×';
@@ -229,7 +246,7 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 
         &:focus {
             outline: none;
-            color: red;
+            color: var(--selectbox-clear-focus-color);
         }
     }
 
@@ -257,10 +274,10 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
         height: 1em;
         text-indent: -9999em;
         overflow: hidden;
-        border-top: 0.3em solid rgba(100, 100, 100, 0.1);
-        border-right: 0.3em solid rgba(100, 100, 100, 0.1);
-        border-bottom: 0.3em solid rgba(100, 100, 100, 0.1);
-        border-left: 0.3em solid rgba(60, 60, 60, 0.45);
+        border-top: 0.3em solid var(--selectbox-spinner-track-color);
+        border-right: 0.3em solid var(--selectbox-spinner-track-color);
+        border-bottom: 0.3em solid var(--selectbox-spinner-track-color);
+        border-left: 0.3em solid var(--selectbox-spinner-color);
         border-radius: 50%;
         transform: translateZ(0);
         animation: selectbox__spinner_anim 1.1s infinite linear;
@@ -285,8 +302,8 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     float: inline-start;
     cursor: default;
 
-    background-color: #e4e4e4;
-    border: var(--selectbox-multi-item-border-width) solid #aaa;
+    background-color: var(--selectbox-multi-item-background-color);
+    border: var(--selectbox-multi-item-border-width) solid var(--selectbox-multi-item-border-color);
     border-radius: var(--selectbox-multi-item-border-radius);
 
     margin-inline-start: 0;
@@ -300,13 +317,13 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 	}
 
 	&:focus {
-		background-color: #ccc;
+		background-color: var(--selectbox-multi-item-focus-background-color);
 		outline: 0;
 	}
 }
 
 .selectbox__item_remove {
-    color: #999;
+    color: var(--selectbox-multi-item-remove-color);
     cursor: pointer;
     display: inline-block;
     font-weight: bold;

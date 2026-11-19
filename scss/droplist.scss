@@ -19,15 +19,31 @@
 	--droplist-item-remove-spacing: 2px;
 	--droplist-checkbox-start: 6px;
 
+	--droplist-background-color: #fff;
+	--droplist-border-color: #b1b1b1;
+	--droplist-item-text-color: #3e3f48;
+	--droplist-item-focus-background-color: #c7c7c7;
+	--droplist-item-focus-text-color: var(--droplist-item-text-color);
+	--droplist-item-selected-background-color: #3e3f48;
+	--droplist-item-selected-text-color: #fff;
+	--droplist-item-selected-focus-background-color: #2e3038;
+	--droplist-item-selected-focus-color: #fff;
+	--droplist-item-remove-color: #fff;
+	--droplist-checkbox-border-color: #6ca1c6;
+	--droplist-checkbox-background-color: #dae7f1;
+	--droplist-checkbox-hover-background-color: #fff;
+	--droplist-checkbox-active-border-color: #396d93;
+	--droplist-checkbox-active-background-color: #b5cfe3;
+
 	box-sizing: border-box;
 	z-index: 10000;
 	float: left;
 	margin: 0;
 	padding: 0;
-	border: 1px solid #b1b1b1;
+	border: 1px solid var(--droplist-border-color);
 	outline: 0;
 	border-radius: var(--droplist-border-radius);
-	background: #fff;
+	background: var(--droplist-background-color);
 	max-height: 300px;
 	max-width: 100%;
 	line-height: 1.3;
@@ -86,7 +102,7 @@
 			padding-inline-start: var(--droplist-item-start-padding);
 			padding-inline-end: var(--droplist-item-end-padding);
 			height: var(--droplist-item-height);
-			color: #3e3f48;
+			color: var(--droplist-item-text-color);
 			white-space: nowrap;
 			cursor: pointer;
 
@@ -96,15 +112,16 @@
 			overflow: hidden;
 
 			&.droplist__item_focus {
-				background-color: #c7c7c7;
+				background-color: var(--droplist-item-focus-background-color);
+				color: var(--droplist-item-focus-text-color);
 			}
 			&.droplist__item_selected {
-				background-color: #3e3f48;
-				color: #fff;
+				background-color: var(--droplist-item-selected-background-color);
+				color: var(--droplist-item-selected-text-color);
 			}
 			&.droplist__item_selected.droplist__item_focus {
-				background-color: #2e3038;
-				color: #fff;
+				background-color: var(--droplist-item-selected-focus-background-color);
+				color: var(--droplist-item-selected-focus-color);
 			}
 		}
 
@@ -115,39 +132,36 @@
 				transform: translateY(-50%);
 				inset-inline-start: var(--droplist-checkbox-start);
 				display: block;
+				box-sizing: border-box;
 				width: 16px;
 				height: 16px;
-
-				/* unchecked style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3C/svg%3E");
-				background-size: 100% 100%;
+				border: 1px solid var(--droplist-checkbox-border-color);
+				border-radius: 3.5px;
+				background-color: var(--droplist-checkbox-background-color);
 			}
 
 			&:not(:active):hover .checkbox {
-				/* unchecked hover style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3C/svg%3E");
+				background-color: var(--droplist-checkbox-hover-background-color);
 			}
 
 			&:active .checkbox {
-				/* unchecked active style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3C/svg%3E");
+				border-color: var(--droplist-checkbox-active-border-color);
+				background-color: var(--droplist-checkbox-active-background-color);
 			}
 		}
 
 		li.droplist__item_multi.droplist__item_checked {
-			.checkbox {
-				/* checked style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23dae7f1;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
+			.checkbox::after {
+				/* the check mark, drawn in the checkbox's border color */
+				content: '';
+				position: absolute;
+				inset: -1px;
+				background-color: var(--droplist-checkbox-border-color);
+				mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Cpath d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 			}
 
-			&:not(:active):hover .checkbox {
-				/* checked hover style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %236ca1c6; fill: %23fff;'%3E%3C/rect%3E%3Cpath fill='%236ca1c6' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
-			}
-
-			&:active .checkbox {
-				/* checked active style */
-				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 448'%3E%3Crect x='14' y='14' width='420' height='420' rx='84' style='stroke-width: 28px; stroke: %23396d93; fill: %23b5cfe3;'%3E%3C/rect%3E%3Cpath fill='%23396d93' d='m364.136 158.276-172.589 171.204c-4.705 4.667-12.303 4.637-16.97-.068l-90.781-91.516c-4.667-4.705-4.637-12.303.069-16.971l22.719-22.536c4.705-4.667 12.303-4.637 16.97.069l59.792 60.277 141.352-140.216c4.705-4.667 12.303-4.637 16.97.068l22.536 22.718c4.667 4.706 4.637 12.304-.068 16.971z'/%3E%3C/svg%3E%0A");
+			&:active .checkbox::after {
+				background-color: var(--droplist-checkbox-active-border-color);
 			}
 		}
 
@@ -209,7 +223,7 @@
 			&:before {
 				display: inline-block;
 				content: 'x';
-				color: #fff;
+				color: var(--droplist-item-remove-color);
 			}
 		}
 
