@@ -1012,7 +1012,7 @@ class DropList {
                     .render();
             } else {
                 p.virtualListHelper
-                    .removeItemsAt(virtualItemIndex, 1)
+                    .removeItemsAt(1, virtualItemIndex)
                     .render();
             }
         }
