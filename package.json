@@ -92,6 +92,6 @@
     "mitt": "^3.0.1"
   },
   "peerDependencies": {
-    "vue": "^2.* || ^3.*"
+    "vue": "^3.*"
   }
 }

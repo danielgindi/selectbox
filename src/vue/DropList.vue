@@ -6,7 +6,7 @@
 import { DropList, DropListDefaultOptions as DefaultOptions } from '@danielgindi/selectbox';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots.js';
-import { defineComponent, version, type PropType } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 import type {
     DropListInputKeydownOptions,
     DropListOptions,
@@ -14,8 +14,6 @@ import type {
     ItemBase,
     PositionOptions,
 } from '@danielgindi/selectbox';
-
-const isVue3 = version > '3.';
 
 /*const AllListEvents = [
     'itemfocus', 'itemblur', 'select',
@@ -148,7 +146,7 @@ export const PropTypes = {
         type: Array as PropType<ItemBase[]>,
         default: (): ItemBase[] => [],
     },
-    [isVue3 ? 'modelValue' : 'value']: { // Vue 2
+    modelValue: {
         type: [Number, String, Object, Array] as unknown as PropType<any>,
     },
     renderItem: {
@@ -321,7 +319,7 @@ export default defineComponent({
             }
         },
 
-        [isVue3 ? 'modelValue' : 'value'](value: any, old: any) {
+        modelValue(value: any, old: any) {
             if (Array.isArray(value) && Array.isArray(old) &&
                 (value.length as any) === old && value.every((v: any, i: number) => old[i] === v))
                 return;
@@ -431,12 +429,6 @@ export default defineComponent({
             },
         },
 
-        ...(isVue3 ? {} : {
-            $scopedSlots(this: any) { // Vue 2
-                this._recreateList();
-            },
-        } as Record<string, any>),
-
         $slots() {
             this._recreateList();
         },
@@ -446,7 +438,7 @@ export default defineComponent({
         this._createList();
     },
 
-    [isVue3 ? 'unmounted' : 'destroyed']() {
+    unmounted() {
         this._destroyList();
     },
 
@@ -456,7 +448,7 @@ export default defineComponent({
                 // Checking a group is followed by 'groupcheck', which emits once for the whole group
                 event === 'check' && !data?.isCheckingGroup && !data?.isGroup ||
                 event === 'groupcheck') {
-                (this.$emit as any)(isVue3 ? 'update:modelValue' : 'input',
+                this.$emit('update:modelValue',
                     event === 'select'
                         ? data.value
                         : this.nonReactive.instance.getCheckedValues(false));
@@ -511,7 +503,7 @@ export default defineComponent({
             if (Array.isArray(this.items))
                 list.addItems(this.items);
 
-            const modelValue = isVue3 ? this.modelValue : this.value;
+            const modelValue = this.modelValue;
             if (this.multi) {
                 list.setCheckedValues(Array.isArray(modelValue) ? modelValue : modelValue == null ? [] : [modelValue]);
             } else {

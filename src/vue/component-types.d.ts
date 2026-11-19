@@ -46,7 +46,7 @@ export interface DropListVueProps {
     labelProp?: string;
     valueProp?: string;
     items?: ItemBase[];
-    /** Vue 3 (`v-model`). Under Vue 2 compat this is `value` (+ `input` event) instead - untyped here. */
+    /** The bound value (`v-model`). */
     modelValue?: any;
     renderItem?: DropListOptions['renderItem'];
     unrenderItem?: DropListOptions['unrenderItem'];
@@ -134,7 +134,7 @@ export interface SelectBoxVueProps {
     multiItemLabelProp?: string;
     multiItemRemovePosition?: 'before' | 'after' | 'none';
     items?: ItemBase[];
-    /** Vue 3 (`v-model`). Under Vue 2 compat this is `value` (+ `input` event) instead - untyped here. */
+    /** The bound value (`v-model`). */
     modelValue?: any;
     maxMultiItems?: number;
     multiItemsRestLabelProvider?: SelectBoxOptions['multiItemsRestLabelProvider'];

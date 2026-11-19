@@ -3,13 +3,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, markRaw, version, type PropType } from 'vue';
+import { defineComponent, markRaw, type PropType } from 'vue';
 import { SelectBox, SelectBoxDefaultOptions as DefaultOptions } from '@danielgindi/selectbox';
 import { createSlotBasedRenderFunc, createSlotBasedUnrenderFunc } from './utils/slots';
 import deepEqual from 'fast-deep-equal';
 import type { SelectBoxOptions, DropListOptions, DropListZIndex, ItemBase } from '@danielgindi/selectbox';
-
-const isVue3 = version > '3.';
 
 /**
  * Events:
@@ -29,8 +27,7 @@ const isVue3 = version > '3.';
  * 'search:blur': input box has lost focus
  * 'search:term': search term has been updated, before results were re-filtered
  * 'input:resize': input box resized
- * 'input' (Vue v2): (on select, clear, addsel, removesel) - fired after any of the above events.
- * 'update:modelValue' (Vue v3): (on select, clear, addsel, removesel) - fired after any of the above events.
+ * 'update:modelValue': (on select, clear, addsel, removesel) - fired after any of the above events.
  * 'itemschanged': `{term, mutated, count}` = the current set of items has changed
  *
  * Slots:
@@ -162,7 +159,7 @@ export const PropTypes = {
         type: Array as PropType<ItemBase[]>,
         default: (): ItemBase[] => [],
     },
-    [isVue3 ? 'modelValue' : 'value']: {
+    modelValue: {
         type: [String, Number, Boolean, Object, Array, Symbol] as unknown as PropType<any>,
         default: undefined as any,
     },
@@ -645,12 +642,12 @@ export default defineComponent({
             if (this.instance) {
                 this.instance.setItems(value, false);
 
-                const modelValue = isVue3 ? this.modelValue : this.value;
+                const modelValue = this.modelValue;
                 this.instance.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
             }
         },
 
-        [isVue3 ? 'modelValue' : 'value'](value: any, old: any) {
+        modelValue(value: any, old: any) {
             if (Array.isArray(value) && Array.isArray(old) &&
                 (value.length as any) === old && value.every((v: any, i: number) => old[i] === v))
                 return;
@@ -708,13 +705,6 @@ export default defineComponent({
             if (this.instance)
                 this.instance.setListOptions(this.computedListOptions);
         },
-
-        ...(isVue3 ? {} : {
-            $scopedSlots(this: any) { // Vue 2
-                if (this.instance)
-                    this.instance.setListOptions(this.computedListOptions);
-            },
-        } as Record<string, any>),
 
         $slots() {
             if (this.instance)
@@ -786,7 +776,7 @@ export default defineComponent({
     },
 
     // Destroy here: the `el` watcher can't, as a component's watchers stop before its refs are cleared
-    [isVue3 ? 'unmounted' : 'destroyed']() {
+    unmounted() {
         this.isMounted = false;
         this._destroyBox();
     },
@@ -825,7 +815,7 @@ export default defineComponent({
                 let value = event === 'select' ? data.value : this.instance.getValue();
                 if (value === undefined && event !== 'select' && this.emitNullForEmptyValue)
                     value = null;
-                (this.$emit as any)(isVue3 ? 'update:modelValue' : 'input', value);
+                this.$emit('update:modelValue', value);
             }
         },
 
@@ -884,7 +874,7 @@ export default defineComponent({
                 treatGroupSelectionAsItems: this.treatGroupSelectionAsItems,
             });
 
-            const modelValue = isVue3 ? this.modelValue : this.value;
+            const modelValue = this.modelValue;
             box.setValue(modelValue === null && (!this.acceptNullAsValue || this.multi) ? undefined : modelValue);
 
             this.instance = markRaw(box);

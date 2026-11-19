@@ -11,7 +11,7 @@ A full featured selectbox and drop down.
 * Highly configurable
 * No dependency on any ui framework
 * Can work in any framework or in vanilla js
-* Has existing Vue bindings
+* Has existing Vue 3 bindings
 * The droplist part can be used separately for floating menus etc.
 
 This is a real good component, which is the product of evolution over years. Until I sat down one day and refactored it into one cool thing.  

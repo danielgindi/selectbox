@@ -1,93 +1,46 @@
-import * as VueModule from 'vue';
-
-const isVue3 = VueModule.version > '3.';
-const render3 = (VueModule as any).render;
-const createVNode3 = (VueModule as any).createVNode;
-
-const createInstanceFromVnode = (vnode: any) => {
-    return new (VueModule as any)({
-        render() {
-            return vnode;
-        },
-    });
-};
-
-const createInstanceFromVnodes = (vnodes: any) => {
-    return new (VueModule as any)({
-        render(h: any) {
-            return h('div', vnodes);
-        },
-    });
-};
+import { createVNode, render } from 'vue';
 
 const VueInstanceSymbol = Symbol('vue_instance');
 
 /**
- *
- * @param {import('vue').Component} vue
- * @param {string} slotName
- * @returns {(function(item: *, parent: Element): void)|undefined}
+ * Creates a render function (for `renderItem`-style options) that renders the component's slot into a parent element.
+ * @param vue - the component instance owning the slot
+ * @param slotName - name of the slot to render
+ * @returns the render function, or `undefined` if the slot is not provided
  */
 const createSlotBasedRenderFunc = (vue: any, slotName: string) => {
-    if (vue.$slots[slotName]) {
-        return (item: any, parent: any) => {
-            if (isVue3) {
-                let slotVnode = vue.$slots[slotName](item);
-                let vnode = createVNode3({
-                    render() {
-                        return slotVnode;
-                    },
-                });
-                render3(vnode, parent);
-                parent[VueInstanceSymbol] = true;
-            } else {
-                let slotVnode = vue.$slots[slotName];
-                let vm = createInstanceFromVnode(slotVnode);
-                vm.$mount();
-                parent[VueInstanceSymbol] = vm;
-                parent.appendChild(vm.$el);
-            }
-        };
-    }
+    if (!vue.$slots[slotName])
+        return undefined;
 
-    if (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName]) { // Removed in Vue 3
-        return (item: any, parent: any) => {
-            let vnode = vue.$scopedSlots[slotName](item);
-            let vm: any;
-
-            if (Array.isArray(vnode)) {
-                vm = createInstanceFromVnodes(vnode);
-                vm.$mount();
-                let nodes = vm.$el.childNodes;
-                parent[VueInstanceSymbol] = vm;
-                for (let node of nodes)
-                    parent.appendChild(node);
-            } else {
-                vm = createInstanceFromVnode(vnode);
-                vm.$mount();
-                parent[VueInstanceSymbol] = vm;
-                parent.appendChild(vm.$el);
-            }
-        };
-    }
+    return (item: any, parent: any) => {
+        const slotVnode = vue.$slots[slotName](item);
+        const vnode = createVNode({
+            render() {
+                return slotVnode;
+            },
+        });
+        render(vnode, parent);
+        parent[VueInstanceSymbol] = true;
+    };
 };
 
 /**
- *
- * @param {import('vue').Component} vue
- * @param {string} slotName
- * @returns {(function(parent: Element): void)|undefined}
+ * Creates the matching unrender function (for `unrenderItem`-style options), unmounting what the render function rendered.
+ * @param vue - the component instance owning the slot
+ * @param slotName - name of the slot
+ * @returns the unrender function, or `undefined` if the slot is not provided
  */
 const createSlotBasedUnrenderFunc = (vue: any, slotName: string) => {
-    if (vue.$slots[slotName] || (!isVue3 && vue.$scopedSlots && vue.$scopedSlots[slotName])) {
-        return (parent: any) => {
-            const vmOrApp = parent[VueInstanceSymbol];
-            if (!vmOrApp) return;
-            if (isVue3) render3(null, parent);
-            else vmOrApp.$destroy();
-            delete parent[VueInstanceSymbol];
-        };
-    }
+    if (!vue.$slots[slotName])
+        return undefined;
+
+    return (parent: any) => {
+        if (!parent[VueInstanceSymbol])
+            return;
+
+        render(null, parent);
+        delete parent[VueInstanceSymbol];
+    };
 };
 
 export {
