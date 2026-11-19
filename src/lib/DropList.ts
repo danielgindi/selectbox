@@ -3268,10 +3268,17 @@ class DropList {
                     let base = getElementOffset(p.focusItemEl).top;
                     let height = getElementHeight(p.el, true);
 
-                    while (true) {
-                        next = p.focusItemEl.nextElementSibling;
-                        if (!next) return;
-                        if (next.tagName !== 'LI') continue;
+                    // Walk from the focused item towards the page's direction, until an item a page away.
+                    // If there's no such item, stop at the farthest one.
+                    let candidate: Element | null = p.focusItemEl;
+                    next = null;
+
+                    while ((candidate = direction === 'prev_page'
+                        ? candidate.previousElementSibling
+                        : candidate.nextElementSibling)) {
+                        if (candidate.tagName !== 'LI') continue;
+
+                        next = candidate;
 
                         if (direction === 'prev_page') {
                             if (getElementOffset(next).top - base + height <= 0)
@@ -3281,6 +3288,8 @@ class DropList {
                                 break;
                         }
                     }
+
+                    if (!next) return;
 
                     if (next) {
                         nextIndex = p.virtualListHelper.getItemIndexFromElement(next);
