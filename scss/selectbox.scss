@@ -290,6 +290,8 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     border: var(--selectbox-multi-item-border-width) solid var(--selectbox-multi-item-border-color);
     border-radius: var(--selectbox-multi-item-border-radius);
 
+    overflow: hidden;
+    text-overflow: ellipsis;
     margin: 0;
     padding: var(--selectbox-multi-item-top-padding) var(--selectbox-multi-item-horz-padding) var(--selectbox-multi-item-bottom-padding);
     line-height: inherit;
