@@ -66,9 +66,12 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
     --selectbox-multi-item-focus-background-color: #ccc;
     --selectbox-multi-item-remove-color: #999;
 
+    // A row of [content][controls]: the controls take their own room, so nothing has to reserve it.
+    // For a block-level box, override with `display: flex` (not `block`).
     position: relative;
     box-sizing: border-box;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     cursor: default;
     outline: 0;
     line-height: 1.2;
@@ -121,34 +124,6 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 		border-bottom-right-radius: 0;
 	}
 
-    &.selectbox__has_open_indicator:not(.selectbox__has_clear):not(.selectbox__has_spinner) {
-        padding-inline-end: var(--selectbox-open-indicator-width);
-    }
-
-    &.selectbox__has_clear:not(.selectbox__has_open_indicator):not(.selectbox__has_spinner) {
-        padding-inline-end: var(--selectbox-clear-width);
-    }
-
-    &.selectbox__has_spinner:not(.selectbox__has_open_indicator):not(.selectbox__has_clear) {
-        padding-inline-end: var(--selectbox-spinner-width);
-    }
-
-    &.selectbox__has_open_indicator.selectbox__has_spinner:not(.selectbox__has_clear) {
-        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-spinner-width));
-    }
-
-    &.selectbox__has_open_indicator.selectbox__has_clear:not(.selectbox__has_spinner) {
-        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width));
-    }
-
-    &.selectbox__has_clear.selectbox__has_spinner:not(.selectbox__has_open_indicator) {
-        padding-inline-end: calc(var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-    }
-
-    &.selectbox__has_open_indicator.selectbox__has_clear.selectbox__has_spinner {
-        padding-inline-end: calc(var(--selectbox-open-indicator-width) + var(--selectbox-clear-width) + var(--selectbox-spinner-width));
-    }
-
     &.selectbox__multi {
         padding-top: var(--selectbox-multi-vert-padding);
         padding-bottom: var(--selectbox-multi-vert-padding);
@@ -164,24 +139,55 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 .selectbox__list {
     box-sizing: border-box;
     list-style: none none;
-    display: inline-block;
-    vertical-align: top;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--selectbox-multi-item-vert-spacing) var(--selectbox-multi-item-horz-spacing);
 
-    width: 100%;
-    margin: calc(0px - var(--selectbox-multi-item-vert-spacing)) 0 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
     padding: 0 var(--selectbox-horz-padding);
 
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.selectbox__open_indicator {
-    position: absolute;
-    inset-inline-end: var(--selectbox-open-indicator-spacing);
-    top: 50%;
-    transform: translateY(-50%);
+// Each control takes at least its `--*-width`, and sits `--*-spacing` away from the inline-end of that room.
+// Above the content, as the single-mode search field is absolutely positioned and may run under them.
+// Zero height: the controls never make the box taller, they overflow evenly around its vertical center.
+.selectbox__controls {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 0;
+    position: relative;
     z-index: 2;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.selectbox__open_indicator,
+.selectbox__clear,
+.selectbox__spinner {
+    flex: none;
+    box-sizing: border-box;
+}
+
+.selectbox__clear,
+.selectbox__spinner {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.selectbox__open_indicator {
+    // The arrow is drawn in a 1em box: the rest of the width is split around it
+    padding-inline-start: max(0px, calc(var(--selectbox-open-indicator-width) - 1em - var(--selectbox-open-indicator-spacing)));
+    margin-inline-end: var(--selectbox-open-indicator-spacing);
     font-size: 1em;
+    box-sizing: content-box;
     width: 1em;
     height: 0.5em;
     overflow: hidden;
@@ -219,11 +225,8 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 }
 
 .selectbox__clear {
-    position: absolute;
-    inset-inline-end: var(--selectbox-clear-spacing);
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
+    min-width: var(--selectbox-clear-width);
+    padding-inline-end: var(--selectbox-clear-spacing);
 
     > button {
         box-sizing: border-box;
@@ -250,21 +253,15 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
         }
     }
 
-    .selectbox__has_open_indicator.selectbox__has_clear & {
-        inset-inline-end: calc(var(--selectbox-clear-spacing) + var(--selectbox-open-indicator-width));
-    }
-
-    .selectbox[aria-disabled=true] > &, .selectbox[aria-readonly=true] > & {
+    .selectbox[aria-disabled=true] > .selectbox__controls > &,
+    .selectbox[aria-readonly=true] > .selectbox__controls > & {
         display: none;
     }
 }
 
 .selectbox__spinner {
-    position: absolute;
-    inset-inline-end: var(--selectbox-spinner-spacing);
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
+    min-width: var(--selectbox-spinner-width);
+    padding-inline-end: var(--selectbox-spinner-spacing);
 
     &::before {
         content: '';
@@ -283,32 +280,17 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
         animation: selectbox__spinner_anim 1.1s infinite linear;
         transition: opacity .1s;
     }
-
-    .selectbox__has_spinner.selectbox__has_open_indicator:not(.selectbox__has_clear) & {
-        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-open-indicator-width));
-    }
-
-    .selectbox__has_spinner.selectbox__has_clear:not(.selectbox__has_open_indicator) & {
-        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width));
-    }
-
-    .selectbox__has_spinner.selectbox__has_open_indicator.selectbox__has_clear & {
-        inset-inline-end: calc(var(--selectbox-spinner-spacing) + var(--selectbox-clear-width) + var(--selectbox-open-indicator-width));
-    }
 }
 
 .selectbox__item {
     box-sizing: border-box;
-    float: inline-start;
     cursor: default;
 
     background-color: var(--selectbox-multi-item-background-color);
     border: var(--selectbox-multi-item-border-width) solid var(--selectbox-multi-item-border-color);
     border-radius: var(--selectbox-multi-item-border-radius);
 
-    margin-inline-start: 0;
-    margin-inline-end: var(--selectbox-multi-item-horz-spacing);
-    margin-top: var(--selectbox-multi-item-vert-spacing);
+    margin: 0;
     padding: var(--selectbox-multi-item-top-padding) var(--selectbox-multi-item-horz-padding) var(--selectbox-multi-item-bottom-padding);
     line-height: inherit;
 
@@ -345,6 +327,8 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 
 .selectbox__single_wrapper {
     position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
     min-height: 1em;
     max-width: 100%;
     margin: 0;
@@ -371,11 +355,15 @@ $selectbox-rtl-condition: ':where(.selectbox__rtl, :dir(rtl):not(.selectbox__ltr
 	max-width: 100%;
 
     .selectbox__multi & {
-        float: inline-start;
-        margin-top: calc(var(--selectbox-multi-item-vert-spacing) +
-        var(--selectbox-multi-item-border-width) +
+        flex: 0 1 auto;
+        min-width: 0;
+        margin-top: calc(var(--selectbox-multi-item-border-width) +
         var(--selectbox-multi-item-top-padding) +
         var(--selectbox-multi-search-top-offset));
+
+        &:first-child {
+            flex-grow: 1;
+        }
     }
 
     .selectbox__single & {
@@ -442,6 +430,10 @@ input.selectbox__search_field {
 
 .selectbox__multi input.selectbox__search_field {
     padding: 0;
+}
+
+.selectbox__multi .selectbox__search_wrapper:first-child input.selectbox__search_field {
+    width: 100%;
 }
 
 .selectbox.has_droplist_above {

@@ -2,7 +2,6 @@ import {
     getCssProps,
     getElementWidth,
     setElementWidth,
-    getPseudoElementWidth,
     setCssProps,
 } from '@danielgindi/dom-utils/lib/Css';
 import escapeRegex from './utils/escapeRegex';
@@ -14,7 +13,6 @@ import {
     setElementAttrs,
 } from '@danielgindi/dom-utils/lib/Dom';
 import {
-    append,
     getRootNode,
     before,
     remove,
@@ -136,6 +134,8 @@ interface SelectBoxState {
     list?: HTMLElement;
     /** only exists in single-select mode; `delete`d when switching to multi mode */
     singleWrapper?: HTMLElement;
+    /** holds the spinner, clear button and open indicator, in that order; always the last child of `el` */
+    controls: HTMLElement;
     /** `delete`d together with `clearButtonWrapper` */
     clearButton?: HTMLElement;
     /** `delete`d when the clear button is hidden */
@@ -556,6 +556,8 @@ class SelectBox {
         remove(p.inputBackBuffer);
         remove(p.clearButtonWrapper);
         remove(p.openIndicator);
+        remove(p.spinner);
+        remove(p.controls);
 
         if (!p.ownsEl) {
             for (let name of Array.from(p.el.classList)) {
@@ -975,7 +977,7 @@ class SelectBox {
 
         this._setupDropdownMenu();
 
-        // move to correct parent
+        // re-created by the next sync
         remove(p.clearButtonWrapper);
         delete p.clearButtonWrapper;
 
@@ -1611,6 +1613,13 @@ class SelectBox {
             });
         }
 
+        if (!p.controls) {
+            p.controls = createElement('span', {
+                class: `${p.baseClassName}__controls`,
+            });
+            p.el.appendChild(p.controls);
+        }
+
         if (!p.input) {
             p.inputWrapper = createElement('span',
                 {
@@ -1648,7 +1657,7 @@ class SelectBox {
                 p.list = createElement('ul', {
                     class: `${p.baseClassName}__list`,
                 });
-                p.el.appendChild(p.list);
+                p.el.insertBefore(p.list, p.controls);
                 p.list.appendChild(p.inputWrapper);
                 p.el.classList.remove(`${p.baseClassName}__single`);
                 p.el.classList.add(`${p.baseClassName}__multi`);
@@ -1696,8 +1705,8 @@ class SelectBox {
                 p.singleWrapper = createElement('div', {
                     class: `${p.baseClassName}__single_wrapper`,
                 });
-                p.el.appendChild(p.singleWrapper);
-                p.el.appendChild(p.inputWrapper);
+                p.el.insertBefore(p.singleWrapper, p.controls);
+                p.el.insertBefore(p.inputWrapper, p.controls);
                 p.el.classList.remove(`${p.baseClassName}__multi`);
                 p.el.classList.add(`${p.baseClassName}__single`);
 
@@ -1711,7 +1720,7 @@ class SelectBox {
         if (p.hasOpenIndicator !== !!p.openIndicator) {
             if (p.hasOpenIndicator) {
                 p.openIndicator = createElement('span', { class: `${p.baseClassName}__open_indicator` });
-                p.el.appendChild(p.openIndicator);
+                this._insertControl(p.openIndicator);
                 p.el.classList.add(`${p.baseClassName}__has_open_indicator`);
             } else {
                 remove(p.openIndicator);
@@ -1723,7 +1732,7 @@ class SelectBox {
         if (p.isLoadingMode !== !!p.spinner) {
             if (p.isLoadingMode) {
                 p.spinner = createElement('span', { class: `${p.baseClassName}__spinner` });
-                p.el.appendChild(p.spinner);
+                this._insertControl(p.spinner);
                 p.el.classList.add(`${p.baseClassName}__has_spinner`);
             } else {
                 remove(p.spinner);
@@ -1731,6 +1740,21 @@ class SelectBox {
                 p.el.classList.remove(`${p.baseClassName}__has_spinner`);
             }
         }
+    }
+
+    /**
+     * Inserts a control into the controls group, keeping the order: spinner, clear button, open indicator
+     * @private
+     * @internal
+     */
+    _insertControl(control: HTMLElement) {
+        const p = this._p;
+        const order = [p.spinner, p.clearButtonWrapper, p.openIndicator];
+        const next = order
+            .slice(order.indexOf(control) + 1)
+            .find(x => x && x.parentNode === p.controls);
+
+        p.controls.insertBefore(control, next ?? null);
     }
 
     /**
@@ -2595,12 +2619,10 @@ class SelectBox {
             p.clearable && p.showSelection) {
             if (!p.clearButtonWrapper) {
                 p.clearButtonWrapper = createElement(
-                    p.multi ? 'li' : 'span',
+                    'span',
                     { class: `${p.baseClassName}__clear` },
                     p.clearButton = createElement('button'));
-                if (p.multi)
-                    append(p.list, p.clearButtonWrapper);
-                else append(p.el, p.clearButtonWrapper);
+                this._insertControl(p.clearButtonWrapper);
                 p.el.classList.add(`${p.baseClassName}__has_clear`);
 
                 p.sink.add(p.clearButton, 'click', () => {
@@ -2990,31 +3012,8 @@ class SelectBox {
         let hasResize = false;
 
         if (p.multi && p.multiItemEls.length === 0 && p.showSelection) {
-            // Full width of list wrapper
-            input.style.width = ''; // reset first
-
-            let beforeWidth = 0, afterWidth = 0;
-
-            let beforeStyle = getComputedStyle(p.list || el, '::before');
-            if (beforeStyle.content &&
-                beforeStyle.content !== 'none' &&
-                beforeStyle.position !== 'absolute' &&
-                beforeStyle.float !== 'none') {
-                beforeWidth = getPseudoElementWidth(p.list || el, '::before', true, true, true);
-            }
-
-            let afterStyle = getComputedStyle(p.list || el, '::after');
-            if (afterStyle.content &&
-                afterStyle.content !== 'none' &&
-                afterStyle.position !== 'absolute' &&
-                afterStyle.float !== 'none') {
-                afterWidth = getPseudoElementWidth(p.list || el, '::after', true, true, true);
-            }
-
-            let contentWidth = getElementWidth(p.list || el); // calculate width
-            contentWidth -= beforeWidth + afterWidth;
-
-            input.style.width = `${contentWidth}px`;
+            // The search field is the list's only child, and CSS stretches it over the whole line
+            input.style.width = '';
 
             hasResize = true; // We may want to track the resize here better to avoid unnecessary event
         } else {
