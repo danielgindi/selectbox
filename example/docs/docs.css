@@ -186,6 +186,8 @@ html {
 }
 
 body {
+    /* See the <style> in index.html */
+    visibility: visible;
     margin: 0;
     background: var(--bg);
     color: var(--text);

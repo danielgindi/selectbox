@@ -246,11 +246,13 @@ export const sections = [
             },
             {
                 id: 'droplist-autocomplete',
-                title: 'Autocomplete',
+                title: 'Your own input',
                 demo: 'droplist-autocomplete.js',
-                description: `Attach a DropList to your own input. <code>handleInputKeydown()</code> gives the input the keyboard
-                    handling SelectBox uses, <code>capturesFocus: false</code> keeps the focus in the input, and
-                    <code>singleSelectedValue</code> marks the current value.`,
+                description: `Attach a DropList to your own input or button. <code>handleInputKeydown()</code> gives it the keyboard
+                    handling SelectBox uses, and <code>capturesFocus: false</code> keeps the focus on it. Its options
+                    decide what happens while the list is closed: <code>moveNext</code> / <code>movePrevious</code> for
+                    the arrows, <code>open</code> for typing and <code>toggle</code> for Enter. On a button,
+                    <code>allowTypeToSelect</code> picks by typing without opening the list, like a native select.`,
             },
             {
                 id: 'droplist-context-menu',
