@@ -32,6 +32,7 @@ import {
 import throttle from './utils/throttle';
 import type { Throttled } from './utils/throttle.js';
 import type {
+    DropListAutoHideIgnore,
     DropListInputKeydownOptions,
     DropListOptions,
     DropListZIndex,
@@ -97,6 +98,8 @@ interface DropListState {
     autoItemBlur: boolean;
     autoItemBlurDelay: number;
     capturesFocus: boolean;
+    autoHide: boolean;
+    autoHideIgnore: DropListAutoHideIgnore;
     multi: boolean;
     singleSelectedValue?: any;
     keyDownHandler?: DropListOptions['keyDownHandler'];
@@ -177,6 +180,13 @@ interface DropListState {
 
     onDocumentMouseDown: ((event: MouseEvent) => void) | null;
 
+    /** `autoHide` listeners on the document, attached only while the list is shown */
+    onAutoHidePointerDown: ((event: PointerEvent) => void) | null;
+    onAutoHidePointerUp: (() => void) | null;
+    onAutoHideFocusIn: ((event: FocusEvent) => void) | null;
+    /** a pointer press that started on the trigger or an ignored element is in progress */
+    autoHidePointerInside: boolean;
+
     blurTimer?: ReturnType<typeof setTimeout>;
     filterTimer?: ReturnType<typeof setTimeout>;
     /** `delete`d once the freetype buffer expires, so must stay optional */
@@ -200,6 +210,8 @@ export const DefaultOptions: DropListOptions = {
     autoItemBlur: true,
     autoItemBlurDelay: 300,
     capturesFocus: true,
+    autoHide: false,
+    autoHideIgnore: null,
     multi: false,
     singleSelectedValue: undefined,
     keyDownHandler: null,
@@ -280,6 +292,8 @@ class DropList {
             autoItemBlur: o.autoItemBlur,
             autoItemBlurDelay: o.autoItemBlurDelay,
             capturesFocus: o.capturesFocus,
+            autoHide: !!o.autoHide,
+            autoHideIgnore: o.autoHideIgnore ?? null,
             multi: o.multi,
             singleSelectedValue: o.singleSelectedValue,
             keyDownHandler: o.keyDownHandler,
@@ -331,6 +345,10 @@ class DropList {
 
             singleSelectedItemEl: null,
             onDocumentMouseDown: null,
+            onAutoHidePointerDown: null,
+            onAutoHidePointerUp: null,
+            onAutoHideFocusIn: null,
+            autoHidePointerInside: false,
 
             lastKeyWasChar: false,
             lastInputKeyAllowsNonTypeKeys: false,
@@ -1981,6 +1999,8 @@ class DropList {
                         this._delayBlurItemOnBlur();
                 });
             }
+
+            this._syncAutoHideListeners();
         });
 
         this.rushRefilter();
@@ -2046,6 +2066,8 @@ class DropList {
             p.sink.remove(document, 'mousedown', p.onDocumentMouseDown);
             p.onDocumentMouseDown = null;
         }
+
+        this._removeAutoHideListeners();
 
         if (this.isVisible()) {
             this._trigger('hide:before');
@@ -2172,6 +2194,119 @@ class DropList {
      */
     getFooterElement() {
         return this._p.footerEl;
+    }
+
+    /**
+     * Hide the list when a pointer press or the focus lands outside of it (see the `autoHide` option)
+     */
+    setAutoHide(autoHide: boolean): this {
+        const p = this._p;
+        p.autoHide = !!autoHide;
+        this._syncAutoHideListeners();
+        return this;
+    }
+
+    /**
+     * Elements that are not "outside" for `autoHide`, besides the list, its sub-lists and its position target
+     */
+    setAutoHideIgnore(ignore: DropListAutoHideIgnore): this {
+        this._p.autoHideIgnore = ignore ?? null;
+        return this;
+    }
+
+    /** @internal */
+    _syncAutoHideListeners() {
+        const p = this._p;
+
+        if (!p.autoHide || !this.isVisible() || p.hiding) {
+            this._removeAutoHideListeners();
+            return;
+        }
+
+        if (p.onAutoHidePointerDown)
+            return;
+
+        // Capture phase: decide before the page's own handlers run (and even if they stop propagation)
+        p.sink
+            .add(document, 'pointerdown', p.onAutoHidePointerDown = (event: PointerEvent) => {
+                p.autoHidePointerInside = this._isInsideForAutoHide(event.target);
+
+                if (!p.autoHidePointerInside)
+                    this.hide(event);
+            }, true)
+            .add(document, 'pointerup', p.onAutoHidePointerUp = () => {
+                // After the click that follows, which may toggle the list itself
+                setTimeout(() => {
+                    if (this._p)
+                        this._p.autoHidePointerInside = false;
+                });
+            }, true)
+            .add(document, 'focusin', p.onAutoHideFocusIn = (event: FocusEvent) => {
+                if (!this._isInsideForAutoHide(event.target))
+                    this.hide(event);
+            }, true);
+    }
+
+    /** @internal */
+    _removeAutoHideListeners() {
+        const p = this._p;
+
+        if (!p.onAutoHidePointerDown)
+            return;
+
+        p.sink
+            .remove(document, 'pointerdown', p.onAutoHidePointerDown, true)
+            .remove(document, 'pointerup', p.onAutoHidePointerUp, true)
+            .remove(document, 'focusin', p.onAutoHideFocusIn, true);
+
+        p.onAutoHidePointerDown = null;
+        p.onAutoHidePointerUp = null;
+        p.onAutoHideFocusIn = null;
+        p.autoHidePointerInside = false;
+    }
+
+    /**
+     * Is this inside the list, a sub-list, the position target or an `autoHideIgnore` element?
+     * @internal
+     */
+    _isInsideForAutoHide(target: EventTarget | null): boolean {
+        const p = this._p;
+
+        if (!(target instanceof Node))
+            return false;
+
+        if (this.elContains(target, true))
+            return true;
+
+        if (p.lastPositionTarget?.contains(target))
+            return true;
+
+        const ignore = typeof p.autoHideIgnore === 'function' ? p.autoHideIgnore() : p.autoHideIgnore;
+        const ignored = Array.isArray(ignore) ? ignore : [ignore];
+
+        return ignored.some(el => !!el && el.contains(target));
+    }
+
+    /**
+     * The focus left the list (and its sub-lists)
+     * @internal
+     */
+    _autoHideOnBlur(event: FocusEvent) {
+        const p = this._p;
+
+        if (!p.autoHide || !this.isVisible() || p.hiding)
+            return;
+
+        // Pressing the trigger or an ignored element. Safari does not focus buttons on click,
+        // so the focus may go nowhere in particular.
+        if (p.autoHidePointerInside)
+            return;
+
+        if (this._isInsideForAutoHide(event.relatedTarget) ||
+            this._isInsideForAutoHide(document.activeElement !== document.body ? document.activeElement : null))
+            return;
+
+        this.hide(event);
     }
 
     /**
@@ -2785,6 +2920,9 @@ class DropList {
 
                     this._delayBlurItemOnBlur();
                     this._trigger('blur', event);
+
+                    if (!this[DestroyedSymbol])
+                        this._autoHideOnBlur(event);
                 });
             }, true);
     }

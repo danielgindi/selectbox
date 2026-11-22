@@ -20,9 +20,9 @@
       :is-header-visible="true"
       :is-footer-visible="true"
       :auto-focus="true"
+      :auto-hide="true"
       :auto-relayout-on-items-change="true"
       @select="open = false"
-      @blur="onBlur"
       @hide="open = false"
     >
       <template #header>
@@ -70,11 +70,5 @@ let extra = 0;
 function addOption() {
     extra++;
     options.value = [...options.value, { label: `Custom field ${extra}`, value: `custom-${extra}` }];
-}
-
-// Close when focus leaves the list - unless it went to the toggle button, which closes it itself
-function onBlur(event) {
-    if (event.relatedTarget !== toggle.value)
-        open.value = false;
 }
 </script>

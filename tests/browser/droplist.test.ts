@@ -166,3 +166,130 @@ describe('DropList (standalone)', () => {
         });
     });
 });
+
+describe('DropList autoHide', () => {
+    const tick = () => new Promise(resolve => setTimeout(resolve));
+
+    /** A shown list anchored to its own trigger button; the button toggles the list like a real menu button */
+    async function showWithTrigger(options: Parameters<typeof createDropList>[0] = {}) {
+        const trigger = createAnchor();
+        const outside = createAnchor();
+        outside.textContent = 'Outside';
+
+        const events: string[] = [];
+        const dropList = createDropList({
+            autoHide: true,
+            on: name => events.push(name),
+            positionOptionsProvider: () => ({ target: trigger, anchor: { x: 'start', y: 'bottom' }, position: { x: 'start', y: 'top' } }),
+            ...options,
+        });
+        dropList.setItems(fruits);
+
+        trigger.addEventListener('click', () => {
+            if (dropList.isVisible())
+                dropList.hide();
+            else
+                dropList.show();
+        });
+
+        dropList.show();
+        await tick(); // listeners attach after the opening click
+
+        return { dropList, trigger, outside, events };
+    }
+
+    it('is off by default', async () => {
+        const { dropList, outside } = await showWithTrigger({ autoHide: undefined });
+
+        await userEvent.click(outside);
+
+        expect(dropList.isVisible()).toBe(true);
+    });
+
+    it('hides on a pointer press outside, emitting hide', async () => {
+        const { dropList, outside, events } = await showWithTrigger();
+
+        await userEvent.click(outside);
+
+        expect(dropList.isVisible()).toBe(false);
+        expect(events.filter(x => x === 'hide')).toHaveLength(1);
+    });
+
+    it('stays open on a press inside the list', async () => {
+        const { dropList } = await showWithTrigger();
+
+        await userEvent.click(dropList.el.querySelector('.droplist__item'));
+
+        expect(dropList.isVisible()).toBe(true);
+    });
+
+    it('lets the trigger toggle the list: a press on it is not outside', async () => {
+        const { dropList, trigger, events } = await showWithTrigger();
+
+        await userEvent.click(trigger);
+        expect(dropList.isVisible()).toBe(false);
+        expect(events.filter(x => x === 'hide')).toHaveLength(1);
+
+        await userEvent.click(trigger);
+        expect(dropList.isVisible()).toBe(true);
+    });
+
+    it('ignores autoHideIgnore elements, given directly or by a function', async () => {
+        const controls = document.createElement('div');
+        const control = document.createElement('button');
+        control.textContent = 'Control';
+        controls.append(control);
+        document.body.append(controls);
+
+        const { dropList, outside } = await showWithTrigger({ autoHideIgnore: () => [null, controls] });
+
+        await userEvent.click(control);
+        expect(dropList.isVisible()).toBe(true);
+
+        dropList.setAutoHideIgnore(control);
+        await userEvent.click(control);
+        expect(dropList.isVisible()).toBe(true);
+
+        await userEvent.click(outside);
+        expect(dropList.isVisible()).toBe(false);
+    });
+
+    it('hides when the focus moves to an element outside', async () => {
+        const { dropList, outside } = await showWithTrigger();
+
+        outside.focus();
+
+        expect(dropList.isVisible()).toBe(false);
+    });
+
+    it('hides when the focus leaves the list for nowhere in particular', async () => {
+        const { dropList } = await showWithTrigger();
+        dropList.el.focus();
+
+        dropList.el.blur();
+        await tick();
+
+        expect(dropList.isVisible()).toBe(false);
+    });
+
+    it('keeps the list open while the trigger is pressed, even when the trigger takes no focus (Safari)', async () => {
+        const { dropList, trigger } = await showWithTrigger();
+        dropList.el.focus();
+
+        // Safari doesn't focus a clicked button: the list blurs with no relatedTarget
+        trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+        dropList.el.blur();
+        await tick();
+
+        expect(dropList.isVisible()).toBe(true);
+    });
+
+    it('can be turned off while open', async () => {
+        const { dropList, outside } = await showWithTrigger();
+
+        dropList.setAutoHide(false);
+        await userEvent.click(outside);
+
+        expect(dropList.isVisible()).toBe(true);
+    });
+});

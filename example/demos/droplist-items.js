@@ -34,6 +34,9 @@ export default function (stage) {
         // Size the list from one measured row, instead of measuring every row
         estimateWidth: true,
         noResultsText: 'No tasks',
+        // Close on a click or focus outside - except on the buttons next to it, which change the open list
+        autoHide: true,
+        autoHideIgnore: stage,
         positionOptionsProvider: () => ({
             target: toggle,
             anchor: { x: 'start', y: 'bottom' },

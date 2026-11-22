@@ -38,6 +38,9 @@ export default function (stage, controls) {
             constrainToWindow: settings.constrainToWindow,
             // Open above instead when there's no room below (and vice versa)
             autoFlipDirection: settings.autoFlipDirection,
+            // Close on a click or focus outside - except on the settings, to play with them while it's open
+            autoHide: true,
+            autoHideIgnore: controls.el,
             positionOptionsProvider: () => ({
                 target,
                 // The `anchor` point of the target meets the `position` point of the list

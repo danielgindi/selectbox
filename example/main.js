@@ -62,6 +62,8 @@ function createControls(container) {
     };
 
     return {
+        /** The element holding the controls */
+        el: container,
         toggle(name, initial, onChange) {
             const input = el('input', { type: 'checkbox', role: 'switch' });
             input.checked = initial;

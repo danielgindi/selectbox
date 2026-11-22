@@ -9,6 +9,9 @@ export default function (stage) {
 
     // A DropList is the floating list on its own - use it for menus, popovers, pickers...
     const menu = new DropList({
+        // Close on a click or focus outside. The button (the position target) doesn't count as outside,
+        // so its own click handler can toggle the menu.
+        autoHide: true,
         isHeaderVisible: true,
         isFooterVisible: true,
         positionOptionsProvider: () => ({

@@ -23,6 +23,8 @@ export interface DropListVueProps {
     autoItemBlur?: boolean;
     autoItemBlurDelay?: number;
     capturesFocus?: boolean;
+    autoHide?: boolean;
+    autoHideIgnore?: DropListOptions['autoHideIgnore'];
     multi?: boolean;
     isHeaderVisible?: boolean;
     isFooterVisible?: boolean;

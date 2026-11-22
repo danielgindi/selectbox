@@ -29,6 +29,9 @@ export default function (stage) {
         // Keep the highlighted item when focus moves away (to the remote below).
         // By default it's cleared `autoItemBlurDelay` ms (300) after the list loses focus.
         autoItemBlur: false,
+        // Close on a click or focus outside - except on the remote, which works on the open list
+        autoHide: true,
+        autoHideIgnore: () => remote,
         // Your own keys first. Return true to skip the default handling of that key.
         keyDownHandler: (event) => {
             if (event.key === 'Delete' && list.hasFocusedItem()) {

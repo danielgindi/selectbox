@@ -3,6 +3,7 @@ import SelectBox, { DefaultOptions as SelectBoxDefaultOptions } from './SelectBo
 
 export { DropList, SelectBox, DropListDefaultOptions, SelectBoxDefaultOptions, ItemSymbol };
 export type {
+    DropListAutoHideIgnore,
     DropListInputKeydownOptions,
     DropListOptions,
     DropListZIndex,

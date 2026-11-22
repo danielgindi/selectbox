@@ -8,7 +8,8 @@ export default function (stage) {
     const note = document.createElement('span');
     note.className = 'demo-note';
 
-    const menu = new DropList({});
+    // Close on a click or focus outside (nested menus count as inside)
+    const menu = new DropList({ autoHide: true });
 
     // Groups and nested menus work in a plain DropList too
     menu.setItems([
@@ -68,8 +69,6 @@ export default function (stage) {
     menu.on('show_subitems', ({ item }) => {
         note.textContent = `Opened "${item.label}"…`;
     });
-
-    menu.on('blur', () => menu.hide());
 
     stage.append(area, note);
 }

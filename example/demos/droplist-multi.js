@@ -45,6 +45,8 @@ export default function (stage) {
         // ...but a group left with no matching items is hidden. Search "hi": only Priority > High remains.
         filterEmptyGroups: true,
         isFooterVisible: true,
+        // Close on a click or focus outside. The toggle button (the position target) doesn't count as outside.
+        autoHide: true,
         positionOptionsProvider: () => ({
             target: toggle,
             anchor: { x: 'start', y: 'bottom' },
@@ -68,12 +70,6 @@ export default function (stage) {
     panel.on('groupcheck', ({ item, affectedCount }) => {
         update();
         summary.textContent += ` (${item.label}: ${affectedCount} changed)`;
-    });
-
-    // Close when focus leaves the panel - unless it went to the toggle button, which closes it itself
-    panel.on('blur', (event) => {
-        if (event.relatedTarget !== toggle)
-            panel.hide();
     });
 
     // The footer is a plain element: add your own buttons

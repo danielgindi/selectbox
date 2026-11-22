@@ -225,7 +225,8 @@ export const sections = [
                 demo: 'droplist-menu.js',
                 description: `<code>DropList</code> is the floating list on its own. Anchor it to any element with
                     <code>positionOptionsProvider</code>, and use its header and footer for extra content.
-                    It flips and stays inside the window automatically.`,
+                    It flips and stays inside the window automatically. <code>autoHide: true</code> closes it on a click
+                    or focus outside; the element it's anchored to doesn't count, so that can toggle it.`,
             },
             {
                 id: 'droplist-search',
@@ -324,8 +325,9 @@ export const sections = [
                 description: `The <code>DropList</code> component shows while it's rendered, so toggle it with <code>v-if</code>.
                     <code>v-model</code> binds the selected value (an array with <code>multi</code>), <code>position-options</code>
                     places it, the <code>header</code> and <code>footer</code> slots fill it, and <code>auto-focus</code>
-                    focuses it on show. Its methods (<code>relayout()</code>, <code>handleInputKeydown()</code>, …)
-                    are available through a template ref.`,
+                    focuses it on show. With <code>auto-hide</code> it hides itself on a click or focus outside: it emits
+                    <code>hide</code>, so update your <code>v-if</code> state there. Its methods (<code>relayout()</code>,
+                    <code>handleInputKeydown()</code>, …) are available through a template ref.`,
             },
         ],
     },

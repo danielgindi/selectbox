@@ -51,6 +51,15 @@ export const PropTypes = {
         type: Boolean,
         default: true,
     },
+    /** Hide on a press or focus outside. The list emits 'hide': update your `v-if` state from it. */
+    autoHide: {
+        type: Boolean,
+        default: false,
+    },
+    autoHideIgnore: {
+        type: [Object, Array, Function] as unknown as PropType<DropListOptions['autoHideIgnore']>,
+        default: null,
+    },
     multi: {
         type: Boolean,
         default: false,
@@ -235,7 +244,7 @@ export default defineComponent({
                 opts.direction = this.direction;
             }
 
-            for (let key of ['autoItemBlur', 'capturesFocus', 'multi',
+            for (let key of ['autoItemBlur', 'capturesFocus', 'autoHide', 'multi',
                 'autoCheckGroupChildren', 'useExactTargetWidth', 'constrainToWindow',
                 'autoFlipDirection', 'estimateWidth',
                 'isHeaderVisible', 'isFooterVisible',
@@ -260,6 +269,10 @@ export default defineComponent({
 
             if (typeof this.keyDownHandler === 'function') {
                 opts.keyDownHandler = this.keyDownHandler;
+            }
+
+            if (this.autoHideIgnore) {
+                opts.autoHideIgnore = this.autoHideIgnore;
             }
 
             if (typeof this.onError === 'function') {
@@ -310,6 +323,14 @@ export default defineComponent({
     },
 
     watch: {
+        autoHide(value) {
+            this.nonReactive.instance?.setAutoHide(value);
+        },
+
+        autoHideIgnore(value) {
+            this.nonReactive.instance?.setAutoHideIgnore(value);
+        },
+
         items(value) {
             if (this.nonReactive.instance) {
                 const instance = this.nonReactive.instance;

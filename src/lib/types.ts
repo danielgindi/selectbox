@@ -120,6 +120,14 @@ export interface DropListInputKeydownOptions {
     toggle?: (event: KeyboardEvent) => void;
 }
 
+/**
+ * Elements that don't count as "outside" for `autoHide`: one, several, or a function returning them.
+ */
+export type DropListAutoHideIgnore =
+    Element | null | undefined |
+    (Element | null | undefined)[] |
+    (() => Element | null | undefined | (Element | null | undefined)[]);
+
 export interface DropListOptions {
     /** An element to attach to, instead of creating a new one */
     el?: HTMLElement;
@@ -134,6 +142,14 @@ export interface DropListOptions {
     autoItemBlurDelay?: number;
     /** Should this DropList be added to the TAB-key stack? (default: true) */
     capturesFocus?: boolean;
+    /**
+     * Hide the list when the user moves on: a pointer press outside of it, or the focus moving outside of it.
+     * The list's sub-lists, its position `target` (usually the button that opens it) and `autoHideIgnore` are not
+     * "outside". Hiding emits 'hide' as usual, so keep your own "open" state in sync from that event. (default: false)
+     */
+    autoHide?: boolean;
+    /** More elements that are not "outside" for `autoHide`, e.g. controls that work on the open list. (default: null) */
+    autoHideIgnore?: DropListAutoHideIgnore;
     /** Does this DropList show checkboxes for multiple item selection? (default: false) */
     multi?: boolean;
     /** Current selected value when using single selection. */

@@ -17,6 +17,8 @@ export default function (stage) {
         // Adds a search box to the list's header
         searchable: true,
         searchPlaceholder: 'Type a command',
+        // Close on a click or focus outside
+        autoHide: true,
         filterThrottleWindow: 50,
         positionOptionsProvider: () => ({
             target: button,
