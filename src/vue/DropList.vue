@@ -104,6 +104,10 @@ export const PropTypes = {
         type: Function as PropType<DropListOptions['filterFn']>,
         default: undefined as any,
     },
+    typeAheadTextFn: {
+        type: Function as PropType<DropListOptions['typeAheadTextFn']>,
+        default: undefined as any,
+    },
     filterDependencies: {
         type: [Array, String, Number, Boolean, Object] as unknown as PropType<any>,
         default: undefined as any,
@@ -283,6 +287,10 @@ export default defineComponent({
                 opts.filterFn = this.filterFn;
             }
 
+            if (typeof this.typeAheadTextFn === 'function') {
+                opts.typeAheadTextFn = this.typeAheadTextFn;
+            }
+
             if (this.zIndex !== undefined) {
                 opts.zIndex = this.zIndex;
             }
@@ -392,6 +400,10 @@ export default defineComponent({
         filterFn() {
             if (this.nonReactive.instance)
                 this.nonReactive.instance.setFilterFn(this.filterFn);
+        },
+
+        typeAheadTextFn() {
+            this.nonReactive.instance?.setTypeAheadTextFn(this.typeAheadTextFn);
         },
 
         onError() {

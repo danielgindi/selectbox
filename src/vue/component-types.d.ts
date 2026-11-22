@@ -36,6 +36,7 @@ export interface DropListVueProps {
     filterGroups?: boolean;
     filterEmptyGroups?: boolean;
     filterFn?: DropListOptions['filterFn'];
+    typeAheadTextFn?: DropListOptions['typeAheadTextFn'];
     filterDependencies?: any;
     keyDownHandler?: DropListOptions['keyDownHandler'];
     autoCheckGroupChildren?: boolean;

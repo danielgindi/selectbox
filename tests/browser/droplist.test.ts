@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import { DropListDefaultOptions } from '../../src/lib/index';
+import type { ItemBase } from '../../src/lib/index';
 import { createAnchor, createDropList, fruits, listItemEls, listLabels, mountSelectBox, option } from './helpers';
 
 const highlighted = () => document.querySelector<HTMLElement>('.droplist__item_focus')?.textContent;
@@ -83,6 +84,36 @@ describe('DropList (standalone)', () => {
         await userEvent.keyboard('cr');
 
         expect(highlighted()).toBe('Cranberry');
+    });
+
+    it('matches typing against typeAheadTextFn, given the original item', async () => {
+        const reactions = ['👍 Like', '❤️ Love', '😮 Wow'].map(label => ({ label, value: label, word: label.split(' ')[1] }));
+        const typeAheadTextFn = vi.fn((item: ItemBase) => item.word as string);
+        const dropList = createDropList({ typeAheadTextFn });
+        dropList.setItems(reactions).show();
+        dropList.el.focus();
+
+        await userEvent.keyboard('w');
+
+        expect(highlighted()).toBe('😮 Wow');
+        expect(typeAheadTextFn).toHaveBeenCalledWith(reactions[0]);
+    });
+
+    it('falls back to the label, and reports to onError, when typeAheadTextFn throws', async () => {
+        const onError = vi.fn();
+        const dropList = createDropList({
+            onError,
+            typeAheadTextFn: () => {
+                throw new Error('nope');
+            },
+        });
+        dropList.setItems(fruits).show();
+        dropList.el.focus();
+
+        await userEvent.keyboard('ch');
+
+        expect(highlighted()).toBe('Cherry');
+        expect(onError).toHaveBeenCalledWith(expect.any(Error), expect.objectContaining({ source: 'typeAheadTextFn' }));
     });
 
     it('filters with its own inline search box when searchable', async () => {

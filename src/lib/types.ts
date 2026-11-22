@@ -200,6 +200,11 @@ export interface DropListOptions {
     /** should empty groups be filtered out? (default: false) */
     filterEmptyGroups?: boolean;
     filterFn?: (items: ItemBase[], term: string) => (ItemBase[] | null);
+    /**
+     * The text that typing matches: typing jumps to the first item whose text starts with what was typed.
+     * Gets the original item. (default: null - the item's label)
+     */
+    typeAheadTextFn?: ((item: ItemBase) => string) | null;
     positionOptionsProvider?: (dropList?: DropList) => PositionOptions;
     /**
      * z-index for the DropList's element: a fixed value, or a function resolving it each time the DropList is shown.

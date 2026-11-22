@@ -44,6 +44,10 @@ export default function (stage) {
 
     const menu = new DropList({
         baseClassName: 'pill-menu',
+        // Close on a click or focus outside (the button doesn't count)
+        autoHide: true,
+        // Typing jumps to the item starting with what's typed: match the words, skipping the emoji
+        typeAheadTextFn: item => item.label.replace(/^\P{L}+/u, ''),
         positionOptionsProvider: () => ({
             target: button,
             anchor: { x: 'start', y: 'bottom' },
@@ -59,10 +63,6 @@ export default function (stage) {
         button.textContent = `${value} ▾`;
         menu.setSingleSelectedItemByValue(value);
         menu.hide();
-    });
-    menu.on('blur', (event) => {
-        if (event.relatedTarget !== button)
-            menu.hide();
     });
 
     button.addEventListener('click', () => {

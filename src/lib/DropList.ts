@@ -139,6 +139,7 @@ interface DropListState {
     filterGroups: boolean;
     filterEmptyGroups: boolean;
     filterFn?: DropListOptions['filterFn'];
+    typeAheadTextFn: DropListOptions['typeAheadTextFn'];
     filteredItems: InternalItem[] | null;
     filterTerm: string;
     needsRefilter: boolean;
@@ -330,6 +331,7 @@ class DropList {
             filterGroups: o.filterGroups,
             filterEmptyGroups: o.filterEmptyGroups,
             filterFn: o.filterFn,
+            typeAheadTextFn: o.typeAheadTextFn ?? null,
             filteredItems: null,
             filterTerm: '',
             needsRefilter: false,
@@ -1578,6 +1580,32 @@ class DropList {
         return this._p.filterEmptyGroups;
     }
 
+    /**
+     * Sets the text that typing matches (see the `typeAheadTextFn` option)
+     */
+    setTypeAheadTextFn(fn: DropListOptions['typeAheadTextFn']): this {
+        this._p.typeAheadTextFn = fn ?? null;
+        return this;
+    }
+
+    /**
+     * The text that typing matches for an item
+     * @internal
+     */
+    _typeAheadText(item: any): string {
+        const p = this._p;
+
+        if (!p.typeAheadTextFn)
+            return item.label ?? '';
+
+        try {
+            return String(p.typeAheadTextFn(item[ItemSymbol] ?? item) ?? '');
+        } catch (err) {
+            reportError(p.onError, err, { source: 'typeAheadTextFn', item: item[ItemSymbol] ?? item });
+            return item.label ?? '';
+        }
+    }
+
     setFilterFn(fn: DropListOptions['filterFn'] | null): this {
         const p = this._p;
 
@@ -2444,6 +2472,8 @@ class DropList {
             valueProp: p.valueProp,
             renderItem: p.renderItem,
             unrenderItem: p.unrenderItem,
+            // Sub-lists match typing the same way
+            typeAheadTextFn: p.typeAheadTextFn,
             positionOptionsProvider: () => p.currentSubDropList.showOptions,
             // Sub-lists stack with their parent: same z-index, later in the DOM
             zIndex: () => this._p?.appliedZIndex ?? null,
@@ -3219,7 +3249,7 @@ class DropList {
                 continue; // We are only interested in first match + match after the focused item
 
             item = items[i];
-            if (regex.test(item.label)) {
+            if (regex.test(this._typeAheadText(item))) {
                 matchIndex = i;
                 if (focusItemIndex === -1 || i >= focusItemIndex)
                     break;
@@ -3237,7 +3267,7 @@ class DropList {
                     continue; // We are only interested in first match + match after the focused item
 
                 item = items[i];
-                if (regex.test(item.label)) {
+                if (regex.test(this._typeAheadText(item))) {
                     matchIndex = i;
                     if (focusItemIndex === -1 || i >= focusItemIndex)
                         break;

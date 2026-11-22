@@ -294,7 +294,8 @@ export const sections = [
                 title: 'Your own styles',
                 demo: 'own-styles.js',
                 description: `<code>baseClassName</code> renames every class the list uses, so none of the bundled styles apply
-                    and your stylesheet takes over. SelectBox has the same option.`,
+                    and your stylesheet takes over. SelectBox has the same option. The labels start with an emoji, so
+                    <code>typeAheadTextFn</code> skips it: typing a letter still jumps to the matching item.`,
             },
         ],
     },
