@@ -66,10 +66,12 @@ export default function (stage, controls) {
     build();
 
     target.addEventListener('click', () => {
-        if (list.isVisible())
+        if (list.isVisible()) {
             list.hide();
-        else
+        } else {
             list.show();
+            list.el.focus(); // for the keyboard: arrows, typing to jump to an item, Escape
+        }
     });
 
     // Re-position an open list after changing its position options

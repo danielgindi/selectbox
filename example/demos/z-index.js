@@ -34,6 +34,8 @@ export default function (stage) {
     more.textContent = 'More ▾';
 
     const menu = new DropList({
+        // Close on a click or focus outside (the button doesn't count)
+        autoHide: true,
         positionOptionsProvider: () => ({ target: more }),
     });
     menu.setItems([
@@ -45,7 +47,6 @@ export default function (stage) {
         return container ? Number(container.style.zIndex) + 1 : null;
     });
     menu.on('select', () => menu.hide());
-    menu.on('blur', () => menu.hide());
     more.addEventListener('click', () => {
         menu.show();
         menu.el.focus();

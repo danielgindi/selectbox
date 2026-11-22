@@ -17,10 +17,12 @@ export default function (stage) {
     };
 
     const toggle = button('Show tasks ▾', () => {
-        if (list.isVisible())
+        if (list.isVisible()) {
             list.hide();
-        else
+        } else {
             list.show();
+            list.el.focus(); // for the keyboard: arrows, typing to jump to an item, Escape
+        }
     });
 
     const count = document.createElement('span');
