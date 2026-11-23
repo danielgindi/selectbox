@@ -76,6 +76,20 @@ describe('DropList (standalone)', () => {
         expect(listItemEls().length).toBeLessThan(100);
     });
 
+    it('updates rendered focus after removing an earlier virtual item', () => {
+        const items = Array.from({ length: 200 }, (_, i) => ({ label: `Item ${i}`, value: i }));
+        const dropList = createDropList({ virtualMinItems: 0 });
+        dropList.setItems(items).show();
+        dropList.setFocusedItemAtIndex(1);
+
+        expect(highlighted()).toBe('Item 1');
+
+        dropList.removeItem(0);
+
+        expect(dropList.getFocusedItemIndex()).toBe(1);
+        expect(highlighted()).toBe('Item 2');
+    });
+
     it('focuses the first option starting with typed characters when not searchable', async () => {
         const dropList = createDropList();
         dropList.setItems([...fruits, { label: 'Cranberry', value: 'cranberry' }]).show();

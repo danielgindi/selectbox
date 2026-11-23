@@ -4,10 +4,8 @@ import {
     setElementWidth,
     setCssProps,
 } from '@danielgindi/dom-utils/lib/Css';
-import escapeRegex from './utils/escapeRegex';
 import {
     closestUntil,
-    createElement,
     next,
     prev,
     setElementAttrs,
@@ -18,8 +16,9 @@ import {
     remove,
     toggleClass,
 } from '@danielgindi/dom-utils/lib/DomCompat';
-
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
+import escapeRegex from './utils/escapeRegex';
+import { createElement } from './utils/domUtils';
 import DropList, { DefaultOptions as DropListDefaultOptions, ItemSymbol } from './DropList';
 import reportError from './utils/reportError';
 import {
@@ -2931,7 +2930,8 @@ class SelectBox {
             nextFocus = nextFocus.querySelector('input');
         }
 
-        nextFocus && nextFocus.focus();
+        if (nextFocus)
+            (nextFocus as HTMLElement).focus();
 
         return this;
     }
@@ -3144,7 +3144,7 @@ class SelectBox {
         let nextFocus;
 
         if (event.key === (isRtl ? VALUE_LEFT : VALUE_RIGHT)) { // Next arrow
-            nextFocus = next(/**@type Element*/event.target, `.${p.baseClassName}__item,.${p.baseClassName}__search_wrapper`);
+            nextFocus = next(/**@type Element*/event.target, `.${p.baseClassName}__item,.${p.baseClassName}__search_wrapper`) as HTMLElement | null;
             if (hasClass(nextFocus, `${p.baseClassName}__search_wrapper`)) {
                 nextFocus = nextFocus.querySelector('input');
             }
@@ -3152,7 +3152,7 @@ class SelectBox {
 
             event.preventDefault();
         } else if (event.key === (isRtl ? VALUE_RIGHT : VALUE_LEFT)) { // Prev arrow
-            nextFocus = prev(/**@type Element*/event.target, `.${p.baseClassName}__item,.${p.baseClassName}__search_wrapper`);
+            nextFocus = prev(/**@type Element*/event.target, `.${p.baseClassName}__item,.${p.baseClassName}__search_wrapper`) as HTMLElement | null;
             if (hasClass(nextFocus, `${p.baseClassName}__search_wrapper`)) {
                 nextFocus = nextFocus.querySelector('input');
             }

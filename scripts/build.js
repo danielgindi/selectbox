@@ -178,7 +178,11 @@ const buildCompat = () => {
         'mitt': 'mitt',
     };
 
-    const external = (id) => {
+    const external = (id, outputFormat) => {
+        // The lib paths resolve to ESM; bundle them into our CommonJS output.
+        if (outputFormat === 'cjs' && id.startsWith('@danielgindi/dom-utils/lib/'))
+            return false;
+
         return id === 'keycode-js' ||
             id === 'mitt' ||
             id.startsWith('@danielgindi/dom-utils') ||
@@ -278,7 +282,7 @@ const buildCompat = () => {
                     },
                 },
                 rolldownOptions: {
-                    external: external,
+                    external: id => external(id, task.outputFormat),
                     treeshake: false,
                     output: {
                         globals: globals,

@@ -1,18 +1,15 @@
 import escapeRegex from './utils/escapeRegex';
-import {
-    closestUntil,
-    createElement,
-} from '@danielgindi/dom-utils/lib/Dom';
-import {
-    remove,
-    toggleClass,
-} from '@danielgindi/dom-utils/lib/DomCompat';
+import { createElement } from './utils/domUtils';
+import { closestUntil } from '@danielgindi/dom-utils/lib/Dom';
+import { remove, toggleClass } from '@danielgindi/dom-utils/lib/DomCompat';
 import {
     setCssProps,
     getElementHeight,
     getElementWidth,
     setElementHeight,
-    setElementWidth, getElementOffset, anchoredPosition,
+    setElementWidth,
+    getElementOffset,
+    anchoredPosition,
     parseTransition,
 } from '@danielgindi/dom-utils/lib/Css';
 import DomEventsSink from '@danielgindi/dom-utils/lib/DomEventsSink';
@@ -420,6 +417,8 @@ class DropList {
         p.virtualListHelper = new VirtualListHelper({
             list: p.menuEl,
             virtual: true,
+            // Focus and item classes depend on the rendered index.
+            rerenderVirtualItemsAfterRemoval: true,
             buffer: 5,
             estimatedItemHeight: o.estimatedItemHeight || 20,
             itemElementCreatorFn: () => {
@@ -430,7 +429,8 @@ class DropList {
                     },
                 );
             },
-            onItemRender: (itemEl: HTMLElement, index: any) => {
+            onItemRender: (element: Element, index: any) => {
+                const itemEl = element as HTMLElement;
                 let item;
 
                 if ((/**@type any*/index) === GhostSymbol) {
@@ -793,7 +793,8 @@ class DropList {
     triggerItemSelection(item: any, event: Event): boolean {
         const p = this._p;
 
-        p.focusItemEl = p.focusItemEl || closestUntil(event.target, 'li', p.el);
+        p.focusItemEl = p.focusItemEl ||
+            closestUntil(event.target as Element, 'li', p.el) as HTMLElement | null;
         p.focusItemIndex = p.virtualListHelper.getItemIndexFromElement(p.focusItemEl);
         if (p.focusItemIndex === undefined)
             p.focusItemIndex = -1;
@@ -1647,18 +1648,20 @@ class DropList {
             };
         }
 
-        let targetBox: { left?: number; top?: number; height?: number; width?: number; bottom?: number } = {};
-
         let offset = positionOptions.targetOffset || getElementOffset(positionOptions.target);
-        targetBox.left = offset.left;
-        targetBox.top = offset.top;
-        targetBox.height = positionOptions.targetHeight == null
+        const targetHeight = positionOptions.targetHeight == null
             ? getElementHeight(positionOptions.target, true, true)
             : positionOptions.targetHeight;
-        targetBox.width = positionOptions.targetWidth == null
+        const targetWidth = positionOptions.targetWidth == null
             ? getElementWidth(positionOptions.target, true, true)
             : positionOptions.targetWidth;
-        targetBox.bottom = targetBox.top + targetBox.height;
+        const targetBox = {
+            left: offset.left,
+            top: offset.top,
+            height: targetHeight,
+            width: targetWidth,
+            bottom: offset.top + targetHeight,
+        };
 
         let viewport: { top?: number; left?: number; width?: number; height?: number; bottom?: number; right?: number } = {};
         viewport.top = w.pageYOffset;
@@ -2840,7 +2843,7 @@ class DropList {
 
         p.sink
             .add(p.el, 'mouseup', (event: any) => {
-                const li = closestUntil(event.target, 'li', event.currentTarget);
+                const li = closestUntil(event.target, 'li', event.currentTarget) as HTMLElement | null;
                 if (!li) return;
 
                 if (event.button !== 0) return;
@@ -2848,7 +2851,7 @@ class DropList {
                 this._itemUpAction(event, li);
             })
             .add(p.el, 'mouseover', (event: any) => {
-                const li = closestUntil(event.target, 'li', event.currentTarget);
+                const li = closestUntil(event.target, 'li', event.currentTarget) as HTMLElement | null;
                 if (!li) return;
 
                 this._handleMouseOver(event, li);
@@ -2867,7 +2870,7 @@ class DropList {
         let currentTouchId: any;
 
         p.sink.add(p.el, 'touchstart', (event: any) => {
-            const li = closestUntil(event.target, 'li', event.currentTarget);
+            const li = closestUntil(event.target, 'li', event.currentTarget) as HTMLElement | null;
             if (!li) return;
 
             if (currentTouchId) return;
@@ -2898,7 +2901,7 @@ class DropList {
             p.sink.add(window, 'touchcancel.dropdown_touchextra', onTouchCancel);
 
             p.sink.add(p.el, 'touchend.dropdown_touchextra', (event: any) => {
-                const li = closestUntil(event.target, 'li', event.currentTarget);
+                const li = closestUntil(event.target, 'li', event.currentTarget) as HTMLElement | null;
                 if (!li) return onTouchCancel();
 
                 let touch = Array.prototype.find.call(event.changedTouches, (touch: any) => {
